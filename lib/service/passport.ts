@@ -13,7 +13,7 @@ import CounterRedisAdapter from '../adapter/redis/counter';
 import CounterSqlServerAdapter from '../adapter/sqlServer/counter';
 import * as passportFactory from '../factory/passport';
 
-const debug = createDebug('waiter-prototype:controller:passports');
+const debug = createDebug('waiter-domain:service:passport');
 
 export function issueWithMongo(clientId: string, scope: string) {
     return async (counterMongoDBAdapter: CounterMongoDBAdapter): Promise<string | null> => {
