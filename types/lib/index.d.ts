@@ -8,13 +8,13 @@ import { Connection } from 'mongoose';
 import { ConnectionPool } from 'mssql';
 import { RedisClient } from 'redis';
 import * as passportService from './service/passport';
-import CounterMongoDBAdapter from './adapter/mongoDB/counter';
+import RequestCounterMongoDBAdapter from './adapter/mongoDB/requestCounter';
 import CounterRedisAdapter from './adapter/redis/counter';
 import CounterSqlServerAdapter from './adapter/sqlServer/counter';
 import * as passportFactory from './factory/passport';
 export declare const adapter: {
     mongoDB: {
-        counter: (connection: Connection) => CounterMongoDBAdapter;
+        requestCounter: (connection: Connection) => RequestCounterMongoDBAdapter;
     };
     redis: {
         counter: (redisClient: RedisClient) => CounterRedisAdapter;

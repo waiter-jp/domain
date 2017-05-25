@@ -8,46 +8,59 @@ import * as createDebug from 'debug';
 import * as jwt from 'jsonwebtoken';
 import * as moment from 'moment';
 
-import CounterMongoDBAdapter from '../adapter/mongoDB/counter';
+import RequestCounterMongoDBAdapter from '../adapter/mongoDB/requestCounter';
 import CounterRedisAdapter from '../adapter/redis/counter';
 import CounterSqlServerAdapter from '../adapter/sqlServer/counter';
+import * as clientFactory from '../factory/client';
 import * as passportFactory from '../factory/passport';
 
 const debug = createDebug('waiter-domain:service:passport');
 
-export function issueWithMongo(clientId: string, scope: string) {
-    return async (counterMongoDBAdapter: CounterMongoDBAdapter): Promise<string | null> => {
-        const key = createKey(scope);
-        const counter = <any>await counterMongoDBAdapter.counterModel.findOneAndUpdate(
-            { key: key },
-            { $inc: { count: +1 } },
+export function issueWithMongo(client: clientFactory.IClient, scope: string) {
+    return async (requestCounterMongoDBAdapter: RequestCounterMongoDBAdapter): Promise<string | null> => {
+        // クライアントに所属の発行者を呼び出し
+        const issuer = createIssuer(client);
+
+        // DBで発行リクエストカウントをとる
+        const record = <any>await requestCounterMongoDBAdapter.requestCounterModel.findOneAndUpdate(
+            {
+                issuer: issuer,
+                scope: scope
+            },
+            { $inc: { number_of_requests: +1 } },
             {
                 new: true,
                 upsert: true
             }
         ).lean().exec();
-        debug('counter:', counter);
+        debug('record:', record);
 
-        if (counter.count > Number(process.env.WAITER_NUMBER_OF_TOKENS_PER_UNIT)) {
+        // リクエストカウントが発行可能数を超えていなければ、暗号化して返却
+        if (record.number_of_requests > client.total_number_of_passports_per_issuer) {
             return null;
         } else {
-            return await createToken({
-                client_id: clientId,
-                scope: scope
+            const passport = passportFactory.create({
+                client: client.id,
+                scope: scope,
+                issuer: issuer,
+                issued_place: record.number_of_requests
             });
+
+            return await encode(passport, client.secret, client.passport_issuer_work_shift_in_sesonds);
         }
     };
 }
 
-export function issueWithRedis(clientId: string, scope: string) {
+export function issueWithRedis(client: clientFactory.IClient, scope: string) {
     return async (counterRedisAdapter: CounterRedisAdapter): Promise<string | null> => {
-        const key = createKey(scope);
+        const issuer = createIssuer(client);
+        const redisKey = `${issuer}:${scope}`;
         const ttl = Number(process.env.WAITER_SEQUENCE_COUNT_UNIT_IN_SECONDS);
 
         return new Promise<string | null>((resolve, reject) => {
             const multi = counterRedisAdapter.redisClient.multi();
-            multi.incr(key, debug)
-                .expire(key, ttl, debug)
+            multi.incr(redisKey, debug)
+                .expire(redisKey, ttl, debug)
                 .exec(async (execErr, replies) => {
                     if (execErr instanceof Error) {
                         reject(execErr);
@@ -57,14 +70,17 @@ export function issueWithRedis(clientId: string, scope: string) {
 
                     debug('replies:', replies);
 
-                    const count = replies[0];
-                    if (count > Number(process.env.WAITER_NUMBER_OF_TOKENS_PER_UNIT)) {
+                    const numberOfPassportsIssued = replies[0];
+                    if (numberOfPassportsIssued > client.total_number_of_passports_per_issuer) {
                         resolve(null);
                     } else {
-                        const token = await createToken({
-                            client_id: clientId,
-                            scope: scope
+                        const passport = passportFactory.create({
+                            client: client.id,
+                            scope: scope,
+                            issuer: issuer,
+                            issued_place: numberOfPassportsIssued
                         });
+                        const token = await encode(passport, client.secret, client.passport_issuer_work_shift_in_sesonds);
 
                         resolve(token);
                     }
@@ -73,60 +89,64 @@ export function issueWithRedis(clientId: string, scope: string) {
     };
 }
 
-export function issueWithSqlServer(clientId: string, scope: string) {
+export function issueWithSqlServer(client: clientFactory.IClient, scope: string) {
     return async (counterSqlServerAdapter: CounterSqlServerAdapter): Promise<string | null> => {
-        const key = createKey(scope);
+        const issuer = createIssuer(client);
         const result = await counterSqlServerAdapter.connectionPool.query`
 MERGE INTO counters AS A
-    USING (SELECT ${key} AS unit) AS B
+    USING (SELECT ${issuer} AS unit) AS B
     ON (A.unit = B.unit)
     WHEN MATCHED THEN
         UPDATE SET count = count + 1
     WHEN NOT MATCHED THEN
-        INSERT (unit, count) VALUES (${key}, '0');
-SELECT count FROM counters WHERE unit = ${key};
+        INSERT (unit, count) VALUES (${issuer}, '0');
+SELECT count FROM counters WHERE unit = ${issuer};
 `;
 
         debug('result', result);
         // tslint:disable-next-line:no-magic-numbers
-        const nextCount = parseInt(result.recordset[0].count, 10);
-        debug('nextCount', nextCount);
-        if (nextCount > Number(process.env.WAITER_NUMBER_OF_TOKENS_PER_UNIT)) {
+        const numberOfPassportsIssued = parseInt(result.recordset[0].count, 10);
+        debug('numberOfPassportsIssued', numberOfPassportsIssued);
+        if (numberOfPassportsIssued > client.total_number_of_passports_per_issuer) {
             return null;
         } else {
-            return await createToken({
-                client_id: clientId,
-                scope: scope
+            const passport = passportFactory.create({
+                client: client.id,
+                scope: scope,
+                issuer: issuer,
+                issued_place: numberOfPassportsIssued
             });
+
+            return await encode(passport, client.secret, client.passport_issuer_work_shift_in_sesonds);
         }
     };
 }
 
 /**
- * カウント単位キーを作成する
+ * 発行者を作成する
  *
- * @param {string} scope カウント単位スコープ
+ * @param {string} clinetId クライアントID
  * @returns {string}
  */
-function createKey(scope: string) {
+function createIssuer(client: clientFactory.IClient) {
     const dateNow = moment();
 
-    return `${scope}:${(dateNow.unix() - dateNow.unix() % Number(process.env.WAITER_SEQUENCE_COUNT_UNIT_IN_SECONDS)).toString()}`;
+    return `${client.id}:${(dateNow.unix() - dateNow.unix() % client.passport_issuer_work_shift_in_sesonds).toString()}`;
 }
 
 /**
- * トークンを生成する
+ * 許可証を暗号化する
  *
- * @param {IPassport} passport スコープ
+ * @param {IPassport} passport 許可証
  * @returns {Promise<string>}
  */
-export async function createToken(passport: passportFactory.IPassport) {
+async function encode(passport: passportFactory.IPassport, secret: string, expiresIn: number) {
     return new Promise<string>((resolve, reject) => {
         jwt.sign(
             passport,
-            process.env.WAITER_SECRET,
+            secret,
             {
-                expiresIn: Number(process.env.WAITER_SEQUENCE_COUNT_UNIT_IN_SECONDS)
+                expiresIn: expiresIn
             },
             (err, encoded) => {
                 if (err instanceof Error) {
@@ -136,5 +156,25 @@ export async function createToken(passport: passportFactory.IPassport) {
                 }
             }
         );
+    });
+}
+
+/**
+ * 暗号化された許可証を検証する
+ *
+ * @param {string} encodedPassport
+ * @param {string} secret
+ * @returns {Promise<passportFactory.IPassport>}
+ */
+export async function verify(encodedPassport: string, secret: string): Promise<passportFactory.IPassport> {
+    return new Promise<passportFactory.IPassport>((resolve, reject) => {
+        jwt.verify(encodedPassport, secret, (err, decoded) => {
+            if (err instanceof Error) {
+                reject(err);
+            } else {
+                const passport = passportFactory.create(decoded);
+                resolve(passport);
+            }
+        });
     });
 }

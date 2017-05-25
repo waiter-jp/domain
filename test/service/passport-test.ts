@@ -9,12 +9,17 @@ import * as mongoose from 'mongoose';
 import * as mssql from 'mssql';
 import * as redis from 'redis';
 
-import CounterMongoDBAdapter from '../../lib/adapter/mongoDB/counter';
+import RequestCounterMongoDBAdapter from '../../lib/adapter/mongoDB/requestCounter';
 import CounterRedisAdapter from '../../lib/adapter/redis/counter';
 import CounterSqlServerAdapter from '../../lib/adapter/sqlServer/counter';
 import * as passportService from '../../lib/service/passport';
 
-const testClientId = 'motionpicture';
+const testClient = {
+    id: 'motionpicture',
+    secret: 'motionpicture',
+    passport_issuer_work_shift_in_sesonds: 60,
+    total_number_of_passports_per_issuer: 10
+};
 const testScope = 'testscope';
 let connection: mongoose.Connection;
 let redisClient: redis.RedisClient;
@@ -48,15 +53,15 @@ describe('mongodbで発行する', () => {
     });
 
     it('ok', async () => {
-        const counterMongoDBAdapter = new CounterMongoDBAdapter(connection);
-        const token = await passportService.issueWithMongo(testClientId, testScope)(counterMongoDBAdapter);
+        const requestCounterMongoDBAdapter = new RequestCounterMongoDBAdapter(connection);
+        const token = await passportService.issueWithMongo(testClient, testScope)(requestCounterMongoDBAdapter);
         assert.equal(typeof token, 'string');
     });
 
     it('発行数が上限に達していればnull', async () => {
-        process.env.WAITER_NUMBER_OF_TOKENS_PER_UNIT = 0;
-        const counterMongoDBAdapter = new CounterMongoDBAdapter(connection);
-        const token = await passportService.issueWithMongo(testClientId, testScope)(counterMongoDBAdapter);
+        testClient.total_number_of_passports_per_issuer = 0;
+        const requestCounterMongoDBAdapter = new RequestCounterMongoDBAdapter(connection);
+        const token = await passportService.issueWithMongo(testClient, testScope)(requestCounterMongoDBAdapter);
         assert.equal(token, null);
     });
 });
@@ -68,14 +73,14 @@ describe('redisで発行する', () => {
 
     it('ok', async () => {
         const counterRedisAdapter = new CounterRedisAdapter(redisClient);
-        const token = await passportService.issueWithRedis(testClientId, testScope)(counterRedisAdapter);
+        const token = await passportService.issueWithRedis(testClient, testScope)(counterRedisAdapter);
         assert.equal(typeof token, 'string');
     });
 
     it('発行数が上限に達していればnull', async () => {
-        process.env.WAITER_NUMBER_OF_TOKENS_PER_UNIT = 0;
+        testClient.total_number_of_passports_per_issuer = 0;
         const counterRedisAdapter = new CounterRedisAdapter(redisClient);
-        const token = await passportService.issueWithRedis(testClientId, testScope)(counterRedisAdapter);
+        const token = await passportService.issueWithRedis(testClient, testScope)(counterRedisAdapter);
         assert.equal(token, null);
     });
 });
@@ -87,21 +92,52 @@ describe('sql serverで発行する', () => {
 
     it('ok', async () => {
         const counterSqlServerAdapter = new CounterSqlServerAdapter(sqlServerConnectionPool);
-        const token = await passportService.issueWithSqlServer(testClientId, testScope)(counterSqlServerAdapter);
+        const token = await passportService.issueWithSqlServer(testClient, testScope)(counterSqlServerAdapter);
         assert.equal(typeof token, 'string');
     });
 
     it('発行数が上限に達していればnull', async () => {
-        process.env.WAITER_NUMBER_OF_TOKENS_PER_UNIT = 0;
+        testClient.total_number_of_passports_per_issuer = 0;
         const counterSqlServerAdapter = new CounterSqlServerAdapter(sqlServerConnectionPool);
-        const token = await passportService.issueWithSqlServer(testClientId, testScope)(counterSqlServerAdapter);
+        const token = await passportService.issueWithSqlServer(testClient, testScope)(counterSqlServerAdapter);
         assert.equal(token, null);
     });
 });
 
 function resetEnvironmentVariables() {
     // tslint:disable-next-line:no-magic-numbers
-    process.env.WAITER_SEQUENCE_COUNT_UNIT_IN_SECONDS = 60;
+    testClient.passport_issuer_work_shift_in_sesonds = 60;
     // tslint:disable-next-line:no-magic-numbers
-    process.env.WAITER_NUMBER_OF_TOKENS_PER_UNIT = 10;
+    testClient.total_number_of_passports_per_issuer = 10;
 }
+
+describe('トークンを検証する', () => {
+    beforeEach(() => {
+        resetEnvironmentVariables();
+    });
+
+    it('適切に発行された許可証であれば検証成功', async () => {
+        const counterSqlServerAdapter = new CounterSqlServerAdapter(sqlServerConnectionPool);
+        const token = await passportService.issueWithSqlServer(testClient, testScope)(counterSqlServerAdapter);
+        assert.equal(typeof token, 'string');
+
+        const passport = await passportService.verify(<string>token, testClient.secret);
+        assert.equal(passport.client, testClient.id);
+        assert.equal(passport.scope, testScope);
+    });
+
+    it('シークレットが間違っていれば失敗', async () => {
+        const counterSqlServerAdapter = new CounterSqlServerAdapter(sqlServerConnectionPool);
+        const token = await passportService.issueWithSqlServer(testClient, testScope)(counterSqlServerAdapter);
+        assert.equal(typeof token, 'string');
+
+        let verifyError: any;
+        try {
+            await passportService.verify(<string>token, 'invalidsecret');
+        } catch (error) {
+            verifyError = error;
+        }
+
+        assert(verifyError instanceof Error);
+    });
+});

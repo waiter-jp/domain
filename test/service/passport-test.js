@@ -17,11 +17,16 @@ const assert = require("assert");
 const mongoose = require("mongoose");
 const mssql = require("mssql");
 const redis = require("redis");
-const counter_1 = require("../../lib/adapter/mongoDB/counter");
-const counter_2 = require("../../lib/adapter/redis/counter");
-const counter_3 = require("../../lib/adapter/sqlServer/counter");
+const requestCounter_1 = require("../../lib/adapter/mongoDB/requestCounter");
+const counter_1 = require("../../lib/adapter/redis/counter");
+const counter_2 = require("../../lib/adapter/sqlServer/counter");
 const passportService = require("../../lib/service/passport");
-const testClientId = 'motionpicture';
+const testClient = {
+    id: 'motionpicture',
+    secret: 'motionpicture',
+    passport_issuer_work_shift_in_sesonds: 60,
+    total_number_of_passports_per_issuer: 10
+};
 const testScope = 'testscope';
 let connection;
 let redisClient;
@@ -50,14 +55,14 @@ describe('mongodbで発行する', () => {
         resetEnvironmentVariables();
     });
     it('ok', () => __awaiter(this, void 0, void 0, function* () {
-        const counterMongoDBAdapter = new counter_1.default(connection);
-        const token = yield passportService.issueWithMongo(testClientId, testScope)(counterMongoDBAdapter);
+        const requestCounterMongoDBAdapter = new requestCounter_1.default(connection);
+        const token = yield passportService.issueWithMongo(testClient, testScope)(requestCounterMongoDBAdapter);
         assert.equal(typeof token, 'string');
     }));
     it('発行数が上限に達していればnull', () => __awaiter(this, void 0, void 0, function* () {
-        process.env.WAITER_NUMBER_OF_TOKENS_PER_UNIT = 0;
-        const counterMongoDBAdapter = new counter_1.default(connection);
-        const token = yield passportService.issueWithMongo(testClientId, testScope)(counterMongoDBAdapter);
+        testClient.total_number_of_passports_per_issuer = 0;
+        const requestCounterMongoDBAdapter = new requestCounter_1.default(connection);
+        const token = yield passportService.issueWithMongo(testClient, testScope)(requestCounterMongoDBAdapter);
         assert.equal(token, null);
     }));
 });
@@ -66,14 +71,14 @@ describe('redisで発行する', () => {
         resetEnvironmentVariables();
     });
     it('ok', () => __awaiter(this, void 0, void 0, function* () {
-        const counterRedisAdapter = new counter_2.default(redisClient);
-        const token = yield passportService.issueWithRedis(testClientId, testScope)(counterRedisAdapter);
+        const counterRedisAdapter = new counter_1.default(redisClient);
+        const token = yield passportService.issueWithRedis(testClient, testScope)(counterRedisAdapter);
         assert.equal(typeof token, 'string');
     }));
     it('発行数が上限に達していればnull', () => __awaiter(this, void 0, void 0, function* () {
-        process.env.WAITER_NUMBER_OF_TOKENS_PER_UNIT = 0;
-        const counterRedisAdapter = new counter_2.default(redisClient);
-        const token = yield passportService.issueWithRedis(testClientId, testScope)(counterRedisAdapter);
+        testClient.total_number_of_passports_per_issuer = 0;
+        const counterRedisAdapter = new counter_1.default(redisClient);
+        const token = yield passportService.issueWithRedis(testClient, testScope)(counterRedisAdapter);
         assert.equal(token, null);
     }));
 });
@@ -82,20 +87,46 @@ describe('sql serverで発行する', () => {
         resetEnvironmentVariables();
     });
     it('ok', () => __awaiter(this, void 0, void 0, function* () {
-        const counterSqlServerAdapter = new counter_3.default(sqlServerConnectionPool);
-        const token = yield passportService.issueWithSqlServer(testClientId, testScope)(counterSqlServerAdapter);
+        const counterSqlServerAdapter = new counter_2.default(sqlServerConnectionPool);
+        const token = yield passportService.issueWithSqlServer(testClient, testScope)(counterSqlServerAdapter);
         assert.equal(typeof token, 'string');
     }));
     it('発行数が上限に達していればnull', () => __awaiter(this, void 0, void 0, function* () {
-        process.env.WAITER_NUMBER_OF_TOKENS_PER_UNIT = 0;
-        const counterSqlServerAdapter = new counter_3.default(sqlServerConnectionPool);
-        const token = yield passportService.issueWithSqlServer(testClientId, testScope)(counterSqlServerAdapter);
+        testClient.total_number_of_passports_per_issuer = 0;
+        const counterSqlServerAdapter = new counter_2.default(sqlServerConnectionPool);
+        const token = yield passportService.issueWithSqlServer(testClient, testScope)(counterSqlServerAdapter);
         assert.equal(token, null);
     }));
 });
 function resetEnvironmentVariables() {
     // tslint:disable-next-line:no-magic-numbers
-    process.env.WAITER_SEQUENCE_COUNT_UNIT_IN_SECONDS = 60;
+    testClient.passport_issuer_work_shift_in_sesonds = 60;
     // tslint:disable-next-line:no-magic-numbers
-    process.env.WAITER_NUMBER_OF_TOKENS_PER_UNIT = 10;
+    testClient.total_number_of_passports_per_issuer = 10;
 }
+describe('トークンを検証する', () => {
+    beforeEach(() => {
+        resetEnvironmentVariables();
+    });
+    it('適切に発行された許可証であれば検証成功', () => __awaiter(this, void 0, void 0, function* () {
+        const counterSqlServerAdapter = new counter_2.default(sqlServerConnectionPool);
+        const token = yield passportService.issueWithSqlServer(testClient, testScope)(counterSqlServerAdapter);
+        assert.equal(typeof token, 'string');
+        const passport = yield passportService.verify(token, testClient.secret);
+        assert.equal(passport.client, testClient.id);
+        assert.equal(passport.scope, testScope);
+    }));
+    it('シークレットが間違っていれば失敗', () => __awaiter(this, void 0, void 0, function* () {
+        const counterSqlServerAdapter = new counter_2.default(sqlServerConnectionPool);
+        const token = yield passportService.issueWithSqlServer(testClient, testScope)(counterSqlServerAdapter);
+        assert.equal(typeof token, 'string');
+        let verifyError;
+        try {
+            yield passportService.verify(token, 'invalidsecret');
+        }
+        catch (error) {
+            verifyError = error;
+        }
+        assert(verifyError instanceof Error);
+    }));
+});
