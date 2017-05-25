@@ -32,19 +32,19 @@ let connection;
 let redisClient;
 let sqlServerConnectionPool;
 before(() => __awaiter(this, void 0, void 0, function* () {
-    connection = mongoose.createConnection(process.env.MONGOLAB_URI);
+    connection = mongoose.createConnection(process.env.TEST_MONGOLAB_URI);
     redisClient = redis.createClient({
-        host: process.env.REDIS_HOST,
-        port: process.env.REDIS_PORT,
-        password: process.env.REDIS_KEY,
+        host: process.env.TEST_REDIS_HOST,
+        port: process.env.TEST_REDIS_PORT,
+        password: process.env.TEST_REDIS_KEY,
         return_buffers: false,
-        tls: { servername: process.env.REDIS_HOST }
+        tls: { servername: process.env.TEST_REDIS_HOST }
     });
     sqlServerConnectionPool = yield (new mssql.ConnectionPool({
-        user: process.env.SQL_SERVER_USERNAME,
-        password: process.env.SQL_SERVER_PASSWORD,
-        server: process.env.SQL_SERVER_SERVER,
-        database: process.env.SQL_SERVER_DATABASE,
+        user: process.env.TEST_SQL_SERVER_USERNAME,
+        password: process.env.TEST_SQL_SERVER_PASSWORD,
+        server: process.env.TEST_SQL_SERVER_SERVER,
+        database: process.env.TEST_SQL_SERVER_DATABASE,
         options: {
             encrypt: true // Use this if you're on Windows Azure
         }

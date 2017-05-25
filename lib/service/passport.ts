@@ -55,7 +55,7 @@ export function issueWithRedis(client: clientFactory.IClient, scope: string) {
     return async (counterRedisAdapter: CounterRedisAdapter): Promise<string | null> => {
         const issuer = createIssuer(client);
         const redisKey = `${issuer}:${scope}`;
-        const ttl = Number(process.env.WAITER_SEQUENCE_COUNT_UNIT_IN_SECONDS);
+        const ttl = client.passport_issuer_work_shift_in_sesonds;
 
         return new Promise<string | null>((resolve, reject) => {
             const multi = counterRedisAdapter.redisClient.multi();

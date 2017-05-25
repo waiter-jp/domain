@@ -48,7 +48,7 @@
   "main": "./lib/index.js",
   "name": "@motionpicture/waiter-domain",
   "nyc": {
-    "check-coverage": true,
+    "check-coverage": false,
     "include": [
       "lib/**/*.js"
     ],
