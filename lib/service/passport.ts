@@ -172,7 +172,7 @@ export async function verify(encodedPassport: string, secret: string): Promise<p
             if (err instanceof Error) {
                 reject(err);
             } else {
-                const passport = passportFactory.create(decoded);
+                const passport = passportFactory.create(<any>decoded);
                 resolve(passport);
             }
         });

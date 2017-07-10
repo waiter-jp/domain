@@ -6,6 +6,7 @@
 
 import * as assert from 'assert';
 
+import WaiterError from '../../lib/error';
 import ArgumentNullError from '../../lib/error/argumentNull';
 
 describe('引数なしエラー', () => {
@@ -16,7 +17,7 @@ describe('引数なしエラー', () => {
         assert(argumentError instanceof Error);
         assert.equal(argumentError.argumentName, argumentName);
         assert.equal(argumentError.message, message);
-        assert.equal(argumentError.name, ArgumentNullError.name);
+        assert.equal(argumentError.name, WaiterError.name);
         assert.equal(typeof argumentError.stack, 'string');
     });
 
@@ -25,7 +26,7 @@ describe('引数なしエラー', () => {
         const argumentError = new ArgumentNullError(argumentName);
         assert(argumentError instanceof Error);
         assert.equal(argumentError.argumentName, argumentName);
-        assert.equal(argumentError.name, ArgumentNullError.name);
+        assert.equal(argumentError.name, WaiterError.name);
         assert.equal(typeof argumentError.message, 'string');
         assert.equal(typeof argumentError.stack, 'string');
     });

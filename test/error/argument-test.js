@@ -14,6 +14,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const assert = require("assert");
+const error_1 = require("../../lib/error");
 const argument_1 = require("../../lib/error/argument");
 describe('引数無効エラー', () => {
     it('正しくインスタンス化できる', () => __awaiter(this, void 0, void 0, function* () {
@@ -23,7 +24,7 @@ describe('引数無効エラー', () => {
         assert(argumentError instanceof Error);
         assert.equal(argumentError.argumentName, argumentName);
         assert.equal(argumentError.message, message);
-        assert.equal(argumentError.name, argument_1.default.name);
+        assert.equal(argumentError.name, error_1.default.name);
         assert.equal(typeof argumentError.stack, 'string');
     }));
     it('メッセージを指定しなくても、正しくインスタンス化できる', () => __awaiter(this, void 0, void 0, function* () {
@@ -31,7 +32,7 @@ describe('引数無効エラー', () => {
         const argumentError = new argument_1.default(argumentName);
         assert(argumentError instanceof Error);
         assert.equal(argumentError.argumentName, argumentName);
-        assert.equal(argumentError.name, argument_1.default.name);
+        assert.equal(argumentError.name, error_1.default.name);
         assert.equal(typeof argumentError.message, 'string');
         assert.equal(typeof argumentError.stack, 'string');
     }));

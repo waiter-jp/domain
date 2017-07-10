@@ -4,40 +4,75 @@
  * @module
  */
 
-import { Connection } from 'mongoose';
-import { ConnectionPool } from 'mssql';
-import { RedisClient } from 'redis';
+import * as mongoose from 'mongoose';
+import * as mssql from 'mssql';
+import * as nodeRedis from 'redis';
 
-import * as passportService from './service/passport';
+import * as PassportService from './service/passport';
 
 import RequestCounterMongoDBAdapter from './adapter/mongoDB/requestCounter';
 import CounterRedisAdapter from './adapter/redis/counter';
 import CounterSqlServerAdapter from './adapter/sqlServer/counter';
 
-import * as passportFactory from './factory/passport';
+import * as PassportFactory from './factory/passport';
 
-export const adapter = {
-    mongoDB: {
-        requestCounter: (connection: Connection) => {
+import ErrorCode from './errorCode';
+
+(<any>mongoose).Promise = global.Promise;
+
+/**
+ * MongoDBクライアント`mongoose`
+ *
+ * @example
+ * var promise = waiter.mongoose.connect('mongodb://localhost/myapp', {
+ *     useMongoClient: true
+ * });
+ */
+export import mongoose = mongoose;
+
+/**
+ * SQLServerクライアント
+ */
+export import mssql = mssql;
+
+/**
+ * Redis Cacheクライアント
+ *
+ * @example
+ * const client = waiter.redis.createClient({
+ *      host: process.env.REDIS_HOST,
+ *      port: process.env.REDIS_PORT,
+ *      password: process.env.REDIS_KEY,
+ *      tls: { servername: process.env.TEST_REDIS_HOST }
+ * });
+ */
+export import redis = nodeRedis;
+
+export namespace adapter {
+    export namespace mongoDB {
+        export function requestCounter(connection: mongoose.Connection) {
             return new RequestCounterMongoDBAdapter(connection);
         }
-    },
-    redis: {
-        counter: (redisClient: RedisClient) => {
+    }
+    // tslint:disable-next-line:no-shadowed-variable
+    export namespace redis {
+        export function counter(redisClient: nodeRedis.RedisClient) {
             return new CounterRedisAdapter(redisClient);
         }
-    },
-    sqlServer: {
-        counter: (connectionPool: ConnectionPool) => {
+    }
+    export namespace sqlServer {
+        export function counter(connectionPool: mssql.ConnectionPool) {
             return new CounterSqlServerAdapter(connectionPool);
         }
     }
-};
+}
 
-export const service = {
-    passport: passportService
-};
+export namespace service {
+    export import passport = PassportService;
+}
 
-export const factory = {
-    passport: passportFactory
-};
+export namespace factory {
+    export import passport = PassportFactory;
+}
+
+export import errorCode = ErrorCode;
