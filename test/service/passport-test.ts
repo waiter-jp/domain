@@ -14,10 +14,11 @@ import CounterRedisAdapter from '../../lib/adapter/redis/counter';
 import CounterSqlServerAdapter from '../../lib/adapter/sqlServer/counter';
 import * as passportService from '../../lib/service/passport';
 
+const TEST_PASSPORT_ISSUER_WORK_SHIFT_IN_SECONDS = <any>'60';
 const testClient = {
     id: 'motionpicture',
     secret: 'motionpicture',
-    passport_issuer_work_shift_in_sesonds: 60,
+    passport_issuer_work_shift_in_sesonds: TEST_PASSPORT_ISSUER_WORK_SHIFT_IN_SECONDS,
     total_number_of_passports_per_issuer: 10
 };
 const testScope = 'testscope';
@@ -106,7 +107,7 @@ describe('sql serverで発行する', () => {
 
 function resetEnvironmentVariables() {
     // tslint:disable-next-line:no-magic-numbers
-    testClient.passport_issuer_work_shift_in_sesonds = 60;
+    testClient.passport_issuer_work_shift_in_sesonds = TEST_PASSPORT_ISSUER_WORK_SHIFT_IN_SECONDS;
     // tslint:disable-next-line:no-magic-numbers
     testClient.total_number_of_passports_per_issuer = 10;
 }
@@ -139,5 +140,26 @@ describe('トークンを検証する', () => {
         }
 
         assert(verifyError instanceof Error);
+    });
+
+    it('期限切れであれば失敗', async () => {
+        testClient.passport_issuer_work_shift_in_sesonds = 1;
+        const counterRedisAdapter = new CounterRedisAdapter(redisClient);
+        const token = await passportService.issueWithRedis(testClient, testScope)(counterRedisAdapter);
+        assert.equal(typeof token, 'string');
+
+        return new Promise((resolve) => {
+            setTimeout(
+                async () => {
+                    const verifyError = await passportService.verify(<string>token, testClient.secret)
+                        .catch((error) => error);
+                    console.error(verifyError);
+                    assert(verifyError instanceof Error);
+                    resolve();
+                },
+                // tslint:disable-next-line:no-magic-numbers
+                testClient.passport_issuer_work_shift_in_sesonds * 1000
+            );
+        });
     });
 });

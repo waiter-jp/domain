@@ -21,10 +21,11 @@ const requestCounter_1 = require("../../lib/adapter/mongoDB/requestCounter");
 const counter_1 = require("../../lib/adapter/redis/counter");
 const counter_2 = require("../../lib/adapter/sqlServer/counter");
 const passportService = require("../../lib/service/passport");
+const TEST_PASSPORT_ISSUER_WORK_SHIFT_IN_SECONDS = '60';
 const testClient = {
     id: 'motionpicture',
     secret: 'motionpicture',
-    passport_issuer_work_shift_in_sesonds: 60,
+    passport_issuer_work_shift_in_sesonds: TEST_PASSPORT_ISSUER_WORK_SHIFT_IN_SECONDS,
     total_number_of_passports_per_issuer: 10
 };
 const testScope = 'testscope';
@@ -100,7 +101,7 @@ describe('sql serverで発行する', () => {
 });
 function resetEnvironmentVariables() {
     // tslint:disable-next-line:no-magic-numbers
-    testClient.passport_issuer_work_shift_in_sesonds = 60;
+    testClient.passport_issuer_work_shift_in_sesonds = TEST_PASSPORT_ISSUER_WORK_SHIFT_IN_SECONDS;
     // tslint:disable-next-line:no-magic-numbers
     testClient.total_number_of_passports_per_issuer = 10;
 }
@@ -128,5 +129,22 @@ describe('トークンを検証する', () => {
             verifyError = error;
         }
         assert(verifyError instanceof Error);
+    }));
+    it('期限切れであれば失敗', () => __awaiter(this, void 0, void 0, function* () {
+        testClient.passport_issuer_work_shift_in_sesonds = 1;
+        const counterRedisAdapter = new counter_1.default(redisClient);
+        const token = yield passportService.issueWithRedis(testClient, testScope)(counterRedisAdapter);
+        assert.equal(typeof token, 'string');
+        return new Promise((resolve) => {
+            setTimeout(() => __awaiter(this, void 0, void 0, function* () {
+                const verifyError = yield passportService.verify(token, testClient.secret)
+                    .catch((error) => error);
+                console.error(verifyError);
+                assert(verifyError instanceof Error);
+                resolve();
+            }), 
+            // tslint:disable-next-line:no-magic-numbers
+            testClient.passport_issuer_work_shift_in_sesonds * 1000);
+        });
     }));
 });
