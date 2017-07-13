@@ -20,6 +20,8 @@ export function issueWithMongo(client: clientFactory.IClient, scope: string) {
     return async (requestCounterMongoDBAdapter: RequestCounterMongoDBAdapter): Promise<string | null> => {
         // クライアントに所属の発行者を呼び出し
         const issuer = createIssuer(client);
+        // tslint:disable-next-line:no-magic-numbers
+        const workShiftInSeconds = parseInt(client.passport_issuer_work_shift_in_sesonds.toString(), 10);
 
         // DBで発行リクエストカウントをとる
         const record = <any>await requestCounterMongoDBAdapter.requestCounterModel.findOneAndUpdate(
@@ -46,7 +48,7 @@ export function issueWithMongo(client: clientFactory.IClient, scope: string) {
                 issued_place: record.number_of_requests
             });
 
-            return await encode(passport, client.secret, client.passport_issuer_work_shift_in_sesonds);
+            return await encode(passport, client.secret, workShiftInSeconds);
         }
     };
 }
@@ -54,8 +56,10 @@ export function issueWithMongo(client: clientFactory.IClient, scope: string) {
 export function issueWithRedis(client: clientFactory.IClient, scope: string) {
     return async (counterRedisAdapter: CounterRedisAdapter): Promise<string | null> => {
         const issuer = createIssuer(client);
+        // tslint:disable-next-line:no-magic-numbers
+        const workShiftInSeconds = parseInt(client.passport_issuer_work_shift_in_sesonds.toString(), 10);
         const redisKey = `${issuer}:${scope}`;
-        const ttl = client.passport_issuer_work_shift_in_sesonds;
+        const ttl = workShiftInSeconds;
 
         return new Promise<string | null>((resolve, reject) => {
             const multi = counterRedisAdapter.redisClient.multi();
@@ -80,7 +84,7 @@ export function issueWithRedis(client: clientFactory.IClient, scope: string) {
                             issuer: issuer,
                             issued_place: numberOfPassportsIssued
                         });
-                        const token = await encode(passport, client.secret, client.passport_issuer_work_shift_in_sesonds);
+                        const token = await encode(passport, client.secret, workShiftInSeconds);
 
                         resolve(token);
                     }
@@ -92,6 +96,8 @@ export function issueWithRedis(client: clientFactory.IClient, scope: string) {
 export function issueWithSqlServer(client: clientFactory.IClient, scope: string) {
     return async (counterSqlServerAdapter: CounterSqlServerAdapter): Promise<string | null> => {
         const issuer = createIssuer(client);
+        // tslint:disable-next-line:no-magic-numbers
+        const workShiftInSeconds = parseInt(client.passport_issuer_work_shift_in_sesonds.toString(), 10);
         const result = await counterSqlServerAdapter.connectionPool.query`
 MERGE INTO counters AS A
     USING (SELECT ${issuer} AS unit) AS B
@@ -117,7 +123,7 @@ SELECT count FROM counters WHERE unit = ${issuer};
                 issued_place: numberOfPassportsIssued
             });
 
-            return await encode(passport, client.secret, client.passport_issuer_work_shift_in_sesonds);
+            return await encode(passport, client.secret, workShiftInSeconds);
         }
     };
 }
@@ -130,8 +136,10 @@ SELECT count FROM counters WHERE unit = ${issuer};
  */
 function createIssuer(client: clientFactory.IClient) {
     const dateNow = moment();
+    // tslint:disable-next-line:no-magic-numbers
+    const workShiftInSeconds = parseInt(client.passport_issuer_work_shift_in_sesonds.toString(), 10);
 
-    return `${client.id}:${(dateNow.unix() - dateNow.unix() % client.passport_issuer_work_shift_in_sesonds).toString()}`;
+    return `${client.id}:${(dateNow.unix() - dateNow.unix() % workShiftInSeconds).toString()}`;
 }
 
 /**
