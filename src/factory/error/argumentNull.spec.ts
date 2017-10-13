@@ -1,15 +1,14 @@
 /**
  * ArgumentNullErrorテスト
- *
  * @ignore
  */
 
 import * as assert from 'assert';
 
-import WaiterError from '../../lib/error';
-import ArgumentNullError from '../../lib/error/argumentNull';
+import ArgumentNullError from './argumentNull';
+import { WaiterError } from './waiter';
 
-describe('引数なしエラー', () => {
+describe('new ArgumentNullError()', () => {
     it('正しくインスタンス化できる', async () => {
         const argumentName = 'testname';
         const message = 'test message';

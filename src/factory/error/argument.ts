@@ -1,11 +1,8 @@
-import * as util from 'util';
-
-import WaiterError from '../error';
 import ErrorCode from '../errorCode';
+import { WaiterError } from './waiter';
 
 /**
  * ArgumentError
- *
  * @class ArgumentError
  * @extends {WaiterError}
  */
@@ -14,7 +11,7 @@ export default class ArgumentError extends WaiterError {
 
     constructor(argumentName: string, message?: string) {
         if (message === undefined || message.length === 0) {
-            message = util.format('Invalid or missing argument supplied: %s', argumentName);
+            message = `Invalid or missing argument supplied: ${argumentName}`;
         }
 
         super(ErrorCode.Argument, message);

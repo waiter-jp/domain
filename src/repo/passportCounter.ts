@@ -4,7 +4,7 @@ import * as redis from 'redis';
 
 import * as clientFactory from '../factory/client';
 
-const debug = createDebug('sskts-domain:repository:transactionCount');
+const debug = createDebug('waiter-domain:repository:passportCounter');
 
 export interface IIncrementResult {
     issuer: string;
@@ -45,22 +45,20 @@ export class RedisRepository {
             const ttl = workShiftInSeconds;
 
             const multi = this.redisClient.multi();
+            debug('redis multi client created.', multi);
             multi.incr(redisKey, debug)
                 .expire(redisKey, ttl, debug)
-                .exec(async (execErr, replies) => {
+                .exec((execErr, replies) => {
                     if (execErr instanceof Error) {
                         reject(execErr);
-
-                        return;
+                    } else {
+                        debug('replies:', replies);
+                        resolve({
+                            issuer: issuer,
+                            // tslint:disable-next-line:no-magic-numbers
+                            issuedPlace: parseInt(replies[0], 10)
+                        });
                     }
-
-                    debug('replies:', replies);
-
-                    resolve({
-                        issuer: issuer,
-                        // tslint:disable-next-line:no-magic-numbers
-                        issuedPlace: parseInt(replies[0], 10)
-                    });
                 });
         });
     }

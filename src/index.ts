@@ -7,6 +7,7 @@ import * as redis from 'redis';
 
 import * as PassportService from './service/passport';
 
+import { InMemoryRepository as ClientRepo } from './repo/client';
 import { RedisRepository as PassportCounterRepo } from './repo/passportCounter';
 
 import ErrorCode from './factory/errorCode';
@@ -32,6 +33,13 @@ export namespace repository {
      * @class
      */
     export class PassportCounter extends PassportCounterRepo { }
+    /**
+     * クライアントレポジトリー
+     * @export
+     * @class
+     */
+    export class Client extends ClientRepo { }
+
 }
 
 export namespace service {

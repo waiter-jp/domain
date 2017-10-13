@@ -1,11 +1,8 @@
-import * as util from 'util';
-
-import WaiterError from '../error';
 import ErrorCode from '../errorCode';
+import { WaiterError } from './waiter';
 
 /**
  * ArgumentNullError
- *
  * @class ArgumentNullError
  * @extends {WaiterError}
  */
@@ -14,7 +11,7 @@ export default class ArgumentNullError extends WaiterError {
 
     constructor(argumentName: string, message?: string) {
         if (message === undefined || message.length === 0) {
-            message = util.format('Missing argument: %s', argumentName);
+            message = `Missing argument: ${argumentName}`;
         }
 
         super(ErrorCode.Argument, message);

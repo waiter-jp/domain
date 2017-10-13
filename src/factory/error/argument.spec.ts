@@ -1,15 +1,14 @@
 /**
  * ArgumentErrorテスト
- *
  * @ignore
  */
 
 import * as assert from 'assert';
 
-import WaiterError from '../../lib/error';
-import ArgumentError from '../../lib/error/argument';
+import ArgumentError from './argument';
+import { WaiterError } from './waiter';
 
-describe('引数無効エラー', () => {
+describe('new ArgumentError()', () => {
     it('正しくインスタンス化できる', async () => {
         const argumentName = 'testname';
         const message = 'test message';

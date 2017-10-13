@@ -1,17 +1,19 @@
+import ErrorCode from '../errorCode';
+
 /**
  * WaiterError
- *
+ * @export
  * @class WaiterError
  * @extends {Error}
  */
-export default class WaiterError extends Error {
-    public readonly code: string;
+export class WaiterError extends Error {
+    public readonly reason: ErrorCode;
 
-    constructor(code: string, message?: string) {
+    constructor(code: ErrorCode, message?: string) {
         super(message);
 
         this.name = 'WaiterError';
-        this.code = code;
+        this.reason = code;
 
         // Set the prototype explicitly.
         Object.setPrototypeOf(this, WaiterError.prototype);

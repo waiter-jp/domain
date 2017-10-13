@@ -6,8 +6,9 @@
 import * as createDebug from 'debug';
 import * as jwt from 'jsonwebtoken';
 
-import * as clientFactory from '../factory/client';
+import * as errors from '../factory/errors';
 import * as passportFactory from '../factory/passport';
+import { InMemoryRepository as ClientRepo } from '../repo/client';
 import { RedisRepository as PassportCounterRepo } from '../repo/passportCounter';
 
 const debug = createDebug('waiter-domain:service:passport');
@@ -19,26 +20,29 @@ const debug = createDebug('waiter-domain:service:passport');
  * @param client クライアント
  * @param scope 許可証スコープ
  */
-export function issueWithRedis(client: clientFactory.IClient, scope: string) {
-    return async (passportCounterRepo: PassportCounterRepo): Promise<string | null> => {
+export function issueWithRedis(clientId: string, scope: string) {
+    return async (clientRepo: ClientRepo, passportCounterRepo: PassportCounterRepo): Promise<string> => {
+        debug('client exists?');
+        const client = clientRepo.findbyId(clientId);
+
         // tslint:disable-next-line:no-magic-numbers
         const workShiftInSeconds = parseInt(client.passportIssuerWorkShiftInSesonds.toString(), 10);
         const { issuer, issuedPlace } = await passportCounterRepo.incr(client, scope);
         debug('incremented. issuedPlace:', issuedPlace);
 
         if (issuedPlace > client.totalNumberOfPassportsPerIssuer) {
-            return null;
-        } else {
-            const passport = passportFactory.create({
-                client: client.id,
-                scope: scope,
-                issuer: issuer,
-                issuedPlace: issuedPlace
-            });
-            debug('passport created.', passport);
-
-            return await encode(passport, client.secret, workShiftInSeconds);
+            throw new errors.RateLimitExceeded();
         }
+
+        const passport = passportFactory.create({
+            scope: scope,
+            issuer: issuer,
+            audience: client.id,
+            issuedPlace: issuedPlace
+        });
+        debug('passport created.', passport);
+
+        return await encode(passport, client.secret, workShiftInSeconds);
     };
 }
 

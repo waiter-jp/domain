@@ -13,17 +13,13 @@ async function main() {
         tls: { servername: process.env.TEST_REDIS_HOST }
     });
 
-    const repository = new waiter.repository.PassportCounter(redisClient);
+    const clientRepo = new waiter.repository.Client();
+    const passportRepo = new waiter.repository.PassportCounter(redisClient);
 
-    const client = {
-        id: 'clientid',
-        secret: 'clientsecret',
-        passport_issuer_work_shift_in_sesonds: 60,
-        total_number_of_passports_per_issuer: 100
-    };
+    const clientId = 'clientId';
     const scope = 'scope';
 
-    const passport = await waiter.service.passport.issueWithRedis(client, scope)(repository);
+    const passport = await waiter.service.passport.issueWithRedis(clientId, scope)(clientRepo, passportRepo);
     console.log('passport is', passport);
 
     redisClient.quit();

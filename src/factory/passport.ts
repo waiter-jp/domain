@@ -18,12 +18,6 @@ import ArgumentNullError from './error/argumentNull';
  */
 export interface IPassport {
     /**
-     * 許可証を発行したクライアントID
-     * @type {string}
-     * @memberof IPassport
-     */
-    client: string;
-    /**
      * 許可証のスコープ
      * クライアントが設定&管理する想定
      * @type {string}
@@ -38,6 +32,13 @@ export interface IPassport {
      */
     issuer: string;
     /**
+     * 誰に対して発行された許可証か
+     * 許可証を発行したクライアントIDがここにセットされるので、アプリケーションサイドで適宜この値を確認するべし。
+     * @type {string}
+     * @memberof IPassport
+     */
+    audience: string;
+    /**
      * 発行された順番
      * @type {number}
      * @memberof IPassport
@@ -46,13 +47,13 @@ export interface IPassport {
 }
 
 export function create(params: {
-    client: string;
     scope: string;
     issuer: string;
+    audience: string;
     issuedPlace: number;
 }): IPassport {
-    if (_.isEmpty(params.client)) {
-        throw new ArgumentNullError('client');
+    if (_.isEmpty(params.audience)) {
+        throw new ArgumentNullError('audience');
     }
     if (_.isEmpty(params.scope)) {
         throw new ArgumentNullError('scope');
@@ -65,9 +66,9 @@ export function create(params: {
     }
 
     return {
-        client: params.client,
         scope: params.scope,
         issuer: params.issuer,
+        audience: params.audience,
         issuedPlace: params.issuedPlace
     };
 }

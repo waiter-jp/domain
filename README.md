@@ -2,6 +2,10 @@
 
 # WAITER ドメインパッケージ
 
+[![CircleCI](https://circleci.com/gh/motionpicture/waiter-domain.svg?style=svg)](https://circleci.com/gh/motionpicture/waiter-domain)
+[![Coverage Status](https://coveralls.io/repos/github/motionpicture/waiter-domain/badge.svg)](https://coveralls.io/github/motionpicture/waiter-domain)
+[![Known Vulnerabilities](https://snyk.io/test/github/motionpicture/waiter-domain/badge.svg)](https://snyk.io/test/github/motionpicture/waiter-domain)
+
 ## プロジェクト背景
 - チケット購入サイトへのアクセスがある量感を超えると、システムで受け止め切ることは簡単でない。
 - インフラにコストをかけることで解決するのは簡単だが、コストに限度のないケースは少ない。
@@ -178,6 +182,7 @@ npm run build -- -w
 ### Required environment variables
 ---
 ```shell
+set WAITER_CLIENTS=**********クライアントリスト(オブジェクトの配列をjsonで指定)**********
 set WAITER_DEVELOPER_EMAIL=**********環境名**********
 ```
 

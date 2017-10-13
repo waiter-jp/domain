@@ -3,6 +3,10 @@
  * @namespace factory.client
  */
 
+import * as _ from 'underscore';
+
+import * as errors from './errors';
+
 /**
  * クライアントインターフェース
  * @export
@@ -37,4 +41,31 @@ export interface IClient {
      * @memberof IClient
      */
     totalNumberOfPassportsPerIssuer: number;
+}
+
+export function create(params: {
+    id: string;
+    secret: string;
+    passportIssuerWorkShiftInSesonds: number;
+    totalNumberOfPassportsPerIssuer: number;
+}): IClient {
+    if (_.isEmpty(params.id)) {
+        throw new errors.ArgumentNull('id');
+    }
+    if (_.isEmpty(params.secret)) {
+        throw new errors.ArgumentNull('secret');
+    }
+    if (!_.isNumber(params.passportIssuerWorkShiftInSesonds)) {
+        throw new errors.Argument('passportIssuerWorkShiftInSesonds', 'passportIssuerWorkShiftInSesonds must be number');
+    }
+    if (!_.isNumber(params.totalNumberOfPassportsPerIssuer)) {
+        throw new errors.Argument('totalNumberOfPassportsPerIssuer', 'totalNumberOfPassportsPerIssuer must be number');
+    }
+
+    return {
+        id: params.id,
+        secret: params.secret,
+        passportIssuerWorkShiftInSesonds: params.passportIssuerWorkShiftInSesonds,
+        totalNumberOfPassportsPerIssuer: params.totalNumberOfPassportsPerIssuer
+    };
 }
