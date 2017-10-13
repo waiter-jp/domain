@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Deprecated
 
 ### Removed
+- MongoDBレポジトリーを削除。
+- SqlServerレポジトリーを削除。
 
 ### Fixed
 

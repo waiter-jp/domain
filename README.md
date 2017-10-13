@@ -1,3 +1,5 @@
+<img src="https://motionpicture.jp/images/common/logo_01.svg" alt="motionpicture" title="motionpicture" align="right" height="56" width="98"/>
+
 # WAITER ドメインパッケージ
 
 ## プロジェクト背景
@@ -176,7 +178,6 @@ npm run build -- -w
 ### Required environment variables
 ---
 ```shell
-set WAITER_SECRET=**********JWTシークレット**********
 set WAITER_DEVELOPER_EMAIL=**********環境名**********
 ```
 
