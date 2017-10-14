@@ -3,7 +3,7 @@
  * @module
  */
 
-import * as redis from 'redis';
+import * as Redis from 'ioredis';
 
 import * as PassportService from './service/passport';
 
@@ -15,16 +15,15 @@ import * as PassportFactory from './factory/passport';
 
 /**
  * Redis Cacheクライアント
- *
  * @example
- * const client = waiter.redis.createClient({
+ * const client = new waiter.redis({
  *      host: process.env.REDIS_HOST,
  *      port: process.env.REDIS_PORT,
  *      password: process.env.REDIS_KEY,
  *      tls: { servername: process.env.TEST_REDIS_HOST }
  * });
  */
-export import redis = redis;
+export import Redis = Redis;
 
 export namespace repository {
     /**

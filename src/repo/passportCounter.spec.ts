@@ -4,13 +4,14 @@
  */
 
 import * as assert from 'assert';
-import * as redis from 'redis-mock';
 import * as sinon from 'sinon';
+// tslint:disable-next-line:mocha-no-side-effect-code no-require-imports no-var-requires
+const redis = require('ioredis-mock');
 
 // import * as errors from '../factory/errors';
 import { RedisRepository as PassportCounterRepo } from '../repo/passportCounter';
 
-let redisClient: redis.RedisClient;
+let redisClient: any;
 let sandbox: sinon.SinonSandbox;
 
 before(() => {
@@ -19,12 +20,11 @@ before(() => {
 
 describe('PassportCounterRepo.incr()', () => {
     beforeEach(() => {
-        redisClient = redis.createClient();
+        redisClient = new redis({});
     });
 
     afterEach(() => {
         sandbox.restore();
-        redisClient.quit();
     });
 
     it('redisが正常であれば、オブジェクトを取得できるはず', async () => {
@@ -36,11 +36,11 @@ describe('PassportCounterRepo.incr()', () => {
         };
         const scope = 'scope';
         const multi = redisClient.multi();
-        const execResult = [1, 1];
+        const execResult = [[null, 1], [null, 1]];
 
         const passportCounterRepo = new PassportCounterRepo(redisClient);
         sandbox.mock(redisClient).expects('multi').once().returns(multi);
-        sandbox.mock(multi).expects('exec').once().callsArgWith(0, null, execResult);
+        sandbox.mock(multi).expects('exec').once().resolves(execResult);
 
         const result = await passportCounterRepo.incr(client, scope);
         assert.equal(typeof result, 'object');
@@ -60,10 +60,10 @@ describe('PassportCounterRepo.incr()', () => {
 
         const passportCounterRepo = new PassportCounterRepo(redisClient);
         sandbox.mock(redisClient).expects('multi').once().returns(multi);
-        sandbox.mock(multi).expects('exec').once().callsArgWith(0, execResult);
+        sandbox.mock(multi).expects('exec').once().rejects(execResult);
 
         const result = await passportCounterRepo.incr(client, scope).catch((err) => err);
-        assert.deepEqual(result, execResult);
+        assert.deepEqual(result.message, execResult.message);
         sandbox.verify();
     });
 });

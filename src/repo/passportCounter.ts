@@ -1,6 +1,6 @@
 import * as createDebug from 'debug';
+import * as redis from 'ioredis';
 import * as moment from 'moment';
-import * as redis from 'redis';
 
 import * as clientFactory from '../factory/client';
 
@@ -17,9 +17,9 @@ export interface IIncrementResult {
  * @class
  */
 export class RedisRepository {
-    public readonly redisClient: redis.RedisClient;
+    public readonly redisClient: redis.Redis;
 
-    constructor(redisClient: redis.RedisClient) {
+    constructor(redisClient: redis.Redis) {
         this.redisClient = redisClient;
     }
 
@@ -36,29 +36,28 @@ export class RedisRepository {
         return `${client.id}:${(dateNow.unix() - dateNow.unix() % workShiftInSeconds).toString()}`;
     }
 
-    public async incr(client: clientFactory.IClient, scope: string) {
-        return new Promise<IIncrementResult>((resolve, reject) => {
-            const issuer = RedisRepository.CREATE_ISSUER(client);
-            // tslint:disable-next-line:no-magic-numbers
-            const workShiftInSeconds = parseInt(client.passportIssuerWorkShiftInSesonds.toString(), 10);
-            const redisKey = `${issuer}:${scope}`;
-            const ttl = workShiftInSeconds;
+    /**
+     * クライアントとスコープ指定で許可証数をカウントアップする
+     * @param client クライアント
+     * @param scope スコープ
+     */
+    public async incr(client: clientFactory.IClient, scope: string): Promise<IIncrementResult> {
+        const issuer = RedisRepository.CREATE_ISSUER(client);
+        // tslint:disable-next-line:no-magic-numbers
+        const workShiftInSeconds = parseInt(client.passportIssuerWorkShiftInSesonds.toString(), 10);
+        const redisKey = `${issuer}:${scope}`;
+        const ttl = workShiftInSeconds;
 
-            const multi = this.redisClient.multi();
-            multi.incr(redisKey, debug)
-                .expire(redisKey, ttl, debug)
-                .exec((execErr, replies) => {
-                    if (execErr instanceof Error) {
-                        reject(execErr);
-                    } else {
-                        debug('replies:', replies);
-                        resolve({
-                            issuer: issuer,
-                            // tslint:disable-next-line:no-magic-numbers
-                            issuedPlace: parseInt(replies[0], 10)
-                        });
-                    }
-                });
+        const results = await this.redisClient.multi()
+            .incr(redisKey, debug)
+            .expire(redisKey, ttl, debug)
+            .exec();
+        debug('results:', results);
+
+        return ({
+            issuer: issuer,
+            // tslint:disable-next-line:no-magic-numbers
+            issuedPlace: parseInt(results[0][1], 10)
         });
     }
 }

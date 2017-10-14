@@ -5,8 +5,10 @@
 
 import * as assert from 'assert';
 import * as jwt from 'jsonwebtoken';
-import * as redis from 'redis-mock';
+// import * as redis from 'redis-mock';
 import * as sinon from 'sinon';
+// tslint:disable-next-line:mocha-no-side-effect-code no-require-imports no-var-requires
+const redis = require('ioredis-mock');
 
 import * as errors from '../factory/errors';
 import { InMemoryRepository as ClientRepo } from '../repo/client';
@@ -30,7 +32,7 @@ describe('redisで発行する', () => {
         const scope = 'scope';
 
         const clientRepo = new ClientRepo();
-        const passportCounterRepo = new PassportCounterRepo(redis.createClient());
+        const passportCounterRepo = new PassportCounterRepo(new redis({}));
 
         const result = await passportService.issueWithRedis(clientId, scope)(clientRepo, passportCounterRepo).catch((err) => err);
         assert(result instanceof errors.NotFound);
@@ -49,7 +51,7 @@ describe('redisで発行する', () => {
         const incrResult = { issuer: 'issuer', issuedPlace: 1 };
 
         const clientRepo = new ClientRepo();
-        const passportCounterRepo = new PassportCounterRepo(redis.createClient());
+        const passportCounterRepo = new PassportCounterRepo(new redis({}));
 
         sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
 
@@ -70,7 +72,7 @@ describe('redisで発行する', () => {
         const incrResult = { issuer: 'issuer', issuedPlace: 1 };
 
         const clientRepo = new ClientRepo();
-        const passportCounterRepo = new PassportCounterRepo(redis.createClient());
+        const passportCounterRepo = new PassportCounterRepo(new redis({}));
 
         sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
 
@@ -92,7 +94,7 @@ describe('redisで発行する', () => {
         const signReult = new Error('signError');
 
         const clientRepo = new ClientRepo();
-        const passportCounterRepo = new PassportCounterRepo(redis.createClient());
+        const passportCounterRepo = new PassportCounterRepo(new redis({}));
 
         sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
         // tslint:disable-next-line:no-magic-numbers
@@ -136,7 +138,7 @@ describe('許可証トークンを検証する', () => {
         const incrResult = { issuer: 'issuer', issuedPlace: 1 };
 
         const clientRepo = new ClientRepo();
-        const passportCounterRepo = new PassportCounterRepo(redis.createClient());
+        const passportCounterRepo = new PassportCounterRepo(new redis({}));
 
         sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
 
@@ -162,7 +164,7 @@ describe('許可証トークンを検証する', () => {
         const incrResult = { issuer: 'issuer', issuedPlace: 1 };
 
         const clientRepo = new ClientRepo();
-        const passportCounterRepo = new PassportCounterRepo(redis.createClient());
+        const passportCounterRepo = new PassportCounterRepo(new redis({}));
 
         sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
 
