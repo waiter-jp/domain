@@ -20,7 +20,7 @@ const debug = createDebug('waiter-domain:service:passport');
  * @param client クライアント
  * @param scope 許可証スコープ
  */
-export function issueWithRedis(clientId: string, scope: string) {
+export function issue(clientId: string, scope: string) {
     return async (clientRepo: ClientRepo, passportCounterRepo: PassportCounterRepo): Promise<string> => {
         debug('client exists?');
         const client = clientRepo.findbyId(clientId);
@@ -70,6 +70,25 @@ async function encode(passport: passportFactory.IPassport, secret: string, expir
             }
         );
     });
+}
+
+/**
+ * 現在の許可証発行数を取得する
+ * @export
+ * @function
+ * @param client クライアント
+ * @param scope 許可証スコープ
+ */
+export function getCounter(clientId: string, scope: string) {
+    return async (clientRepo: ClientRepo, passportCounterRepo: PassportCounterRepo): Promise<number> => {
+        debug('client exists?');
+        const client = clientRepo.findbyId(clientId);
+
+        const { issuer, issuedPlace } = await passportCounterRepo.now(client, scope);
+        debug('passportCounter.now:', issuer, issuedPlace);
+
+        return issuedPlace;
+    };
 }
 
 /**

@@ -1,5 +1,5 @@
 /**
- * 許可証発行サンプル
+ * 現在の許可証数取得サンプル
  * @ignore
  */
 
@@ -19,8 +19,8 @@ async function main() {
     const clientId = 'clientId';
     const scope = 'scope';
 
-    const passport = await waiter.service.passport.issue(clientId, scope)(clientRepo, passportRepo);
-    console.log('passport is', passport);
+    const counter = await waiter.service.passport.getCounter(clientId, scope)(clientRepo, passportRepo);
+    console.log('counter is', counter);
 
     redisClient.quit();
 }

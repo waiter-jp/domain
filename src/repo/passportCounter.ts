@@ -60,4 +60,23 @@ export class RedisRepository {
             issuedPlace: parseInt(results[0][1], 10)
         });
     }
+
+    /**
+     * クライアントとスコープ指定で現在の許可証数を取得する
+     * @param client クライアント
+     * @param scope スコープ
+     */
+    public async now(client: clientFactory.IClient, scope: string): Promise<IIncrementResult> {
+        const issuer = RedisRepository.CREATE_ISSUER(client);
+        const redisKey = `${issuer}:${scope}`;
+
+        const result = await this.redisClient.get(redisKey, debug);
+        debug('result:', result);
+
+        return ({
+            issuer: issuer,
+            // tslint:disable-next-line:no-magic-numbers
+            issuedPlace: (result === null) ? 0 : parseInt(result, 10)
+        });
+    }
 }
