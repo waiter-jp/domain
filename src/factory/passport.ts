@@ -3,7 +3,7 @@
  * @namespace factory.passport
  */
 
-import * as _ from 'underscore';
+import * as validator from 'validator';
 
 import ArgumentError from './error/argument';
 import ArgumentNullError from './error/argumentNull';
@@ -52,16 +52,16 @@ export function create(params: {
     audience: string;
     issuedPlace: number;
 }): IPassport {
-    if (_.isEmpty(params.audience)) {
+    if (validator.isEmpty(params.audience)) {
         throw new ArgumentNullError('audience');
     }
-    if (_.isEmpty(params.scope)) {
+    if (validator.isEmpty(params.scope)) {
         throw new ArgumentNullError('scope');
     }
-    if (_.isEmpty(params.issuer)) {
+    if (validator.isEmpty(params.issuer)) {
         throw new ArgumentNullError('issuer');
     }
-    if (!_.isNumber(params.issuedPlace)) {
+    if (!Number.isInteger(params.issuedPlace)) {
         throw new ArgumentError('issuedPlace', 'issuedPlace must be number');
     }
 

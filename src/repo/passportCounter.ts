@@ -45,7 +45,6 @@ export class RedisRepository {
             const ttl = workShiftInSeconds;
 
             const multi = this.redisClient.multi();
-            debug('redis multi client created.', multi);
             multi.incr(redisKey, debug)
                 .expire(redisKey, ttl, debug)
                 .exec((execErr, replies) => {

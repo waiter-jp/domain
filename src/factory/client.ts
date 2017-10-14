@@ -3,7 +3,7 @@
  * @namespace factory.client
  */
 
-import * as _ from 'underscore';
+import * as validator from 'validator';
 
 import * as errors from './errors';
 
@@ -49,16 +49,16 @@ export function create(params: {
     passportIssuerWorkShiftInSesonds: number;
     totalNumberOfPassportsPerIssuer: number;
 }): IClient {
-    if (_.isEmpty(params.id)) {
+    if (validator.isEmpty(params.id)) {
         throw new errors.ArgumentNull('id');
     }
-    if (_.isEmpty(params.secret)) {
+    if (validator.isEmpty(params.secret)) {
         throw new errors.ArgumentNull('secret');
     }
-    if (!_.isNumber(params.passportIssuerWorkShiftInSesonds)) {
+    if (!Number.isInteger(params.passportIssuerWorkShiftInSesonds)) {
         throw new errors.Argument('passportIssuerWorkShiftInSesonds', 'passportIssuerWorkShiftInSesonds must be number');
     }
-    if (!_.isNumber(params.totalNumberOfPassportsPerIssuer)) {
+    if (!Number.isInteger(params.totalNumberOfPassportsPerIssuer)) {
         throw new errors.Argument('totalNumberOfPassportsPerIssuer', 'totalNumberOfPassportsPerIssuer must be number');
     }
 
