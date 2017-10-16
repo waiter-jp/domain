@@ -5,12 +5,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## Unreleased
 ### Added
+- クライアントInMemoryレポジトリを追加。
+- 現在の許可証発行数取得サービスを追加。
 
 ### Changed
 
 ### Deprecated
 
 ### Removed
+- MongoDBレポジトリーを削除。
+- SqlServerレポジトリーを削除。
 
 ### Fixed
 
