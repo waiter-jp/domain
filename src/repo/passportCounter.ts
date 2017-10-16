@@ -7,7 +7,7 @@ import * as clientFactory from '../factory/client';
 const debug = createDebug('waiter-domain:repository:passportCounter');
 
 export interface IIncrementResult {
-    issuer: string;
+    issueUnitName: string;
     issuedPlace: number;
 }
 
@@ -24,16 +24,16 @@ export class RedisRepository {
     }
 
     /**
-     * 発行者を作成する
+     * 発行単位を作成する
      * @param {string} clinetId クライアントID
      * @returns {string}
      */
-    public static CREATE_ISSUER(client: clientFactory.IClient) {
+    public static CREATE_ISSUE_UNIT(client: clientFactory.IClient) {
         const dateNow = moment();
         // tslint:disable-next-line:no-magic-numbers
-        const workShiftInSeconds = parseInt(client.passportIssuerWorkShiftInSesonds.toString(), 10);
+        const aggregationUnitInSeconds = parseInt(client.passportIssueRule.aggregationUnitInSeconds.toString(), 10);
 
-        return `${client.id}:${(dateNow.unix() - dateNow.unix() % workShiftInSeconds).toString()}`;
+        return `${client.id}:${(dateNow.unix() - dateNow.unix() % aggregationUnitInSeconds).toString()}`;
     }
 
     /**
@@ -42,10 +42,10 @@ export class RedisRepository {
      * @param scope スコープ
      */
     public async incr(client: clientFactory.IClient, scope: string): Promise<IIncrementResult> {
-        const issuer = RedisRepository.CREATE_ISSUER(client);
+        const issueUnitName = RedisRepository.CREATE_ISSUE_UNIT(client);
         // tslint:disable-next-line:no-magic-numbers
-        const workShiftInSeconds = parseInt(client.passportIssuerWorkShiftInSesonds.toString(), 10);
-        const redisKey = `${issuer}:${scope}`;
+        const workShiftInSeconds = parseInt(client.passportIssueRule.aggregationUnitInSeconds.toString(), 10);
+        const redisKey = `${issueUnitName}:${scope}`;
         const ttl = workShiftInSeconds;
 
         const results = await this.redisClient.multi()
@@ -55,7 +55,7 @@ export class RedisRepository {
         debug('results:', results);
 
         return ({
-            issuer: issuer,
+            issueUnitName: issueUnitName,
             // tslint:disable-next-line:no-magic-numbers
             issuedPlace: parseInt(results[0][1], 10)
         });
@@ -67,14 +67,14 @@ export class RedisRepository {
      * @param scope スコープ
      */
     public async now(client: clientFactory.IClient, scope: string): Promise<IIncrementResult> {
-        const issuer = RedisRepository.CREATE_ISSUER(client);
-        const redisKey = `${issuer}:${scope}`;
+        const issueUnitName = RedisRepository.CREATE_ISSUE_UNIT(client);
+        const redisKey = `${issueUnitName}:${scope}`;
 
         const result = await this.redisClient.get(redisKey, debug);
         debug('result:', result);
 
         return ({
-            issuer: issuer,
+            issueUnitName: issueUnitName,
             // tslint:disable-next-line:no-magic-numbers
             issuedPlace: (result === null) ? 0 : parseInt(result, 10)
         });

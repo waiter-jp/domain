@@ -31,8 +31,10 @@ describe('PassportCounterRepo.incr()', () => {
         const client = {
             id: 'clientId',
             secret: 'secret',
-            passportIssuerWorkShiftInSesonds: 60,
-            totalNumberOfPassportsPerIssuer: 100
+            passportIssueRule: {
+                aggregationUnitInSeconds: 60,
+                threshold: 100
+            }
         };
         const scope = 'scope';
         const multi = redisClient.multi();
@@ -51,8 +53,10 @@ describe('PassportCounterRepo.incr()', () => {
         const client = {
             id: 'clientId',
             secret: 'secret',
-            passportIssuerWorkShiftInSesonds: 60,
-            totalNumberOfPassportsPerIssuer: 100
+            passportIssueRule: {
+                aggregationUnitInSeconds: 60,
+                threshold: 100
+            }
         };
         const scope = 'scope';
         const multi = redisClient.multi();
@@ -81,8 +85,10 @@ describe('PassportCounterRepo.now()', () => {
         const client = {
             id: 'clientId',
             secret: 'secret',
-            passportIssuerWorkShiftInSesonds: 60,
-            totalNumberOfPassportsPerIssuer: 100
+            passportIssueRule: {
+                aggregationUnitInSeconds: 60,
+                threshold: 100
+            }
         };
         const scope = 'scope';
         const execResult = 1;
@@ -100,8 +106,10 @@ describe('PassportCounterRepo.now()', () => {
         const client = {
             id: 'clientId',
             secret: 'secret',
-            passportIssuerWorkShiftInSesonds: 60,
-            totalNumberOfPassportsPerIssuer: 100
+            passportIssueRule: {
+                aggregationUnitInSeconds: 60,
+                threshold: 100
+            }
         };
         const scope = 'scope';
         const execResult = null;

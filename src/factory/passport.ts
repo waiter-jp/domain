@@ -26,18 +26,24 @@ export interface IPassport {
     scope: string;
     /**
      * パスポート発行者
-     * 発行者がその勤務シフト時間内で整理番号付けを行う
      * @type {string}
      * @memberof IPassport
      */
-    issuer: string;
+    iss: string;
     /**
      * 誰に対して発行された許可証か
      * 許可証を発行したクライアントIDがここにセットされるので、アプリケーションサイドで適宜この値を確認するべし。
      * @type {string}
      * @memberof IPassport
      */
-    audience: string;
+    aud: string;
+    /**
+     * パスポート発行単位名
+     * 発行単位内で整理番号付けを行う
+     * @type {string}
+     * @memberof IPassport
+     */
+    issueUnitName: string;
     /**
      * 発行された順番
      * @type {number}
@@ -48,18 +54,22 @@ export interface IPassport {
 
 export function create(params: {
     scope: string;
-    issuer: string;
-    audience: string;
+    iss: string;
+    aud: string;
+    issueUnitName: string;
     issuedPlace: number;
 }): IPassport {
-    if (validator.isEmpty(params.audience)) {
-        throw new ArgumentNullError('audience');
+    if (validator.isEmpty(params.aud)) {
+        throw new ArgumentNullError('aud');
     }
     if (validator.isEmpty(params.scope)) {
         throw new ArgumentNullError('scope');
     }
-    if (validator.isEmpty(params.issuer)) {
-        throw new ArgumentNullError('issuer');
+    if (validator.isEmpty(params.iss)) {
+        throw new ArgumentNullError('iss');
+    }
+    if (validator.isEmpty(params.issueUnitName)) {
+        throw new ArgumentNullError('issueUnitName');
     }
     if (!Number.isInteger(params.issuedPlace)) {
         throw new ArgumentError('issuedPlace', 'issuedPlace must be number');
@@ -67,8 +77,9 @@ export function create(params: {
 
     return {
         scope: params.scope,
-        issuer: params.issuer,
-        audience: params.audience,
+        iss: params.iss,
+        aud: params.aud,
+        issueUnitName: params.issueUnitName,
         issuedPlace: params.issuedPlace
     };
 }

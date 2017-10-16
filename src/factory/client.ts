@@ -7,6 +7,17 @@ import * as validator from 'validator';
 
 import * as errors from './errors';
 
+export interface IPassportIssueRule {
+    /**
+     * 許可証数集計単位(秒)
+     */
+    aggregationUnitInSeconds: number;
+    /**
+     * 単位時間当たりの許可証数閾値
+     */
+    threshold: number;
+}
+
 /**
  * クライアントインターフェース
  * @export
@@ -16,7 +27,6 @@ import * as errors from './errors';
 export interface IClient {
     /**
      * クライアントID
-     * @type {string}
      * @memberof IClient
      */
     id: string;
@@ -25,29 +35,20 @@ export interface IClient {
      * クライアントのパスポートをトークン化する際に使用
      * また、このシークレットをクライアントに共有することで、クライアントがトークンを検証できるようにする
      * クライアント側で管理を徹底することが前提
-     * @type {string}
      * @memberof IClient
      */
     secret: string;
     /**
-     * パスポート発行者の勤務シフト時間(秒)
-     * @type {number}
+     * 許可証発行ルール
      * @memberof IClient
      */
-    passportIssuerWorkShiftInSesonds: number;
-    /**
-     * 発行者ひとりあたりのパスポート発行可能数
-     * @type {number}
-     * @memberof IClient
-     */
-    totalNumberOfPassportsPerIssuer: number;
+    passportIssueRule: IPassportIssueRule;
 }
 
 export function create(params: {
     id: string;
     secret: string;
-    passportIssuerWorkShiftInSesonds: number;
-    totalNumberOfPassportsPerIssuer: number;
+    passportIssueRule: IPassportIssueRule;
 }): IClient {
     if (validator.isEmpty(params.id)) {
         throw new errors.ArgumentNull('id');
@@ -55,17 +56,19 @@ export function create(params: {
     if (validator.isEmpty(params.secret)) {
         throw new errors.ArgumentNull('secret');
     }
-    if (!Number.isInteger(params.passportIssuerWorkShiftInSesonds)) {
-        throw new errors.Argument('passportIssuerWorkShiftInSesonds', 'passportIssuerWorkShiftInSesonds must be number');
+    if (params.passportIssueRule === undefined || params.passportIssueRule === null) {
+        throw new errors.Argument('passportIssueRule', 'passportIssueRule must be object');
     }
-    if (!Number.isInteger(params.totalNumberOfPassportsPerIssuer)) {
-        throw new errors.Argument('totalNumberOfPassportsPerIssuer', 'totalNumberOfPassportsPerIssuer must be number');
+    if (!Number.isInteger(params.passportIssueRule.aggregationUnitInSeconds)) {
+        throw new errors.Argument('passportIssueRule.aggregationUnitInSeconds', 'aggregationUnitInSeconds must be number');
+    }
+    if (!Number.isInteger(params.passportIssueRule.threshold)) {
+        throw new errors.Argument('passportIssueRule.threshold', 'threshold must be number');
     }
 
     return {
         id: params.id,
         secret: params.secret,
-        passportIssuerWorkShiftInSesonds: params.passportIssuerWorkShiftInSesonds,
-        totalNumberOfPassportsPerIssuer: params.totalNumberOfPassportsPerIssuer
+        passportIssueRule: params.passportIssueRule
     };
 }

@@ -14,7 +14,7 @@ import { RedisRepository as PassportCounterRepo } from '../repo/passportCounter'
 const debug = createDebug('waiter-domain:service:passport');
 
 /**
- * redisリポジトリーで許可証を発行する
+ * 許可証を発行する
  * @export
  * @function
  * @param client クライアント
@@ -26,50 +26,40 @@ export function issue(clientId: string, scope: string) {
         const client = clientRepo.findbyId(clientId);
 
         // tslint:disable-next-line:no-magic-numbers
-        const workShiftInSeconds = parseInt(client.passportIssuerWorkShiftInSesonds.toString(), 10);
-        const { issuer, issuedPlace } = await passportCounterRepo.incr(client, scope);
+        const workShiftInSeconds = parseInt(client.passportIssueRule.aggregationUnitInSeconds.toString(), 10);
+        const { issueUnitName, issuedPlace } = await passportCounterRepo.incr(client, scope);
         debug('incremented. issuedPlace:', issuedPlace);
 
-        if (issuedPlace > client.totalNumberOfPassportsPerIssuer) {
+        if (issuedPlace > client.passportIssueRule.threshold) {
             throw new errors.RateLimitExceeded();
         }
 
-        const passport = passportFactory.create({
+        const payload = {
             scope: scope,
-            issuer: issuer,
-            audience: client.id,
+            issueUnitName: issueUnitName,
             issuedPlace: issuedPlace
-        });
-        debug('passport created.', passport);
+        };
 
-        return await encode(passport, client.secret, workShiftInSeconds);
-    };
-}
-
-/**
- * 許可証を暗号化する
- * @export
- * @function
- * @param {IPassport} passport 許可証
- * @returns {Promise<string>}
- */
-async function encode(passport: passportFactory.IPassport, secret: string, expiresIn: number) {
-    return new Promise<string>((resolve, reject) => {
-        jwt.sign(
-            passport,
-            secret,
-            {
-                expiresIn: expiresIn
-            },
-            (err, encoded) => {
-                if (err instanceof Error) {
-                    reject(err);
-                } else {
-                    resolve(encoded);
+        return new Promise<string>((resolve, reject) => {
+            // 許可証を暗号化する
+            jwt.sign(
+                payload,
+                client.secret,
+                {
+                    issuer: <string>process.env.WAITER_PASSPORT_ISSUER,
+                    audience: client.id,
+                    expiresIn: workShiftInSeconds
+                },
+                (err, encoded) => {
+                    if (err instanceof Error) {
+                        reject(err);
+                    } else {
+                        resolve(encoded);
+                    }
                 }
-            }
-        );
-    });
+            );
+        });
+    };
 }
 
 /**
@@ -84,8 +74,8 @@ export function getCounter(clientId: string, scope: string) {
         debug('client exists?');
         const client = clientRepo.findbyId(clientId);
 
-        const { issuer, issuedPlace } = await passportCounterRepo.now(client, scope);
-        debug('passportCounter.now:', issuer, issuedPlace);
+        const { issueUnitName, issuedPlace } = await passportCounterRepo.now(client, scope);
+        debug('passportCounter.now:', issueUnitName, issuedPlace);
 
         return issuedPlace;
     };
@@ -95,13 +85,13 @@ export function getCounter(clientId: string, scope: string) {
  * 暗号化された許可証を検証する
  * @export
  * @function
- * @param {string} encodedPassport
+ * @param {string} token
  * @param {string} secret
  * @returns {Promise<passportFactory.IPassport>}
  */
-export async function verify(encodedPassport: string, secret: string): Promise<passportFactory.IPassport> {
+export async function verify(token: string, secret: string): Promise<passportFactory.IPassport> {
     return new Promise<passportFactory.IPassport>((resolve, reject) => {
-        jwt.verify(encodedPassport, secret, (err, decoded) => {
+        jwt.verify(token, secret, (err, decoded) => {
             if (err instanceof Error) {
                 reject(err);
             } else {

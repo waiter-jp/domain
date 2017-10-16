@@ -45,8 +45,10 @@ describe('発行する', () => {
         process.env.WAITER_CLIENTS = JSON.stringify([{
             id: clientId,
             secret: 'secret',
-            passportIssuerWorkShiftInSesonds: 60,
-            totalNumberOfPassportsPerIssuer: 0
+            passportIssueRule: {
+                aggregationUnitInSeconds: 60,
+                threshold: 0
+            }
         }]);
         const incrResult = { issuer: 'issuer', issuedPlace: 1 };
 
@@ -66,8 +68,10 @@ describe('発行する', () => {
         process.env.WAITER_CLIENTS = JSON.stringify([{
             id: clientId,
             secret: 'secret',
-            passportIssuerWorkShiftInSesonds: 60,
-            totalNumberOfPassportsPerIssuer: 100
+            passportIssueRule: {
+                aggregationUnitInSeconds: 60,
+                threshold: 100
+            }
         }]);
         const incrResult = { issuer: 'issuer', issuedPlace: 1 };
 
@@ -87,8 +91,10 @@ describe('発行する', () => {
         process.env.WAITER_CLIENTS = JSON.stringify([{
             id: clientId,
             secret: 'secret',
-            passportIssuerWorkShiftInSesonds: 60,
-            totalNumberOfPassportsPerIssuer: 100
+            passportIssueRule: {
+                aggregationUnitInSeconds: 60,
+                threshold: 100
+            }
         }]);
         const incrResult = { issuer: 'issuer', issuedPlace: 1 };
         const signReult = new Error('signError');
@@ -112,8 +118,9 @@ describe('許可証トークンを検証する', () => {
         const token = '';
         const verifyResult = {
             scope: 'scope',
-            issuer: 'issuer',
-            audience: 'audience',
+            iss: 'issuer',
+            aud: 'audience',
+            issueUnitName: 'issueUnitName',
             issuedPlace: 123
         };
 
@@ -131,11 +138,13 @@ describe('許可証トークンを検証する', () => {
         process.env.WAITER_CLIENTS = JSON.stringify([{
             id: clientId,
             secret: secret,
-            passportIssuerWorkShiftInSesonds: 60,
-            totalNumberOfPassportsPerIssuer: 100
+            passportIssueRule: {
+                aggregationUnitInSeconds: 60,
+                threshold: 100
+            }
         }]);
         const scope = 'scope';
-        const incrResult = { issuer: 'issuer', issuedPlace: 1 };
+        const incrResult = { issueUnitName: 'issueUnitName', issuedPlace: 1 };
 
         const clientRepo = new ClientRepo();
         const passportCounterRepo = new PassportCounterRepo(new redis({}));
@@ -157,8 +166,10 @@ describe('許可証トークンを検証する', () => {
         process.env.WAITER_CLIENTS = JSON.stringify([{
             id: clientId,
             secret: secret,
-            passportIssuerWorkShiftInSesonds: 1,
-            totalNumberOfPassportsPerIssuer: 100
+            passportIssueRule: {
+                aggregationUnitInSeconds: 1,
+                threshold: 100
+            }
         }]);
         const scope = 'scope';
         const incrResult = { issuer: 'issuer', issuedPlace: 1 };
@@ -210,8 +221,10 @@ describe('現在の許可証数を取得する', () => {
         process.env.WAITER_CLIENTS = JSON.stringify([{
             id: clientId,
             secret: 'secret',
-            passportIssuerWorkShiftInSesonds: 60,
-            totalNumberOfPassportsPerIssuer: 100
+            passportIssueRule: {
+                aggregationUnitInSeconds: 60,
+                threshold: 100
+            }
         }]);
         const incrResult = { issuer: 'issuer', issuedPlace: 1 };
 

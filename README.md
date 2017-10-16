@@ -14,7 +14,7 @@
 
 ## 要件
 - 本システムにかかる負荷と、フロントエンドアプリケーション側のインフラ(ウェブサーバー、DBサーバー)への負荷が分離していること。
-- 厳密にコントロールできる、というよりは、2017/07あたりに間に合わせる、かつ、**それなりに有効**であることが大事。
+- 厳密にコントロールできる、というよりは、**それなりに有効**であることが大事。
 - フロントウェブサーバーに負荷をかけられないため、クライアントサイドから呼び出せることが必須。
 
 ## 仕様
@@ -100,51 +100,54 @@
 ---
 **クライアント**
 
-- 許可証発行対象のアプリケーションクライアント。事前にWAITER側DBに登録。
+- 許可証発行対象のアプリケーションクライアント。事前にWAITERに環境変数として登録。
 
-field                                   | type                            | description
-:-------------------------------------- | :------------------------------ | :-------------------------------------- 
-id                                      | string                          | クライアントID
-secret                                  | string                          | クライアントシークレット
-passport_issuer_work_shift_in_sesonds   | number                          | 許可証発行者の勤務シフト時間(秒)
-total_number_of_passports_per_issuer    | number                          | 発行者ひとりあたりの許可証発行可能数
+field                                        | type                            | description
+:------------------------------------------- | :------------------------------ | :-------------------------------------- 
+id                                           | string                          | クライアントID
+secret                                       | string                          | クライアントシークレット
+passportIssueRule.aggregationUnitInSeconds   | number                          | 許可証数集計単位(秒)
+passportIssueRule.threshold                  | number                          | 単位時間当たりの許可証数閾値
 
 ```json
 {
     "id": "motionpicture",
     "secret": "secret",
-    "passport_issuer_work_shift_in_sesonds" : 300,
-    "total_number_of_passports_per_issuer": 120
+    "passportIssueRule": {
+        "aggregationUnitInSeconds" : 300,
+        "threshold": 120
+    }
 }
 ```
 
-**許可証発行者**
+**許可証発行単位**
 
-- クライアント専属で勤務。クライアントが許可証の発行を依頼すると、勤務シフト内の発行者が発行を試みる。  
-- 発行者の勤務は秒単位でのシフト制で、許可証発行枚数には限りがある。  
+- クライアントごとに発行単位が作成される。クライアントが許可証の発行を依頼すると、単位ごとに発行数を集計しながら発行を試みる。  
 
 field                                   | type                            | description
 :-------------------------------------- | :------------------------------ | :-------------------------------------- 
-id                                      | string                          | 発行者ID
+issueUnitName                           | string                          | 許可証発行単位名
 
 **許可証**
 
 - 発行者が発行する許可証は鍵によって暗号化される。
-- クライアントは鍵を事前に共有してもらうことで、暗号化された許可証を検証し、許可するかどうかを判断する。
+- クライアントは鍵を事前に設定することで暗号化された許可証を検証し、許可するかどうかを判断する。
 
 field                                   | type                            | description
 :-------------------------------------- | :------------------------------ | :-------------------------------------- 
-client                                  | string                          | クライアントID
+iss                                     | string                          | 発行者
+aud                                     | string                          | 許可証が発行されたターゲットクライアント
 scope                                   | string                          | スコープ
-issuer                                  | number                          | 発行者ID
-issued_place                            | number                          | 発行者が何番目に発行した許可証か
+issueUnitName                           | string                          | 発行単位名
+issuedPlace                             | number                          | 発行者が何番目に発行した許可証か
 
 ```json
 {
+    "issuer" : "https://waiter.example.com",
     "client": "motionpicture",
-    "scope": "purchase",
-    "issuer" : "motionpicture:1495696920",
-    "issued_place": "11"
+    "scope": "transactions",
+    "issueUnitName": "motionpicture:1495696920",
+    "issuedPlace": 11
 }
 ```
 
@@ -164,24 +167,11 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnQiOiJtb3Rpb25waWN0dXJlIiwic2NvcGU
 ---
 [TypeScript](https://www.typescriptlang.org/)
 
-### 開発方法
----
-npmでパッケージをインストール。
-
-```shell
-npm install
-```
-[npm](https://www.npmjs.com/)
-
-typescriptをjavascriptにコンパイル。
-
-```shell
-npm run build -- -w
-```
 
 ### Required environment variables
 ---
 ```shell
+set WAITER_PASSPORT_ISSUER=**********許可証発行者(通常発行APIのドメインを指定)**********
 set WAITER_CLIENTS=**********クライアントリスト(オブジェクトの配列をjsonで指定)**********
 set WAITER_DEVELOPER_EMAIL=**********環境名**********
 ```
@@ -211,8 +201,6 @@ set TEST_SQL_SERVER_DATABASE=**********SQL Serverデータベース**********
 * [tslint](https://github.com/palantir/tslint)
 * [tslint-microsoft-contrib](https://github.com/Microsoft/tslint-microsoft-contrib)
 
-`npm run check`でチェック実行。改修の際には、必ずチェックすること。
-
 
 ## clean
 `npm run clean`で不要なソース削除。
@@ -221,6 +209,3 @@ set TEST_SQL_SERVER_DATABASE=**********SQL Serverデータベース**********
 ## test
 `npm test`でチェック実行。
 
-
-## versioning
-`npm version patch -f -m "enter your commit comment..."`でチェック実行。
