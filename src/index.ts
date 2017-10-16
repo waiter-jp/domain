@@ -11,6 +11,7 @@ import { InMemoryRepository as ClientRepo } from './repo/client';
 import { RedisRepository as PassportCounterRepo } from './repo/passportCounter';
 
 import ErrorCode from './factory/errorCode';
+import * as ErrorFactory from './factory/errors';
 import * as PassportFactory from './factory/passport';
 
 /**
@@ -47,5 +48,6 @@ export namespace service {
 
 export namespace factory {
     export import errorCode = ErrorCode;
+    export import errors = ErrorFactory;
     export import passport = PassportFactory;
 }
