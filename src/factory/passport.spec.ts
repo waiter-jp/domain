@@ -10,14 +10,18 @@ import * as PassportFactory from './passport';
 
 let TEST_CREATE_PARAMS: any;
 
-describe('パスポートファクトリー:作成', () => {
+describe('factory.passport.create()', () => {
     beforeEach(() => {
         TEST_CREATE_PARAMS = {
             scope: 'scope',
             iss: 'issuer',
             aud: 'audience',
-            issueUnitName: 'issueUnitName',
-            issuedPlace: 1
+            issueUnit: {
+                identifier: 'clientId:1508227500:scope',
+                validFrom: 1508227500,
+                validThrough: 1508227800,
+                numberOfRequests: 2
+            }
         };
     });
 
@@ -69,11 +73,11 @@ describe('パスポートファクトリー:作成', () => {
         );
     });
 
-    it('発行単位名が空であればArgumentNullError', () => {
+    it('識別子が空であればArgumentNullError', () => {
         assert.throws(
             () => {
-                const params = { ...TEST_CREATE_PARAMS, ...{ issueUnitName: '' } };
-                PassportFactory.create(params);
+                TEST_CREATE_PARAMS.issueUnit.identifier = '';
+                PassportFactory.create(TEST_CREATE_PARAMS);
             },
             (err: any) => {
                 assert(err instanceof errors.ArgumentNull);
@@ -83,11 +87,11 @@ describe('パスポートファクトリー:作成', () => {
         );
     });
 
-    it('順番が数字でなければArgumentError', () => {
+    it('リクエスト数が数字でなければArgumentError', () => {
         assert.throws(
             () => {
-                const params = { ...TEST_CREATE_PARAMS, ...{ issuedPlace: <any>'1' } };
-                PassportFactory.create(params);
+                TEST_CREATE_PARAMS.issueUnit.numberOfRequests = '1';
+                PassportFactory.create(TEST_CREATE_PARAMS);
             },
             (err: any) => {
                 assert(err instanceof errors.Argument);

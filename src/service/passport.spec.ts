@@ -12,7 +12,7 @@ const redis = require('ioredis-mock');
 
 import * as errors from '../factory/errors';
 import { InMemoryRepository as ClientRepo } from '../repo/client';
-import { RedisRepository as PassportCounterRepo } from '../repo/passportCounter';
+import { RedisRepository as PassportIssueUnitRepo } from '../repo/passportIssueUnit';
 import * as passportService from '../service/passport';
 
 let sandbox: sinon.SinonSandbox;
@@ -32,7 +32,7 @@ describe('発行する', () => {
         const scope = 'scope';
 
         const clientRepo = new ClientRepo();
-        const passportCounterRepo = new PassportCounterRepo(new redis({}));
+        const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
         const result = await passportService.issue(clientId, scope)(clientRepo, passportCounterRepo).catch((err) => err);
         assert(result instanceof errors.NotFound);
@@ -50,10 +50,15 @@ describe('発行する', () => {
                 threshold: 0
             }
         }]);
-        const incrResult = { issuer: 'issuer', issuedPlace: 1 };
+        const incrResult = {
+            identifier: 'clientId:1508227500:scope',
+            validFrom: 1508227500,
+            validThrough: 1508227800,
+            numberOfRequests: 1
+        };
 
         const clientRepo = new ClientRepo();
-        const passportCounterRepo = new PassportCounterRepo(new redis({}));
+        const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
         sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
 
@@ -73,10 +78,15 @@ describe('発行する', () => {
                 threshold: 100
             }
         }]);
-        const incrResult = { issuer: 'issuer', issuedPlace: 1 };
+        const incrResult = {
+            identifier: 'clientId:1508227500:scope',
+            validFrom: 1508227500,
+            validThrough: 1508227800,
+            numberOfRequests: 1
+        };
 
         const clientRepo = new ClientRepo();
-        const passportCounterRepo = new PassportCounterRepo(new redis({}));
+        const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
         sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
 
@@ -96,11 +106,16 @@ describe('発行する', () => {
                 threshold: 100
             }
         }]);
-        const incrResult = { issuer: 'issuer', issuedPlace: 1 };
+        const incrResult = {
+            identifier: 'clientId:1508227500:scope',
+            validFrom: 1508227500,
+            validThrough: 1508227800,
+            numberOfRequests: 1
+        };
         const signReult = new Error('signError');
 
         const clientRepo = new ClientRepo();
-        const passportCounterRepo = new PassportCounterRepo(new redis({}));
+        const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
         sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
         // tslint:disable-next-line:no-magic-numbers
@@ -120,8 +135,12 @@ describe('許可証トークンを検証する', () => {
             scope: 'scope',
             iss: 'issuer',
             aud: 'audience',
-            issueUnitName: 'issueUnitName',
-            issuedPlace: 123
+            issueUnit: {
+                identifier: 'clientId:1508227500:scope',
+                validFrom: 1508227500,
+                validThrough: 1508227800,
+                numberOfRequests: 2
+            }
         };
 
         // tslint:disable-next-line:no-magic-numbers
@@ -144,10 +163,15 @@ describe('許可証トークンを検証する', () => {
             }
         }]);
         const scope = 'scope';
-        const incrResult = { issueUnitName: 'issueUnitName', issuedPlace: 1 };
+        const incrResult = {
+            identifier: 'clientId:1508227500:scope',
+            validFrom: 1508227500,
+            validThrough: 1508227800,
+            numberOfRequests: 1
+        };
 
         const clientRepo = new ClientRepo();
-        const passportCounterRepo = new PassportCounterRepo(new redis({}));
+        const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
         sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
 
@@ -172,10 +196,15 @@ describe('許可証トークンを検証する', () => {
             }
         }]);
         const scope = 'scope';
-        const incrResult = { issuer: 'issuer', issuedPlace: 1 };
+        const incrResult = {
+            identifier: 'clientId:1508227500:scope',
+            validFrom: 1508227500,
+            validThrough: 1508227800,
+            numberOfRequests: 1
+        };
 
         const clientRepo = new ClientRepo();
-        const passportCounterRepo = new PassportCounterRepo(new redis({}));
+        const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
         sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
 
@@ -197,7 +226,7 @@ describe('許可証トークンを検証する', () => {
     });
 });
 
-describe('現在の許可証数を取得する', () => {
+describe('service.passport.currentIssueUnit()', () => {
     afterEach(() => {
         sandbox.restore();
     });
@@ -208,14 +237,14 @@ describe('現在の許可証数を取得する', () => {
         const scope = 'scope';
 
         const clientRepo = new ClientRepo();
-        const passportCounterRepo = new PassportCounterRepo(new redis({}));
+        const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
-        const result = await passportService.getCounter(clientId, scope)(clientRepo, passportCounterRepo).catch((err) => err);
+        const result = await passportService.currentIssueUnit(clientId, scope)(clientRepo, passportCounterRepo).catch((err) => err);
         assert(result instanceof errors.NotFound);
         sandbox.verify();
     });
 
-    it('RedisCacheが正常であれば、許可証数を取得できるはず', async () => {
+    it('RedisCacheが正常であれば、許可証発行リクエスト数を取得できるはず', async () => {
         const clientId = 'clientId';
         const scope = 'scope';
         process.env.WAITER_CLIENTS = JSON.stringify([{
@@ -226,15 +255,20 @@ describe('現在の許可証数を取得する', () => {
                 threshold: 100
             }
         }]);
-        const incrResult = { issuer: 'issuer', issuedPlace: 1 };
+        const incrResult = {
+            identifier: 'clientId:1508227500:scope',
+            validFrom: 1508227500,
+            validThrough: 1508227800,
+            numberOfRequests: 2
+        };
 
         const clientRepo = new ClientRepo();
-        const passportCounterRepo = new PassportCounterRepo(new redis({}));
+        const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
         sandbox.mock(passportCounterRepo).expects('now').once().resolves(incrResult);
 
-        const result = await passportService.getCounter(clientId, scope)(clientRepo, passportCounterRepo);
-        assert(Number.isInteger(result));
+        const result = await passportService.currentIssueUnit(clientId, scope)(clientRepo, passportCounterRepo);
+        assert(Number.isInteger(result.numberOfRequests));
         sandbox.verify();
     });
 });

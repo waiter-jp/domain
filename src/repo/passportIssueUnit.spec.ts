@@ -9,7 +9,7 @@ import * as sinon from 'sinon';
 const redis = require('ioredis-mock');
 
 // import * as errors from '../factory/errors';
-import { RedisRepository as PassportCounterRepo } from '../repo/passportCounter';
+import { RedisRepository as PassportIssueUnitRepo } from '../repo/passportIssueUnit';
 
 let redisClient: any;
 let sandbox: sinon.SinonSandbox;
@@ -18,7 +18,7 @@ before(() => {
     sandbox = sinon.sandbox.create();
 });
 
-describe('PassportCounterRepo.incr()', () => {
+describe('PassportIssueUnitRepo.incr()', () => {
     beforeEach(() => {
         redisClient = new redis({});
     });
@@ -40,7 +40,7 @@ describe('PassportCounterRepo.incr()', () => {
         const multi = redisClient.multi();
         const execResult = [[null, 1], [null, 1]];
 
-        const passportCounterRepo = new PassportCounterRepo(redisClient);
+        const passportCounterRepo = new PassportIssueUnitRepo(redisClient);
         sandbox.mock(redisClient).expects('multi').once().returns(multi);
         sandbox.mock(multi).expects('exec').once().resolves(execResult);
 
@@ -62,7 +62,7 @@ describe('PassportCounterRepo.incr()', () => {
         const multi = redisClient.multi();
         const execResult = new Error('execError');
 
-        const passportCounterRepo = new PassportCounterRepo(redisClient);
+        const passportCounterRepo = new PassportIssueUnitRepo(redisClient);
         sandbox.mock(redisClient).expects('multi').once().returns(multi);
         sandbox.mock(multi).expects('exec').once().rejects(execResult);
 
@@ -93,12 +93,12 @@ describe('PassportCounterRepo.now()', () => {
         const scope = 'scope';
         const execResult = 1;
 
-        const passportCounterRepo = new PassportCounterRepo(redisClient);
+        const passportCounterRepo = new PassportIssueUnitRepo(redisClient);
         sandbox.mock(redisClient).expects('get').once().resolves(execResult);
 
         const result = await passportCounterRepo.now(client, scope);
         assert.equal(typeof result, 'object');
-        assert.equal(result.issuedPlace, execResult);
+        assert.equal(result.numberOfRequests, execResult);
         sandbox.verify();
     });
 
@@ -114,12 +114,12 @@ describe('PassportCounterRepo.now()', () => {
         const scope = 'scope';
         const execResult = null;
 
-        const passportCounterRepo = new PassportCounterRepo(redisClient);
+        const passportCounterRepo = new PassportIssueUnitRepo(redisClient);
         sandbox.mock(redisClient).expects('get').once().resolves(execResult);
 
         const result = await passportCounterRepo.now(client, scope);
         assert.equal(typeof result, 'object');
-        assert.equal(result.issuedPlace, 0);
+        assert.equal(result.numberOfRequests, 0);
         sandbox.verify();
     });
 });

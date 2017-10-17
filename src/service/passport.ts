@@ -7,9 +7,9 @@ import * as createDebug from 'debug';
 import * as jwt from 'jsonwebtoken';
 
 import * as errors from '../factory/errors';
-import * as passportFactory from '../factory/passport';
+import * as PassportFactory from '../factory/passport';
 import { InMemoryRepository as ClientRepo } from '../repo/client';
-import { RedisRepository as PassportCounterRepo } from '../repo/passportCounter';
+import { RedisRepository as PassportIssueUnitRepo } from '../repo/passportIssueUnit';
 
 const debug = createDebug('waiter-domain:service:passport');
 
@@ -20,27 +20,29 @@ const debug = createDebug('waiter-domain:service:passport');
  * @param client クライアント
  * @param scope 許可証スコープ
  */
-export function issue(clientId: string, scope: string) {
-    return async (clientRepo: ClientRepo, passportCounterRepo: PassportCounterRepo): Promise<string> => {
+export function issue(
+    clientId: string,
+    scope: string
+) {
+    return async (clientRepo: ClientRepo, passportIssueUnitRepo: PassportIssueUnitRepo): Promise<PassportFactory.IEncodedPassport> => {
         debug('client exists?');
         const client = clientRepo.findbyId(clientId);
 
         // tslint:disable-next-line:no-magic-numbers
         const workShiftInSeconds = parseInt(client.passportIssueRule.aggregationUnitInSeconds.toString(), 10);
-        const { issueUnitName, issuedPlace } = await passportCounterRepo.incr(client, scope);
-        debug('incremented. issuedPlace:', issuedPlace);
+        const passportIssueUnit = await passportIssueUnitRepo.incr(client, scope);
+        debug('incremented. passportIssueUnit:', passportIssueUnit);
 
-        if (issuedPlace > client.passportIssueRule.threshold) {
+        if (passportIssueUnit.numberOfRequests > client.passportIssueRule.threshold) {
             throw new errors.RateLimitExceeded();
         }
 
         const payload = {
             scope: scope,
-            issueUnitName: issueUnitName,
-            issuedPlace: issuedPlace
+            issueUnit: passportIssueUnit
         };
 
-        return new Promise<string>((resolve, reject) => {
+        return new Promise<PassportFactory.IEncodedPassport>((resolve, reject) => {
             // 許可証を暗号化する
             jwt.sign(
                 payload,
@@ -63,21 +65,18 @@ export function issue(clientId: string, scope: string) {
 }
 
 /**
- * 現在の許可証発行数を取得する
+ * 現在の許可証発行単位を取得する
  * @export
  * @function
  * @param client クライアント
  * @param scope 許可証スコープ
  */
-export function getCounter(clientId: string, scope: string) {
-    return async (clientRepo: ClientRepo, passportCounterRepo: PassportCounterRepo): Promise<number> => {
+export function currentIssueUnit(clientId: string, scope: string) {
+    return async (clientRepo: ClientRepo, passportIssueUnitRepo: PassportIssueUnitRepo): Promise<PassportFactory.IIssueUnit> => {
         debug('client exists?');
         const client = clientRepo.findbyId(clientId);
 
-        const { issueUnitName, issuedPlace } = await passportCounterRepo.now(client, scope);
-        debug('passportCounter.now:', issueUnitName, issuedPlace);
-
-        return issuedPlace;
+        return await passportIssueUnitRepo.now(client, scope);
     };
 }
 
@@ -87,15 +86,15 @@ export function getCounter(clientId: string, scope: string) {
  * @function
  * @param {string} token
  * @param {string} secret
- * @returns {Promise<passportFactory.IPassport>}
+ * @returns {Promise<PassportFactory.IPassport>}
  */
-export async function verify(token: string, secret: string): Promise<passportFactory.IPassport> {
-    return new Promise<passportFactory.IPassport>((resolve, reject) => {
+export async function verify(token: string, secret: string): Promise<PassportFactory.IPassport> {
+    return new Promise<PassportFactory.IPassport>((resolve, reject) => {
         jwt.verify(token, secret, (err, decoded) => {
             if (err instanceof Error) {
                 reject(err);
             } else {
-                const passport = passportFactory.create(<any>decoded);
+                const passport = PassportFactory.create(<any>decoded);
                 resolve(passport);
             }
         });

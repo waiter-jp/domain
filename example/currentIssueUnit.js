@@ -9,18 +9,17 @@ async function main() {
     const redisClient = new waiter.Redis({
         port: process.env.TEST_REDIS_PORT,
         host: process.env.TEST_REDIS_HOST,
-        password: process.env.TEST_REDIS_KEY,
-        tls: { servername: process.env.TEST_REDIS_HOST }
+        password: process.env.TEST_REDIS_KEY
     });
 
     const clientRepo = new waiter.repository.Client();
-    const passportRepo = new waiter.repository.PassportCounter(redisClient);
+    const passportIssueUnitRepo = new waiter.repository.PassportIssueUnit(redisClient);
 
     const clientId = 'clientId';
     const scope = 'scope';
 
-    const counter = await waiter.service.passport.getCounter(clientId, scope)(clientRepo, passportRepo);
-    console.log('counter is', counter);
+    const issueUnit = await waiter.service.passport.currentIssueUnit(clientId, scope)(clientRepo, passportIssueUnitRepo);
+    console.log('current issueUnit is', issueUnit);
 
     redisClient.quit();
 }
