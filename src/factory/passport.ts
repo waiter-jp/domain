@@ -18,7 +18,7 @@ export interface IIssueUnit {
     /**
      * 許可証発行単位識別子
      * 発行単位内で整理番号付けを行う
-     * クライアント+日時+スコープで一意になる想定
+     * スコープ+日時で一意になる想定
      * @memberof IIssueUnit
      */
     identifier: string;
@@ -43,7 +43,7 @@ export interface IIssueUnit {
 
 /**
  * 許可証インターフェース
- * どのクライアントの、どういうスコープに対する許可なのか、という情報を持つ。
+ * どういうスコープに対する許可なのか、という情報を持つ。
  * 実際には許可証がjsonwebtokenに変換されて発行されるので、許可証の有効期間に関してはtokenが責任を持つことになる。
  * @export
  * @interface
@@ -52,7 +52,7 @@ export interface IIssueUnit {
 export interface IPassport {
     /**
      * 許可証のスコープ
-     * クライアントが設定&管理する想定
+     * 発行依頼者が事前に設定する想定
      * @memberof IPassport
      */
     scope: string;
@@ -63,10 +63,9 @@ export interface IPassport {
     iss: string;
     /**
      * 誰に対して発行された許可証か
-     * 許可証を発行したクライアントIDがここにセットされるので、アプリケーションサイドで適宜この値を確認するべし。
      * @memberof IPassport
      */
-    aud: string;
+    // aud: string;
     /**
      * 許可証発行単位名
      * 発行単位内で整理番号付けを行う
@@ -80,12 +79,12 @@ export type IEncodedPassport = string;
 export function create(params: {
     scope: string;
     iss: string;
-    aud: string;
+    // aud: string;
     issueUnit: IIssueUnit;
 }): IPassport {
-    if (validator.isEmpty(params.aud)) {
-        throw new ArgumentNullError('aud');
-    }
+    // if (validator.isEmpty(params.aud)) {
+    //     throw new ArgumentNullError('aud');
+    // }
     if (validator.isEmpty(params.scope)) {
         throw new ArgumentNullError('scope');
     }
@@ -102,7 +101,7 @@ export function create(params: {
     return {
         scope: params.scope,
         iss: params.iss,
-        aud: params.aud,
+        // aud: params.aud,
         issueUnit: params.issueUnit
     };
 }

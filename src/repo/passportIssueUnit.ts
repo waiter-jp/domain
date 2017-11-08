@@ -2,8 +2,8 @@ import * as createDebug from 'debug';
 import * as redis from 'ioredis';
 import * as moment from 'moment';
 
-import * as ClientFactory from '../factory/client';
 import { IIssueUnit } from '../factory/passport';
+import * as RuleFactory from '../factory/rule';
 
 const debug = createDebug('waiter-domain:repository:passportIssueUnit');
 
@@ -21,33 +21,31 @@ export class RedisRepository {
 
     /**
      * 発行単位属性を作成する
-     * @param {string} clinetId クライアントID
-     * @param {string} scope スコープ
+     * @param {RuleFactory.IRule} rule 発行規則
      * @returns {string}
      */
-    public static CREATE_ISSUE_UNIT_PARAMS(client: ClientFactory.IClient, scope: string) {
+    public static CREATE_ISSUE_UNIT_PARAMS(rule: RuleFactory.IRule) {
         const dateNow = moment();
         // tslint:disable-next-line:no-magic-numbers
-        const aggregationUnitInSeconds = parseInt(client.passportIssueRule.aggregationUnitInSeconds.toString(), 10);
+        const aggregationUnitInSeconds = parseInt(rule.aggregationUnitInSeconds.toString(), 10);
         const validFrom = dateNow.unix() - dateNow.unix() % aggregationUnitInSeconds;
         const validThrough = validFrom + aggregationUnitInSeconds;
 
         return {
-            identifier: `${client.id}:${validFrom.toString()}:${scope}`,
+            identifier: `${rule.scope}:${validFrom.toString()}`,
             validFrom: validFrom,
             validThrough: validThrough
         };
     }
 
     /**
-     * クライアントとスコープ指定で許可証数をカウントアップする
-     * @param client クライアント
-     * @param scope スコープ
+     * 許可証数をカウントアップする
+     * @param rule 発行ルール
      */
-    public async incr(client: ClientFactory.IClient, scope: string): Promise<IIssueUnit> {
-        const issueUnitParams = RedisRepository.CREATE_ISSUE_UNIT_PARAMS(client, scope);
+    public async incr(rule: RuleFactory.IRule): Promise<IIssueUnit> {
+        const issueUnitParams = RedisRepository.CREATE_ISSUE_UNIT_PARAMS(rule);
         // tslint:disable-next-line:no-magic-numbers
-        const ttl = parseInt(client.passportIssueRule.aggregationUnitInSeconds.toString(), 10);
+        const ttl = parseInt(rule.aggregationUnitInSeconds.toString(), 10);
 
         const results = await this.redisClient.multi()
             .incr(issueUnitParams.identifier, debug)
@@ -65,12 +63,11 @@ export class RedisRepository {
     }
 
     /**
-     * クライアントとスコープ指定で現在の許可証発行単位を取得する
-     * @param client クライアント
-     * @param scope スコープ
+     * 現在の許可証発行単位を取得する
+     * @param rule 発行ルール
      */
-    public async now(client: ClientFactory.IClient, scope: string): Promise<IIssueUnit> {
-        const issueUnitParams = RedisRepository.CREATE_ISSUE_UNIT_PARAMS(client, scope);
+    public async now(rule: RuleFactory.IRule): Promise<IIssueUnit> {
+        const issueUnitParams = RedisRepository.CREATE_ISSUE_UNIT_PARAMS(rule);
         const result = await this.redisClient.get(issueUnitParams.identifier, debug);
         debug('result:', result);
 

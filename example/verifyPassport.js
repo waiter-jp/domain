@@ -12,7 +12,7 @@ const rl = readline.createInterface({
 });
 
 rl.question('Please enter an token:\n', async (token) => {
-    const secret = 'clientSecret';
+    const secret = 'secret';
 
     try {
         const passport = await waiter.service.passport.verify(token, secret);

@@ -6,18 +6,30 @@
 [![Coverage Status](https://coveralls.io/repos/github/motionpicture/waiter-domain/badge.svg)](https://coveralls.io/github/motionpicture/waiter-domain)
 [![Known Vulnerabilities](https://snyk.io/test/github/motionpicture/waiter-domain/badge.svg)](https://snyk.io/test/github/motionpicture/waiter-domain)
 
-## プロジェクト背景
+
+## Table of contents
+
+* [Background](#background)
+* [Requirement](#requirement)
+* [Specification](#specification)
+* [Usage](#usage)
+* [Code Samples](#code-samples)
+* [Jsdoc](#jsdoc)
+* [License](#license)
+
+
+## Background
 - チケット購入サイトへのアクセスがある量感を超えると、システムで受け止め切ることは簡単でない。
 - インフラにコストをかけることで解決するのは簡単だが、コストに限度のないケースは少ない。
 - GMO、SendGrid等、外部サービスと連携するシステムをつくる以上、外部サービス側の限度を考慮する必要がある。
 - アプリケーション(ソフトウェア)のレベルでできる限りのことはしたい。
 
-## 要件
+## Requirement
 - 本システムにかかる負荷と、フロントエンドアプリケーション側のインフラ(ウェブサーバー、DBサーバー)への負荷が分離していること。
 - 厳密にコントロールできる、というよりは、**それなりに有効**であることが大事。
 - フロントウェブサーバーに負荷をかけられないため、クライアントサイドから呼び出せることが必須。
 
-## 仕様
+## Specification
 ### とりあえず発行数を制御した許可証発行サーバーをたててみる
 ---
 ```
@@ -98,56 +110,56 @@
 
 ### 登場用語
 ---
-**クライアント**
+**発行規則**
 
-- 許可証発行対象のアプリケーションクライアント。事前にWAITERに環境変数として登録。
+- 許可証発行規則。事前にWAITERに環境変数として登録。
 
 field                                        | type                            | description
 :------------------------------------------- | :------------------------------ | :-------------------------------------- 
-id                                           | string                          | クライアントID
-secret                                       | string                          | クライアントシークレット
-passportIssueRule.aggregationUnitInSeconds   | number                          | 許可証数集計単位(秒)
-passportIssueRule.threshold                  | number                          | 単位時間当たりの許可証数閾値
+scope                                        | string                          | スコープ
+aggregationUnitInSeconds                     | number                          | 許可証数集計単位(秒)
+threshold                                    | number                          | 単位時間当たりの許可証数閾値
 
 ```json
 {
-    "id": "motionpicture",
-    "secret": "secret",
-    "passportIssueRule": {
-        "aggregationUnitInSeconds" : 300,
-        "threshold": 120
-    }
+    "scope" : "mcdonalds",
+    "aggregationUnitInSeconds" : 300,
+    "threshold": 120
 }
 ```
 
 **許可証発行単位**
 
-- クライアントごとに発行単位が作成される。クライアントが許可証の発行を依頼すると、単位ごとに発行数を集計しながら発行を試みる。  
+- スコープごとに発行単位が作成される。許可証の発行を依頼されると、単位ごとに発行数を集計しながら発行を試みる。  
 
 field                                   | type                            | description
 :-------------------------------------- | :------------------------------ | :-------------------------------------- 
-issueUnitName                           | string                          | 許可証発行単位名
+identifier                              | string                          | 許可証発行単位識別子
+validFrom                               | number                          | いつから有効な発行単位か
+validThrough                            | number                          | いつまで有効な発行単位か
+numberOfRequests                        | number                          | 許可証発行リクエスト数
 
 **許可証**
 
 - 発行者が発行する許可証は鍵によって暗号化される。
-- クライアントは鍵を事前に設定することで暗号化された許可証を検証し、許可するかどうかを判断する。
+- 発行依頼者は鍵を事前に設定することで暗号化された許可証を検証し、許可するかどうかを判断する。
 
 field                                   | type                            | description
 :-------------------------------------- | :------------------------------ | :-------------------------------------- 
 iss                                     | string                          | 発行者
-aud                                     | string                          | 許可証が発行されたターゲットクライアント
 scope                                   | string                          | スコープ
-issueUnitName                           | string                          | 発行単位名
-issuedPlace                             | number                          | 発行者が何番目に発行した許可証か
+issueUnit                               | IIssueUnit                      | 発行単許可証発行単位位名
 
 ```json
 {
     "issuer" : "https://waiter.example.com",
-    "client": "motionpicture",
-    "scope": "transactions",
-    "issueUnitName": "motionpicture:1495696920",
-    "issuedPlace": 11
+    "scope": "mcdonalds",
+    "issueUnit": {
+        "identifier": "scope:1508227500",
+        "validFrom": 1508227500,
+        "validThrough": 1508227800,
+        "numberOfRequests": 2
+    }
 }
 ```
 
@@ -161,51 +173,26 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnQiOiJtb3Rpb25waWN0dXJlIiwic2NvcGU
 ```
 
 
-## Getting Started
+## Usage
 
-### 言語
----
-[TypeScript](https://www.typescriptlang.org/)
+### Environment variables
 
-
-### Required environment variables
----
-```shell
-set WAITER_PASSPORT_ISSUER=**********許可証発行者(通常発行APIのドメインを指定)**********
-set WAITER_CLIENTS=**********クライアントリスト(オブジェクトの配列をjsonで指定)**********
-set WAITER_DEVELOPER_EMAIL=**********環境名**********
-```
-
-DEBUG
-
-```shell
-set DEBUG=waiter-domain:*
-```
-
-for test
-
-```shell
-set TEST_MONGOLAB_URI=**********MongoDB接続文字列**********
-set TEST_REDIS_HOST=**********Redis Cacheホスト**********
-set TEST_REDIS_PORT=**********Redis Cacheポート**********
-set TEST_REDIS_KEY=**********Redis Cacheパスワード**********
-set TEST_SQL_SERVER_USERNAME=**********SQL Serverユーザーネーム**********
-set TEST_SQL_SERVER_PASSWORD=**********SQL Serverパスワード**********
-set TEST_SQL_SERVER_SERVER=**********SQL Serverサーバー**********
-set TEST_SQL_SERVER_DATABASE=**********SQL Serverデータベース**********
-```
-
-## tslint
-
-コード品質チェックをtslintで行う。
-* [tslint](https://github.com/palantir/tslint)
-* [tslint-microsoft-contrib](https://github.com/Microsoft/tslint-microsoft-contrib)
+| Name                                       | Required              | Purpose                           | Value        |
+|--------------------------------------------|-----------------------|-----------------------------------|--------------|
+| `DEBUG`                                    | false                 | Debug                             | waiter-domain:* |
+| `WAITER_PASSPORT_ISSUER`                   | true                  | 許可証発行者識別子                 ||
+| `WAITER_RULES`                             | true                  | 発行規則リスト                    ||
+| `WAITER_SECRET`                            | true                  | 許可証暗号化の秘密鍵               ||
 
 
-## clean
-`npm run clean`で不要なソース削除。
+## Code Samples
 
+コードサンプルは [example](https://github.com/motionpicture/waiter-domain/tree/master/example) にあります。
 
-## test
-`npm test`でチェック実行。
+## Jsdoc
 
+`npm run doc`でjsdocを作成できます。./docに出力されます。
+
+## License
+
+ISC

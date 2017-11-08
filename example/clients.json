@@ -1,6 +1,0 @@
-{
-    "id": "clientid",
-    "secret": "clientsecret",
-    "passportIssuerWorkShiftInSesonds": 60,
-    "totalNumberOfPassportsPerIssuer": 100
-}

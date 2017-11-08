@@ -5,7 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## Unreleased
 ### Added
-- クライアントInMemoryレポジトリを追加。
+- 発行規則環境変数を追加(複数の発行規則に対応)
+- 発行規則InMemoryレポジトリを追加。
 - 現在の許可証発行数取得サービスを追加。
 
 ### Changed

@@ -17,7 +17,7 @@ describe('factory.passport.create()', () => {
             iss: 'issuer',
             aud: 'audience',
             issueUnit: {
-                identifier: 'clientId:1508227500:scope',
+                identifier: 'scope:1508227500',
                 validFrom: 1508227500,
                 validThrough: 1508227800,
                 numberOfRequests: 2
@@ -29,20 +29,6 @@ describe('factory.passport.create()', () => {
         assert.doesNotThrow(() => {
             PassportFactory.create(TEST_CREATE_PARAMS);
         });
-    });
-
-    it('クライアントが空であればArgumentNullError', () => {
-        assert.throws(
-            () => {
-                const params = { ...TEST_CREATE_PARAMS, ...{ aud: '' } };
-                PassportFactory.create(params);
-            },
-            (err: any) => {
-                assert(err instanceof errors.ArgumentNull);
-
-                return true;
-            }
-        );
     });
 
     it('スコープが空であればArgumentNullError', () => {

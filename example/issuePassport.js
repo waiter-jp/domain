@@ -12,13 +12,12 @@ async function main() {
         password: process.env.TEST_REDIS_KEY
     });
 
-    const clientRepo = new waiter.repository.Client();
+    const ruleRepo = new waiter.repository.Rule();
     const passportIssueUnitRepo = new waiter.repository.PassportIssueUnit(redisClient);
 
-    const clientId = 'clientId';
     const scope = 'scope';
 
-    const passport = await waiter.service.passport.issue(clientId, scope)(clientRepo, passportIssueUnitRepo);
+    const passport = await waiter.service.passport.issue(scope)(ruleRepo, passportIssueUnitRepo);
     console.log('passport is', passport);
 
     redisClient.quit();

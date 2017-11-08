@@ -1,13 +1,12 @@
 /**
- * クライアントレポジトリーテスト
+ * 発行規則レポジトリーテスト
  * @ignore
  */
 
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 
-// import * as errors from '../factory/errors';
-import { InMemoryRepository as ClientRepo } from '../repo/client';
+import { InMemoryRepository as RuleRepo } from '../repo/rule';
 
 let sandbox: sinon.SinonSandbox;
 
@@ -15,22 +14,24 @@ before(() => {
     sandbox = sinon.sandbox.create();
 });
 
-describe('ClientRepo.constructor()', () => {
+describe('RuleRepo.constructor()', () => {
     beforeEach(() => {
+        process.env.WAITER_RULES = JSON.stringify([{}]);
         // no op
     });
 
     afterEach(() => {
+        process.env.WAITER_RULES = JSON.stringify([{}]);
         sandbox.restore();
     });
 
     it('環境変数の設定がされていなければ、インスタンスを生成できないはず', async () => {
-        delete process.env.WAITER_CLIENTS;
+        delete process.env.WAITER_RULES;
 
         assert.throws(
             () => {
                 // tslint:disable-next-line:no-unused-expression
-                new ClientRepo();
+                new RuleRepo();
             },
             (err: any) => {
                 assert(err instanceof Error);
@@ -42,12 +43,12 @@ describe('ClientRepo.constructor()', () => {
     });
 
     it('環境変数の設定が配列でなければ、インスタンスを生成できないはず', async () => {
-        process.env.WAITER_CLIENTS = JSON.stringify({});
+        process.env.WAITER_RULES = JSON.stringify({});
 
         assert.throws(
             () => {
                 // tslint:disable-next-line:no-unused-expression
-                new ClientRepo();
+                new RuleRepo();
             },
             (err: any) => {
                 assert(err instanceof Error);
@@ -56,5 +57,25 @@ describe('ClientRepo.constructor()', () => {
                 return true;
             }
         );
+    });
+});
+
+describe('RuleRepo.findAll()', () => {
+    beforeEach(() => {
+        process.env.WAITER_RULES = JSON.stringify([{}]);
+        // no op
+    });
+
+    afterEach(() => {
+        process.env.WAITER_RULES = JSON.stringify([{}]);
+        sandbox.restore();
+    });
+
+    it('環境変数の設定がされていれば、配列が返されるはず', async () => {
+        // tslint:disable-next-line:no-unused-expression
+        const ruleRepo = new RuleRepo();
+        const result = ruleRepo.findAll();
+        assert(Array.isArray(result));
+        sandbox.verify();
     });
 });

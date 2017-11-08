@@ -7,8 +7,8 @@ import * as Redis from 'ioredis';
 
 import * as PassportService from './service/passport';
 
-import { InMemoryRepository as ClientRepo } from './repo/client';
 import { RedisRepository as PassportIssueUnitRepo } from './repo/passportIssueUnit';
+import { InMemoryRepository as RuleRepo } from './repo/rule';
 
 import ErrorCode from './factory/errorCode';
 import * as ErrorFactory from './factory/errors';
@@ -34,11 +34,11 @@ export namespace repository {
      */
     export class PassportIssueUnit extends PassportIssueUnitRepo { }
     /**
-     * クライアントレポジトリー
+     * 発行ルールレポジトリー
      * @export
      * @class
      */
-    export class Client extends ClientRepo { }
+    export class Rule extends RuleRepo { }
 
 }
 
