@@ -28,10 +28,12 @@ describe('PassportIssueUnitRepo.incr()', () => {
     });
 
     it('redisが正常であれば、オブジェクトを取得できるはず', async () => {
+        const issueDate = new Date();
         const rule = {
             scope: 'scope',
             aggregationUnitInSeconds: 60,
-            threshold: 100
+            threshold: 100,
+            unavailableHoursSpecifications: []
         };
         const multi = redisClient.multi();
         const execResult = [[null, 1], [null, 1]];
@@ -40,16 +42,18 @@ describe('PassportIssueUnitRepo.incr()', () => {
         sandbox.mock(redisClient).expects('multi').once().returns(multi);
         sandbox.mock(multi).expects('exec').once().resolves(execResult);
 
-        const result = await passportCounterRepo.incr(rule);
+        const result = await passportCounterRepo.incr(issueDate, rule);
         assert.equal(typeof result, 'object');
         sandbox.verify();
     });
 
     it('redisが正常でなければ、エラーになるはず', async () => {
+        const issueDate = new Date();
         const rule = {
             scope: 'scope',
             aggregationUnitInSeconds: 60,
-            threshold: 100
+            threshold: 100,
+            unavailableHoursSpecifications: []
         };
         const multi = redisClient.multi();
         const execResult = new Error('execError');
@@ -58,7 +62,7 @@ describe('PassportIssueUnitRepo.incr()', () => {
         sandbox.mock(redisClient).expects('multi').once().returns(multi);
         sandbox.mock(multi).expects('exec').once().rejects(execResult);
 
-        const result = await passportCounterRepo.incr(rule).catch((err) => err);
+        const result = await passportCounterRepo.incr(issueDate, rule).catch((err) => err);
         assert.deepEqual(result.message, execResult.message);
         sandbox.verify();
     });
@@ -74,34 +78,38 @@ describe('PassportCounterRepo.now()', () => {
     });
 
     it('許可証がすでに発行されていれば、数を取得できるはず', async () => {
+        const issueDate = new Date();
         const rule = {
             scope: 'scope',
             aggregationUnitInSeconds: 60,
-            threshold: 100
+            threshold: 100,
+            unavailableHoursSpecifications: []
         };
         const execResult = 1;
 
         const passportCounterRepo = new PassportIssueUnitRepo(redisClient);
         sandbox.mock(redisClient).expects('get').once().resolves(execResult);
 
-        const result = await passportCounterRepo.now(rule);
+        const result = await passportCounterRepo.now(issueDate, rule);
         assert.equal(typeof result, 'object');
         assert.equal(result.numberOfRequests, execResult);
         sandbox.verify();
     });
 
     it('許可証が未発行の場合、数が0になるはず', async () => {
+        const issueDate = new Date();
         const rule = {
             scope: 'scope',
             aggregationUnitInSeconds: 60,
-            threshold: 100
+            threshold: 100,
+            unavailableHoursSpecifications: []
         };
         const execResult = null;
 
         const passportCounterRepo = new PassportIssueUnitRepo(redisClient);
         sandbox.mock(redisClient).expects('get').once().resolves(execResult);
 
-        const result = await passportCounterRepo.now(rule);
+        const result = await passportCounterRepo.now(issueDate, rule);
         assert.equal(typeof result, 'object');
         assert.equal(result.numberOfRequests, 0);
         sandbox.verify();

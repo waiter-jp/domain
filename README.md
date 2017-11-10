@@ -80,13 +80,16 @@
                                                          :                      :
 +--------------+                                         :  +----------------+  :
 |              |--(A)------ Passport Request -------------->|                |  :
-|  End-user    |           + client_id                   :  |  Passport      |  :
+|  End-user    |           + scope                       :  |  Passport      |  :
 |  Local       |                                         :  |  Issue         |  :
 |              |<-(B)------ Encoded Passport ---------------|  Server        |  :
 |              |                                         :  |                |  :
 |              |                                         :  +--------■■------+  :
 |              |                                         :           ■■         :
+|              |                                         :           ■■         :
 |              |                                         :         SECRET       :
+|              |                                         :(environment variable):
+|              |                                         :           ■■         :
 |              |                                         :           ■■         :
 |              |                                   +-----------------■■------------+
 |              |                                   |     :                      :  |
@@ -96,7 +99,7 @@
 |              |                                   |     :                      :  |
 |              |                                   |     :  +----------------+  :  |
 |              |--(C)------ Verify Request ---------------->|                |  :  |
-|              |                                   |     :  |  Token         |  :  |
+|              |            + encoded passport     |     :  |  Token         |  :  |
 |              |                                   |     :  |  Verifier      |  :  |
 |              |<-(D)------ Verify Result ------------------|                |  :  |
 |              |                                   |     :  |                |  :  |
@@ -119,12 +122,18 @@ field                                        | type                            |
 scope                                        | string                          | スコープ
 aggregationUnitInSeconds                     | number                          | 許可証数集計単位(秒)
 threshold                                    | number                          | 単位時間当たりの許可証数閾値
+unavailableHoursSpecifications               | array                           | サービス休止時間帯設定リスト
+unavailableHoursSpecifications.startDate     | string                          | サービス休止開始日時
+unavailableHoursSpecifications.endDate       | string                          | サービス休止終了日時
 
 ```json
 {
     "scope" : "mcdonalds",
     "aggregationUnitInSeconds" : 300,
-    "threshold": 120
+    "threshold": 120,
+    "unavailableHoursSpecifications":[
+        {"startDate":"2017-11-10T09:00:00Z","endDate":"2017-11-10T09:30:00Z"}
+    ]
 }
 ```
 
@@ -177,12 +186,12 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnQiOiJtb3Rpb25waWN0dXJlIiwic2NvcGU
 
 ### Environment variables
 
-| Name                                       | Required              | Purpose                           | Value        |
-|--------------------------------------------|-----------------------|-----------------------------------|--------------|
-| `DEBUG`                                    | false                 | Debug                             | waiter-domain:* |
-| `WAITER_PASSPORT_ISSUER`                   | true                  | 許可証発行者識別子                 ||
-| `WAITER_RULES`                             | true                  | 発行規則リスト                    ||
-| `WAITER_SECRET`                            | true                  | 許可証暗号化の秘密鍵               ||
+ Name                                       | Required              | Value                | Purpose                           
+--------------------------------------------|-----------------------|----------------------|-----------------------------------
+ `DEBUG`                                    | false                 | waiter-domain:*      | Debug
+ `WAITER_PASSPORT_ISSUER`                   | true                  |                      | 許可証発行者識別子
+ `WAITER_RULES`                             | true                  |                      | 発行規則リスト
+ `WAITER_SECRET`                            | true                  |                      | 許可証暗号化の秘密鍵
 
 
 ## Code Samples

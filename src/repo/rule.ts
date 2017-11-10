@@ -22,7 +22,7 @@ export class InMemoryRepository {
                 throw new Error('WAITER_RULES must be an array.');
             }
 
-            this.rulesFromJson = rules;
+            this.rulesFromJson = rules.map(RuleFactory.createFromObject);
         } catch (error) {
             throw new Error(`Please set an environment variable \`WAITER_RULES\` correctly. ${error.message}`);
         }
@@ -45,7 +45,8 @@ export class InMemoryRepository {
         if (ruleFromJson === undefined) {
             throw new errors.NotFound('rule');
         }
+        debug('rule found.', ruleFromJson);
 
-        return RuleFactory.create(ruleFromJson);
+        return ruleFromJson;
     }
 }

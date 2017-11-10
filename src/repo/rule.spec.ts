@@ -62,12 +62,22 @@ describe('RuleRepo.constructor()', () => {
 
 describe('RuleRepo.findAll()', () => {
     beforeEach(() => {
-        process.env.WAITER_RULES = JSON.stringify([{}]);
+        process.env.WAITER_RULES = JSON.stringify([{
+            scope: 'scope',
+            aggregationUnitInSeconds: 60,
+            threshold: 100,
+            unavailableHoursSpecifications: []
+        }]);
         // no op
     });
 
     afterEach(() => {
-        process.env.WAITER_RULES = JSON.stringify([{}]);
+        process.env.WAITER_RULES = JSON.stringify([{
+            scope: 'scope',
+            aggregationUnitInSeconds: 60,
+            threshold: 100,
+            unavailableHoursSpecifications: []
+        }]);
         sandbox.restore();
     });
 

@@ -12,21 +12,21 @@ describe('new NotFoundError()', () => {
     it('正しくインスタンス化できる', async () => {
         const entityName = 'entityName';
         const message = 'test message';
-        const notFoundError = new NotFoundError(entityName, message);
-        assert(notFoundError instanceof Error);
-        assert.equal(notFoundError.entityName, entityName);
-        assert.equal(notFoundError.message, message);
-        assert.equal(notFoundError.name, WaiterError.name);
-        assert.equal(typeof notFoundError.stack, 'string');
+        const error = new NotFoundError(entityName, message);
+        assert(error instanceof Error);
+        assert.equal(error.entityName, entityName);
+        assert.equal(error.message, message);
+        assert.equal(error.name, WaiterError.name);
+        assert.equal(typeof error.stack, 'string');
     });
 
     it('メッセージを指定しなくても、正しくインスタンス化できる', async () => {
         const entityName = 'testname';
-        const notFoundError = new NotFoundError(entityName);
-        assert(notFoundError instanceof Error);
-        assert.equal(notFoundError.entityName, entityName);
-        assert.equal(notFoundError.name, WaiterError.name);
-        assert.equal(typeof notFoundError.message, 'string');
-        assert.equal(typeof notFoundError.stack, 'string');
+        const error = new NotFoundError(entityName);
+        assert(error instanceof Error);
+        assert.equal(error.entityName, entityName);
+        assert.equal(error.name, WaiterError.name);
+        assert.equal(typeof error.message, 'string');
+        assert.equal(typeof error.stack, 'string');
     });
 });

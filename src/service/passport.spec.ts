@@ -5,6 +5,7 @@
 
 import * as assert from 'assert';
 import * as jwt from 'jsonwebtoken';
+import * as moment from 'moment';
 // import * as redis from 'redis-mock';
 import * as sinon from 'sinon';
 // tslint:disable-next-line:mocha-no-side-effect-code no-require-imports no-var-requires
@@ -48,7 +49,8 @@ describe('発行する', () => {
         process.env.WAITER_RULES = JSON.stringify([{
             scope: 'scope',
             aggregationUnitInSeconds: 60,
-            threshold: 0
+            threshold: 0,
+            unavailableHoursSpecifications: []
         }]);
         const incrResult = {
             identifier: 'scope:1508227500',
@@ -67,12 +69,35 @@ describe('発行する', () => {
         sandbox.verify();
     });
 
+    it('サービス休止時間帯であれば、許可証を発行できないはず', async () => {
+        const scope = 'scope';
+        process.env.WAITER_RULES = JSON.stringify([{
+            scope: 'scope',
+            aggregationUnitInSeconds: 60,
+            threshold: 100,
+            unavailableHoursSpecifications: [{
+                startDate: moment().add(-1, 'hour').toISOString(),
+                endDate: moment().add(1, 'hour').toISOString()
+            }]
+        }]);
+
+        const ruleRepo = new RuleRepo();
+        const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
+
+        const result = await passportService.issue(scope)(ruleRepo, passportCounterRepo).catch((err) => err);
+        assert(result instanceof Error);
+        console.error(result);
+        // assert.equal(typeof result, 'string');
+        sandbox.verify();
+    });
+
     it('RedisCacheが正常であれば、許可証を発行できるはず', async () => {
         const scope = 'scope';
         process.env.WAITER_RULES = JSON.stringify([{
             scope: 'scope',
             aggregationUnitInSeconds: 60,
-            threshold: 100
+            threshold: 100,
+            unavailableHoursSpecifications: []
         }]);
         const incrResult = {
             identifier: 'scope:1508227500',
@@ -96,7 +121,8 @@ describe('発行する', () => {
         process.env.WAITER_RULES = JSON.stringify([{
             scope: 'scope',
             aggregationUnitInSeconds: 60,
-            threshold: 100
+            threshold: 100,
+            unavailableHoursSpecifications: []
         }]);
         const incrResult = {
             identifier: 'scope:1508227500',
@@ -156,7 +182,8 @@ describe('許可証トークンを検証する', () => {
         process.env.WAITER_RULES = JSON.stringify([{
             scope: 'scope',
             aggregationUnitInSeconds: 60,
-            threshold: 100
+            threshold: 100,
+            unavailableHoursSpecifications: []
         }]);
         const scope = 'scope';
         const incrResult = {
@@ -185,7 +212,8 @@ describe('許可証トークンを検証する', () => {
         process.env.WAITER_RULES = JSON.stringify([{
             scope: 'scope',
             aggregationUnitInSeconds: 1,
-            threshold: 100
+            threshold: 100,
+            unavailableHoursSpecifications: []
         }]);
         const scope = 'scope';
         const incrResult = {
@@ -249,7 +277,8 @@ describe('service.passport.currentIssueUnit()', () => {
         process.env.WAITER_RULES = JSON.stringify([{
             scope: 'scope',
             aggregationUnitInSeconds: 60,
-            threshold: 100
+            threshold: 100,
+            unavailableHoursSpecifications: []
         }]);
         const incrResult = {
             identifier: 'scope:1508227500',

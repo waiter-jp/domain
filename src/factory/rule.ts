@@ -3,10 +3,28 @@
  * @namespace factory.rule
  */
 
+import * as moment from 'moment';
 import * as validator from 'validator';
 
 import * as errors from './errors';
 
+/**
+ * サービス休止時間帯インターフェース
+ * @export
+ * @interface
+ * @memberof factory.rule
+ */
+export interface IUnavailableHoursSpecification {
+    startDate: Date;
+    endDate: Date;
+}
+
+/**
+ * 許可証発行規則インターフェース
+ * @export
+ * @interface
+ * @memberof factory.rule
+ */
 export interface IRule {
     /**
      * スコープ
@@ -20,22 +38,43 @@ export interface IRule {
      * 単位時間当たりの許可証数閾値
      */
     threshold: number;
+    /**
+     * 発行サービスを利用できない時間帯
+     */
+    unavailableHoursSpecifications: IUnavailableHoursSpecification[];
 }
 
-export function create(params: {
-    scope: string;
-    aggregationUnitInSeconds: number;
-    threshold: number;
-}): IRule {
+export function createFromObject(params: any): IRule {
     if (validator.isEmpty(params.scope)) {
         throw new errors.ArgumentNull('scope');
     }
     if (!Number.isInteger(params.aggregationUnitInSeconds)) {
-        throw new errors.Argument('aggregationUnitInSeconds', 'aggregationUnitInSeconds must be number');
+        throw new errors.Argument('aggregationUnitInSeconds', 'aggregationUnitInSeconds must be number.');
     }
     if (!Number.isInteger(params.threshold)) {
-        throw new errors.Argument('threshold', 'threshold must be number');
+        throw new errors.Argument('threshold', 'threshold must be number.');
     }
+    if (!Array.isArray(params.unavailableHoursSpecifications)) {
+        throw new errors.Argument('unavailableHoursSpecifications', 'unavailableHoursSpecifications must be an array.');
+    }
+    params.unavailableHoursSpecifications.forEach((unavailableHoursSpecification) => {
+        if (!moment(unavailableHoursSpecification.startDate, 'YYYY-MM-DDTHH:mm:ssZ').isValid()) {
+            throw new errors.Argument('unavailableHoursSpecification.startDate', 'unavailableHoursSpecification.startDate must be Date.');
+        }
+        if (!moment(unavailableHoursSpecification.endDate, 'YYYY-MM-DDTHH:mm:ssZ').isValid()) {
+            throw new errors.Argument('unavailableHoursSpecification.endDate', 'unavailableHoursSpecification.endDate must be Date.');
+        }
+    });
 
-    return params;
+    return {
+        scope: params.scope,
+        aggregationUnitInSeconds: params.aggregationUnitInSeconds,
+        threshold: params.threshold,
+        unavailableHoursSpecifications: params.unavailableHoursSpecifications.map((unavailableHoursSpecification) => {
+            return {
+                startDate: moment(unavailableHoursSpecification.startDate, 'YYYY-MM-DDTHH:mm:ssZ').toDate(),
+                endDate: moment(unavailableHoursSpecification.endDate, 'YYYY-MM-DDTHH:mm:ssZ').toDate()
+            };
+        })
+    };
 }

@@ -21,11 +21,12 @@ export class RedisRepository {
 
     /**
      * 発行単位属性を作成する
-     * @param {RuleFactory.IRule} rule 発行規則
+     * @param {Date} issueDate 発行日時
+     * @param {RuleFactory.IRule} rule 発行ルール
      * @returns {string}
      */
-    public static CREATE_ISSUE_UNIT_PARAMS(rule: RuleFactory.IRule) {
-        const dateNow = moment();
+    public static CREATE_ISSUE_UNIT_PARAMS(issueDate: Date, rule: RuleFactory.IRule) {
+        const dateNow = moment(issueDate);
         // tslint:disable-next-line:no-magic-numbers
         const aggregationUnitInSeconds = parseInt(rule.aggregationUnitInSeconds.toString(), 10);
         const validFrom = dateNow.unix() - dateNow.unix() % aggregationUnitInSeconds;
@@ -40,10 +41,11 @@ export class RedisRepository {
 
     /**
      * 許可証数をカウントアップする
-     * @param rule 発行ルール
+     * @param {Date} issueDate 発行日時
+     * @param {RuleFactory.IRule} rule 発行ルール
      */
-    public async incr(rule: RuleFactory.IRule): Promise<IIssueUnit> {
-        const issueUnitParams = RedisRepository.CREATE_ISSUE_UNIT_PARAMS(rule);
+    public async incr(issueDate: Date, rule: RuleFactory.IRule): Promise<IIssueUnit> {
+        const issueUnitParams = RedisRepository.CREATE_ISSUE_UNIT_PARAMS(issueDate, rule);
         // tslint:disable-next-line:no-magic-numbers
         const ttl = parseInt(rule.aggregationUnitInSeconds.toString(), 10);
 
@@ -64,10 +66,11 @@ export class RedisRepository {
 
     /**
      * 現在の許可証発行単位を取得する
-     * @param rule 発行ルール
+     * @param {Date} issueDate 発行日時
+     * @param {RuleFactory.IRule} rule 発行ルール
      */
-    public async now(rule: RuleFactory.IRule): Promise<IIssueUnit> {
-        const issueUnitParams = RedisRepository.CREATE_ISSUE_UNIT_PARAMS(rule);
+    public async now(issueDate: Date, rule: RuleFactory.IRule): Promise<IIssueUnit> {
+        const issueUnitParams = RedisRepository.CREATE_ISSUE_UNIT_PARAMS(issueDate, rule);
         const result = await this.redisClient.get(issueUnitParams.identifier, debug);
         debug('result:', result);
 

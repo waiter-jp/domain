@@ -5,6 +5,8 @@
 
 import * as createDebug from 'debug';
 import * as jwt from 'jsonwebtoken';
+import * as moment from 'moment';
+import * as util from 'util';
 
 import * as errors from '../factory/errors';
 import * as PassportFactory from '../factory/passport';
@@ -25,10 +27,25 @@ export function issue(
     return async (ruleRepo: RuleRepo, passportIssueUnitRepo: PassportIssueUnitRepo): Promise<PassportFactory.IEncodedPassport> => {
         debug('rule exists?');
         const rule = ruleRepo.findbyScope(scope);
+        const issueDate = moment().toDate();
+
+        // サービス休止時間帯であれば、問答無用に発行できない
+        rule.unavailableHoursSpecifications.forEach((specification) => {
+            // tslint:disable-next-line:no-single-line-block-comment
+            /* istanbul ignore else */
+            if (issueDate >= specification.startDate && issueDate <= specification.endDate) {
+                const message = util.format(
+                    'Service unvailable from %s to %s.',
+                    specification.startDate.toISOString(),
+                    specification.endDate.toISOString()
+                );
+                throw new errors.ServiceUnavailable(message);
+            }
+        });
 
         // tslint:disable-next-line:no-magic-numbers
         const workShiftInSeconds = parseInt(rule.aggregationUnitInSeconds.toString(), 10);
-        const passportIssueUnit = await passportIssueUnitRepo.incr(rule);
+        const passportIssueUnit = await passportIssueUnitRepo.incr(issueDate, rule);
         debug('incremented. passportIssueUnit:', passportIssueUnit);
 
         if (passportIssueUnit.numberOfRequests > rule.threshold) {
@@ -72,8 +89,9 @@ export function currentIssueUnit(scope: string) {
     return async (ruleRepo: RuleRepo, passportIssueUnitRepo: PassportIssueUnitRepo): Promise<PassportFactory.IIssueUnit> => {
         debug('rule exists?');
         const rule = ruleRepo.findbyScope(scope);
+        const issueDate = moment().toDate();
 
-        return passportIssueUnitRepo.now(rule);
+        return passportIssueUnitRepo.now(issueDate, rule);
     };
 }
 
