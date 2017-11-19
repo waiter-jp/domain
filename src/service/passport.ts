@@ -27,15 +27,19 @@ export function issue(
     return async (ruleRepo: RuleRepo, passportIssueUnitRepo: PassportIssueUnitRepo): Promise<PassportFactory.IEncodedPassport> => {
         debug('rule exists?');
         const rule = ruleRepo.findbyScope(scope);
-        const issueDate = moment().toDate();
+        const now = moment();
+        debug('now is', now.toDate(), now.unix());
+
+        const passportIssueUnit = await passportIssueUnitRepo.incr(now.toDate(), rule);
+        debug('incremented. passportIssueUnit:', passportIssueUnit);
 
         // サービス休止時間帯であれば、問答無用に発行できない
         rule.unavailableHoursSpecifications.forEach((specification) => {
             // tslint:disable-next-line:no-single-line-block-comment
             /* istanbul ignore else */
-            if (issueDate >= specification.startDate && issueDate <= specification.endDate) {
+            if (now.toDate() >= specification.startDate && now.toDate() <= specification.endDate) {
                 const message = util.format(
-                    'Service unvailable from %s to %s.',
+                    'Specified scope unavailable from %s to %s.',
                     specification.startDate.toISOString(),
                     specification.endDate.toISOString()
                 );
@@ -43,18 +47,14 @@ export function issue(
             }
         });
 
-        // tslint:disable-next-line:no-magic-numbers
-        const workShiftInSeconds = parseInt(rule.aggregationUnitInSeconds.toString(), 10);
-        const passportIssueUnit = await passportIssueUnitRepo.incr(issueDate, rule);
-        debug('incremented. passportIssueUnit:', passportIssueUnit);
-
         if (passportIssueUnit.numberOfRequests > rule.threshold) {
             throw new errors.RateLimitExceeded();
         }
 
         const payload = {
             scope: scope,
-            issueUnit: passportIssueUnit
+            issueUnit: passportIssueUnit,
+            iat: now.unix()
         };
 
         return new Promise<PassportFactory.IEncodedPassport>((resolve, reject) => {
@@ -64,8 +64,8 @@ export function issue(
                 <string>process.env.WAITER_SECRET,
                 {
                     issuer: <string>process.env.WAITER_PASSPORT_ISSUER,
-                    // audience: '',
-                    expiresIn: workShiftInSeconds
+                    // tslint:disable-next-line:no-magic-numbers
+                    expiresIn: parseInt(rule.aggregationUnitInSeconds.toString(), 10)
                 },
                 (err, encoded) => {
                     if (err instanceof Error) {

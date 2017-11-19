@@ -30,8 +30,9 @@
 - できる限り、流入者に対して平等に許可証を発行したい。
 - サービスとして、保守の領域にコミットするものを持つ必要がある。
 - オープンソース。
-- できる限りのインフラ非依存。クラウドベンダー非依存。
+- できる限りのインフラ非依存。クラウドベンダー非依存。クラウドベンダー切り替え。
 - 事後の分析に値する何かはありうるか。
+- 導入の手間。
 
 ## Requirement
 - 本システムにかかる負荷と、フロントエンドアプリケーション側のインフラ(ウェブサーバー、DBサーバー)への負荷が分離していること。
@@ -165,19 +166,23 @@ numberOfRequests                        | number                          | 許�
 field                                   | type                            | description
 :-------------------------------------- | :------------------------------ | :-------------------------------------- 
 iss                                     | string                          | 発行者
+iat                                     | number                          | 発行unixタイムスタンプ
+exp                                     | number                          | 期限unixタイムスタンプ
 scope                                   | string                          | スコープ
 issueUnit                               | IIssueUnit                      | 発行単許可証発行単位位名
 
 ```json
 {
-    "issuer" : "https://waiter.example.com",
-    "scope": "mcdonalds",
-    "issueUnit": {
-        "identifier": "scope:1508227500",
-        "validFrom": 1508227500,
-        "validThrough": 1508227800,
-        "numberOfRequests": 2
-    }
+  "scope": "scope",
+  "issueUnit": {
+    "identifier": "scope:1511059500",
+    "validFrom": 1511059500,
+    "validThrough": 1511059800,
+    "numberOfRequests": 1
+  },
+  "iat": 1511059610,
+  "exp": 1511059910,
+  "iss": "https://waiter.example.com"
 }
 ```
 
@@ -187,7 +192,7 @@ issueUnit                               | IIssueUnit                      | 発�
 - 期限つき
 
 ```jsonwebtoken
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnQiOiJtb3Rpb25waWN0dXJlIiwic2NvcGUiOiJ0ZXN0c2NvcGUiLCJpc3N1ZXIiOiJtb3Rpb25waWN0dXJlOjE0OTU3NzQ5MjAiLCJpc3N1ZWRfcGxhY2UiOjgsImlhdCI6MTQ5NTc3NDkyMywiZXhwIjoxNDk1Nzc0OTUzfQ.W_WgQs6rrQhkyXPNW8hDP1IJ1gxI_Nalk3sSDpzUzr8
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6InNjb3BlIiwiaXNzdWVVbml0Ijp7ImlkZW50aWZpZXIiOiJzY29wZToxNTExMDU5NTAwIiwidmFsaWRGcm9tIjoxNTExMDU5NTAwLCJ2YWxpZFRocm91Z2giOjE1MTEwNTk4MDAsIm51bWJlck9mUmVxdWVzdHMiOjF9LCJpYXQiOjE1MTEwNTk2MTAsImV4cCI6MTUxMTA1OTkxMCwiaXNzIjoiaHR0cHM6Ly93YWl0ZXIuZXhhbXBsZS5jb20ifQ.wE_osB77zotND2H56tUMyCFAaAS6SHlp4wCMyvRsVt4
 ```
 
 

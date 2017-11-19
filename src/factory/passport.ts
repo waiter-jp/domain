@@ -57,15 +57,21 @@ export interface IPassport {
      */
     scope: string;
     /**
+     * 発行unixタイムスタンプ
+     * @memberof IPassport
+     */
+    iat: number;
+    /**
+     * 期限unixタイムスタンプ
+     * @memberof IPassport
+     */
+    exp: number;
+    /**
      * 許可証発行者
      * @memberof IPassport
+     * @example https://waiter.example.com
      */
     iss: string;
-    /**
-     * 誰に対して発行された許可証か
-     * @memberof IPassport
-     */
-    // aud: string;
     /**
      * 許可証発行単位名
      * 発行単位内で整理番号付けを行う
@@ -78,30 +84,38 @@ export type IEncodedPassport = string;
 
 export function create(params: {
     scope: string;
+    iat: number;
+    exp: number;
     iss: string;
-    // aud: string;
     issueUnit: IIssueUnit;
 }): IPassport {
-    // if (validator.isEmpty(params.aud)) {
-    //     throw new ArgumentNullError('aud');
-    // }
     if (validator.isEmpty(params.scope)) {
         throw new ArgumentNullError('scope');
+    }
+    if (params.iat === undefined || !Number.isInteger(params.iat)) {
+        throw new ArgumentError('iat', 'iat must be number.');
+    }
+    if (params.exp === undefined || !Number.isInteger(params.exp)) {
+        throw new ArgumentError('exp', 'exp must be number.');
     }
     if (validator.isEmpty(params.iss)) {
         throw new ArgumentNullError('iss');
     }
+    if (params.issueUnit == null || typeof params.issueUnit !== 'object') {
+        throw new ArgumentError('issueUnit', 'issueUnit must be object.');
+    }
     if (validator.isEmpty(params.issueUnit.identifier)) {
         throw new ArgumentNullError('issueUnit.identifier');
     }
-    if (!Number.isInteger(params.issueUnit.numberOfRequests)) {
-        throw new ArgumentError('issueUnit.numberOfRequests', 'issueUnit.numberOfRequests must be number');
+    if (params.issueUnit.numberOfRequests === undefined || !Number.isInteger(params.issueUnit.numberOfRequests)) {
+        throw new ArgumentError('issueUnit.numberOfRequests', 'issueUnit.numberOfRequests must be number.');
     }
 
     return {
         scope: params.scope,
+        iat: params.iat,
+        exp: params.exp,
         iss: params.iss,
-        // aud: params.aud,
         issueUnit: params.issueUnit
     };
 }

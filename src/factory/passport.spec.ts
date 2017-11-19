@@ -14,6 +14,8 @@ describe('factory.passport.create()', () => {
     beforeEach(() => {
         TEST_CREATE_PARAMS = {
             scope: 'scope',
+            iat: 1511059610,
+            exp: 1511059910,
             iss: 'issuer',
             aud: 'audience',
             issueUnit: {
@@ -29,6 +31,34 @@ describe('factory.passport.create()', () => {
         assert.doesNotThrow(() => {
             PassportFactory.create(TEST_CREATE_PARAMS);
         });
+    });
+
+    it('発行日時が数字でなければArgumentError', () => {
+        assert.throws(
+            () => {
+                TEST_CREATE_PARAMS.iat = '1511059610';
+                PassportFactory.create(TEST_CREATE_PARAMS);
+            },
+            (err: any) => {
+                assert(err instanceof errors.Argument);
+
+                return true;
+            }
+        );
+    });
+
+    it('期限が数字でなければArgumentError', () => {
+        assert.throws(
+            () => {
+                TEST_CREATE_PARAMS.exp = '1511059610';
+                PassportFactory.create(TEST_CREATE_PARAMS);
+            },
+            (err: any) => {
+                assert(err instanceof errors.Argument);
+
+                return true;
+            }
+        );
     });
 
     it('スコープが空であればArgumentNullError', () => {
@@ -53,6 +83,20 @@ describe('factory.passport.create()', () => {
             },
             (err: any) => {
                 assert(err instanceof errors.ArgumentNull);
+
+                return true;
+            }
+        );
+    });
+
+    it('発行単位がオブジェクトでなければArgumentError', () => {
+        assert.throws(
+            () => {
+                TEST_CREATE_PARAMS.issueUnit = null;
+                PassportFactory.create(TEST_CREATE_PARAMS);
+            },
+            (err: any) => {
+                assert(err instanceof errors.Argument);
 
                 return true;
             }

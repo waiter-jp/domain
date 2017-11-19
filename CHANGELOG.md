@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - 発行規則InMemoryレポジトリを追加。
 - 現在の許可証発行数取得サービスを追加。
 - 発行規則にサービス休止時間帯の設定を追加。
+- 許可証インターフェースに発行日時と期限のプロパティを追加。
 
 ### Changed
 

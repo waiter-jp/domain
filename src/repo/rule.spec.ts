@@ -1,3 +1,5 @@
+// tslint:disable:no-implicit-dependencies
+
 /**
  * 発行規則レポジトリーテスト
  * @ignore

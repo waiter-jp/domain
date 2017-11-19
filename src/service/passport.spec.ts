@@ -1,5 +1,7 @@
+// tslint:disable:no-implicit-dependencies
+
 /**
- * パスポートサービステスト
+ * 許可証サービステスト
  * @ignore
  */
 
@@ -85,9 +87,7 @@ describe('発行する', () => {
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
         const result = await passportService.issue(scope)(ruleRepo, passportCounterRepo).catch((err) => err);
-        assert(result instanceof Error);
-        console.error(result);
-        // assert.equal(typeof result, 'string');
+        assert(result instanceof errors.ServiceUnavailable);
         sandbox.verify();
     });
 
@@ -159,8 +159,9 @@ describe('許可証トークンを検証する', () => {
         const token = '';
         const verifyResult = {
             scope: 'scope',
+            iat: 1511059610,
+            exp: 1511059910,
             iss: 'issuer',
-            // aud: 'audience',
             issueUnit: {
                 identifier: 'scope:1508227500',
                 validFrom: 1508227500,
