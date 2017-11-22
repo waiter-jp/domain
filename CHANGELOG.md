@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+- テスト網羅率100%化。
 
 
 ## v2.0.0 - 2017-11-22

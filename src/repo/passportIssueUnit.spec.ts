@@ -32,6 +32,8 @@ describe('PassportIssueUnitRepo.incr()', () => {
     it('redisが正常であれば、オブジェクトを取得できるはず', async () => {
         const issueDate = new Date();
         const rule = {
+            name: 'name',
+            description: 'description',
             scope: 'scope',
             aggregationUnitInSeconds: 60,
             threshold: 100,
@@ -52,6 +54,8 @@ describe('PassportIssueUnitRepo.incr()', () => {
     it('redisが正常でなければ、エラーになるはず', async () => {
         const issueDate = new Date();
         const rule = {
+            name: 'name',
+            description: 'description',
             scope: 'scope',
             aggregationUnitInSeconds: 60,
             threshold: 100,
@@ -82,6 +86,8 @@ describe('PassportCounterRepo.now()', () => {
     it('許可証がすでに発行されていれば、数を取得できるはず', async () => {
         const issueDate = new Date();
         const rule = {
+            name: 'name',
+            description: 'description',
             scope: 'scope',
             aggregationUnitInSeconds: 60,
             threshold: 100,
@@ -101,6 +107,8 @@ describe('PassportCounterRepo.now()', () => {
     it('許可証が未発行の場合、数が0になるはず', async () => {
         const issueDate = new Date();
         const rule = {
+            name: 'name',
+            description: 'description',
             scope: 'scope',
             aggregationUnitInSeconds: 60,
             threshold: 100,

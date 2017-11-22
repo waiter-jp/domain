@@ -27,10 +27,12 @@ before(() => {
 describe('発行する', () => {
     beforeEach(() => {
         process.env.WAITER_SECRET = 'secret';
+        process.env.WAITER_PASSPORT_ISSUER = 'https://example.com';
     });
 
     afterEach(() => {
         process.env.WAITER_SECRET = 'secret';
+        process.env.WAITER_PASSPORT_ISSUER = 'https://example.com';
         sandbox.restore();
     });
 
