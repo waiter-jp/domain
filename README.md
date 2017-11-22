@@ -2,9 +2,12 @@
 
 # WAITER ドメインパッケージ
 
-[![CircleCI](https://circleci.com/gh/motionpicture/waiter-domain.svg?style=svg)](https://circleci.com/gh/motionpicture/waiter-domain)
+[![npm (scoped)](https://img.shields.io/npm/v/@motionpicture/waiter-domain.svg)](https://www.npmjs.com/package/@motionpicture/waiter-domain)
+[![CircleCI](https://circleci.com/gh/motionpicture/waiter-domain.svg?style=shield)](https://circleci.com/gh/motionpicture/waiter-domain)
 [![Coverage Status](https://coveralls.io/repos/github/motionpicture/waiter-domain/badge.svg)](https://coveralls.io/github/motionpicture/waiter-domain)
 [![Known Vulnerabilities](https://snyk.io/test/github/motionpicture/waiter-domain/badge.svg)](https://snyk.io/test/github/motionpicture/waiter-domain)
+[![Dependency Status](https://img.shields.io/david/motionpicture/waiter-domain.svg)](https://david-dm.org/motionpicture/waiter-domain)
+[![npm](https://img.shields.io/npm/dm/@motionpicture/waiter-domain.svg)](https://nodei.co/npm/@motionpicture/waiter-domain/)
 
 
 ## Table of contents

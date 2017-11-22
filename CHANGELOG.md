@@ -17,6 +17,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Security
 
 
+## v2.0.1 - 2017-11-22
+### Security
+- テスト網羅率100%化。
+
 ## v2.0.0 - 2017-11-22
 ### Added
 - 発行規則環境変数を追加(複数の発行規則に対応)
