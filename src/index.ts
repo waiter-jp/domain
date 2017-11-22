@@ -3,7 +3,7 @@
  * @module
  */
 
-import * as Redis from 'ioredis';
+import * as ioredis from 'ioredis';
 
 import * as PassportService from './service/passport';
 
@@ -13,6 +13,7 @@ import { InMemoryRepository as RuleRepo } from './repo/rule';
 import ErrorCode from './factory/errorCode';
 import * as ErrorFactory from './factory/errors';
 import * as PassportFactory from './factory/passport';
+import * as RuleFactory from './factory/rule';
 
 /**
  * Redis Cacheクライアント
@@ -24,7 +25,7 @@ import * as PassportFactory from './factory/passport';
  *      tls: { servername: process.env.TEST_REDIS_HOST }
  * });
  */
-export import Redis = Redis;
+export import redis = ioredis;
 
 export namespace repository {
     /**
@@ -50,4 +51,5 @@ export namespace factory {
     export import errorCode = ErrorCode;
     export import errors = ErrorFactory;
     export import passport = PassportFactory;
+    export import rule = RuleFactory;
 }

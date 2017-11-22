@@ -6,7 +6,7 @@
 const waiter = require('../');
 
 async function main() {
-    const redisClient = new waiter.Redis({
+    const redisClient = new waiter.redis({
         port: process.env.TEST_REDIS_PORT,
         host: process.env.TEST_REDIS_HOST,
         password: process.env.TEST_REDIS_KEY
