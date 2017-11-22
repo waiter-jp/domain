@@ -19,7 +19,6 @@ before(() => {
 describe('RuleRepo.constructor()', () => {
     beforeEach(() => {
         process.env.WAITER_RULES = JSON.stringify([{}]);
-        // no op
     });
 
     afterEach(() => {
@@ -65,16 +64,19 @@ describe('RuleRepo.constructor()', () => {
 describe('RuleRepo.findAll()', () => {
     beforeEach(() => {
         process.env.WAITER_RULES = JSON.stringify([{
+            name: 'name',
+            description: 'description',
             scope: 'scope',
             aggregationUnitInSeconds: 60,
             threshold: 100,
             unavailableHoursSpecifications: []
         }]);
-        // no op
     });
 
     afterEach(() => {
         process.env.WAITER_RULES = JSON.stringify([{
+            name: 'name',
+            description: 'description',
             scope: 'scope',
             aggregationUnitInSeconds: 60,
             threshold: 100,

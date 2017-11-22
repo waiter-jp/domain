@@ -49,6 +49,8 @@ describe('発行する', () => {
     it('許可証数上限に達すれば、RateLimitExceededエラーになるはず', async () => {
         const scope = 'scope';
         process.env.WAITER_RULES = JSON.stringify([{
+            name: 'name',
+            description: 'description',
             scope: 'scope',
             aggregationUnitInSeconds: 60,
             threshold: 0,
@@ -74,6 +76,8 @@ describe('発行する', () => {
     it('サービス休止時間帯であれば、許可証を発行できないはず', async () => {
         const scope = 'scope';
         process.env.WAITER_RULES = JSON.stringify([{
+            name: 'name',
+            description: 'description',
             scope: 'scope',
             aggregationUnitInSeconds: 60,
             threshold: 100,
@@ -94,6 +98,8 @@ describe('発行する', () => {
     it('RedisCacheが正常であれば、許可証を発行できるはず', async () => {
         const scope = 'scope';
         process.env.WAITER_RULES = JSON.stringify([{
+            name: 'name',
+            description: 'description',
             scope: 'scope',
             aggregationUnitInSeconds: 60,
             threshold: 100,
@@ -119,6 +125,8 @@ describe('発行する', () => {
     it('jwtモジュールで何かエラーが発生すれば、エラーになるはず', async () => {
         const scope = 'scope';
         process.env.WAITER_RULES = JSON.stringify([{
+            name: 'name',
+            description: 'description',
             scope: 'scope',
             aggregationUnitInSeconds: 60,
             threshold: 100,
@@ -181,6 +189,8 @@ describe('許可証トークンを検証する', () => {
     it('秘密鍵が間違っていれば、JsonWebTokenErrorになるはず', async () => {
         const secret = 'invalidsecret';
         process.env.WAITER_RULES = JSON.stringify([{
+            name: 'name',
+            description: 'description',
             scope: 'scope',
             aggregationUnitInSeconds: 60,
             threshold: 100,
@@ -211,6 +221,8 @@ describe('許可証トークンを検証する', () => {
     it('jsonwebtokenが期限切れであれば、TokenExpiredErrorになるはず', async () => {
         const secret = 'secret';
         process.env.WAITER_RULES = JSON.stringify([{
+            name: 'name',
+            description: 'description',
             scope: 'scope',
             aggregationUnitInSeconds: 1,
             threshold: 100,
@@ -276,6 +288,8 @@ describe('service.passport.currentIssueUnit()', () => {
     it('RedisCacheが正常であれば、許可証発行リクエスト数を取得できるはず', async () => {
         const scope = 'scope';
         process.env.WAITER_RULES = JSON.stringify([{
+            name: 'name',
+            description: 'description',
             scope: 'scope',
             aggregationUnitInSeconds: 60,
             threshold: 100,

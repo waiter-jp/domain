@@ -27,6 +27,14 @@ export interface IUnavailableHoursSpecification {
  */
 export interface IRule {
     /**
+     * 規則名称
+     */
+    name: string;
+    /**
+     * 規則説明
+     */
+    description: string;
+    /**
      * スコープ
      */
     scope: string;
@@ -45,7 +53,13 @@ export interface IRule {
 }
 
 export function createFromObject(params: any): IRule {
-    if (validator.isEmpty(params.scope)) {
+    if (typeof params.name !== 'string' || validator.isEmpty(params.name)) {
+        throw new errors.ArgumentNull('name');
+    }
+    if (typeof params.description !== 'string' || validator.isEmpty(params.description)) {
+        throw new errors.ArgumentNull('description');
+    }
+    if (typeof params.scope !== 'string' || validator.isEmpty(params.scope)) {
         throw new errors.ArgumentNull('scope');
     }
     if (!Number.isInteger(params.aggregationUnitInSeconds)) {
@@ -67,6 +81,8 @@ export function createFromObject(params: any): IRule {
     });
 
     return {
+        name: params.name,
+        description: params.description,
         scope: params.scope,
         aggregationUnitInSeconds: params.aggregationUnitInSeconds,
         threshold: params.threshold,

@@ -33,7 +33,7 @@
     "nyc": "^11.3.0",
     "rimraf": "^2.6.2",
     "sinon": "^4.1.2",
-    "snyk": "^1.49.3",
+    "snyk": "^1.49.4",
     "ts-node": "^3.3.0",
     "tslint": "^5.8.0",
     "tslint-microsoft-contrib": "^5.0.1",

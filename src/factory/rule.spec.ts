@@ -13,6 +13,8 @@ let TEST_CREATE_PARAMS: any;
 describe('RuleFactory.createFromObject()', () => {
     beforeEach(() => {
         TEST_CREATE_PARAMS = {
+            name: 'name',
+            description: 'description',
             scope: 'scope',
             aggregationUnitInSeconds: 60,
             threshold: 100,
@@ -31,10 +33,38 @@ describe('RuleFactory.createFromObject()', () => {
         });
     });
 
+    it('nameが空であればArgumentNullError', () => {
+        assert.throws(
+            () => {
+                TEST_CREATE_PARAMS.name = undefined;
+                RuleFactory.createFromObject(TEST_CREATE_PARAMS);
+            },
+            (err: any) => {
+                assert(err instanceof errors.ArgumentNull);
+
+                return true;
+            }
+        );
+    });
+
+    it('descriptionが空であればArgumentNullError', () => {
+        assert.throws(
+            () => {
+                TEST_CREATE_PARAMS.description = undefined;
+                RuleFactory.createFromObject(TEST_CREATE_PARAMS);
+            },
+            (err: any) => {
+                assert(err instanceof errors.ArgumentNull);
+
+                return true;
+            }
+        );
+    });
+
     it('scopeが空であればArgumentNullError', () => {
         assert.throws(
             () => {
-                TEST_CREATE_PARAMS.scope = '';
+                TEST_CREATE_PARAMS.scope = undefined;
                 RuleFactory.createFromObject(TEST_CREATE_PARAMS);
             },
             (err: any) => {
