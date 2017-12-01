@@ -13,10 +13,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Removed
 
 ### Fixed
-- fix Node Security Advisory [Regular Expression Denial of Service](https://nodesecurity.io/advisories/532).
 
 ### Security
 
+
+## v2.0.2 - 2017-12-01
+### Fixed
+- fix Node Security Advisory [Regular Expression Denial of Service](https://nodesecurity.io/advisories/532).
 
 ## v2.0.1 - 2017-11-22
 ### Security
