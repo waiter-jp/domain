@@ -17,6 +17,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Security
 
 
+## v2.0.2 - 2017-12-01
+### Fixed
+- fix Node Security Advisory [Regular Expression Denial of Service](https://nodesecurity.io/advisories/532).
+
 ## v2.0.1 - 2017-11-22
 ### Security
 - テスト網羅率100%化。
