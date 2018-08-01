@@ -3,18 +3,18 @@ import { WaiterError } from './waiter';
 
 /**
  * NotFoundError
- * @class NotFoundError
  * @extends {WaiterError}
  */
 export default class NotFoundError extends WaiterError {
     public readonly entityName: string;
 
     constructor(entityName: string, message?: string) {
+        let actualMessage = message;
         if (message === undefined || message.length === 0) {
-            message = `Not Found: ${entityName}`;
+            actualMessage = `Not Found: ${entityName}`;
         }
 
-        super(ErrorCode.NotFound, message);
+        super(ErrorCode.NotFound, actualMessage);
 
         this.entityName = entityName;
 

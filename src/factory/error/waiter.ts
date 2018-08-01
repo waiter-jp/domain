@@ -2,8 +2,6 @@ import ErrorCode from '../errorCode';
 
 /**
  * WaiterError
- * @export
- * @class WaiterError
  * @extends {Error}
  */
 export class WaiterError extends Error {

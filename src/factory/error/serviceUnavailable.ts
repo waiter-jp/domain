@@ -3,16 +3,16 @@ import { WaiterError } from './waiter';
 
 /**
  * ServiceUnavailableError
- * @class ServiceUnavailableError
  * @extends {WaiterError}
  */
 export default class ServiceUnavailableError extends WaiterError {
     constructor(message?: string) {
+        let actualMessage = message;
         if (message === undefined || message.length === 0) {
-            message = 'Service unavailable temporarily.';
+            actualMessage = 'Service unavailable temporarily.';
         }
 
-        super(ErrorCode.ServiceUnavailable, message);
+        super(ErrorCode.ServiceUnavailable, actualMessage);
 
         // Set the prototype explicitly.
         Object.setPrototypeOf(this, ServiceUnavailableError.prototype);

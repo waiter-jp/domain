@@ -1,9 +1,11 @@
 # Changelog
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## Unreleased
+
 ### Added
 
 ### Changed
@@ -16,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v2.0.3 - 2018-08-01
+
+### Changed
+
+- パッケージ名を変更。
+- 依存パッケージを最新化。
 
 ## v2.0.2 - 2017-12-01
 ### Fixed

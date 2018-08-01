@@ -3,16 +3,16 @@ import { WaiterError } from './waiter';
 
 /**
  * ForbiddenError
- * @class ForbiddenError
  * @extends {WaiterError}
  */
 export default class ForbiddenError extends WaiterError {
     constructor(message?: string) {
+        let actualMessage = message;
         if (message === undefined || message.length === 0) {
-            message = 'Forbidden';
+            actualMessage = 'Forbidden';
         }
 
-        super(ErrorCode.Forbidden, message);
+        super(ErrorCode.Forbidden, actualMessage);
 
         // Set the prototype explicitly.
         Object.setPrototypeOf(this, ForbiddenError.prototype);
