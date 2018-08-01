@@ -3,10 +3,9 @@
 [![npm (scoped)](https://img.shields.io/npm/v/@waiter/domain.svg)](https://www.npmjs.com/package/@waiter/domain)
 [![CircleCI](https://circleci.com/gh/waiter-jp/domain.svg?style=svg)](https://circleci.com/gh/waiter-jp/domain)
 [![Coverage Status](https://coveralls.io/repos/github/waiter-jp/domain/badge.svg)](https://coveralls.io/github/waiter-jp/domain)
-[![Known Vulnerabilities](https://snyk.io/test/github/waiter-jp/domain/badge.svg)](https://snyk.io/test/github/waiter-jp/domain)
+[![Known Vulnerabilities](https://snyk.io/test/github/waiter-jp/domain/badge.svg?targetFile=package.json)](https://snyk.io/test/github/waiter-jp/domain?targetFile=package.json)
 [![Dependency Status](https://img.shields.io/david/waiter-jp/domain.svg)](https://david-dm.org/waiter-jp/domain)
 [![npm](https://img.shields.io/npm/dm/@waiter/domain.svg)](https://nodei.co/npm/@waiter/domain/)
-
 
 ## Table of contents
 
@@ -18,14 +17,15 @@
 * [Jsdoc](#jsdoc)
 * [License](#license)
 
-
 ## Background
+
 - チケット購入サイトへのアクセスがある量感を超えると、システムで受け止め切ることは簡単でない。
 - インフラにコストをかけることで解決するのは簡単だが、コストに限度のないケースは少ない。
 - GMO、SendGrid等、外部サービスと連携するシステムをつくる以上、外部サービス側の限度を考慮する必要がある。
 - アプリケーション(ソフトウェア)のレベルでできる限りのことはしたい。
 
 ### v1を経て...
+
 - 複数の流入制限設定に対応する必要がある。
 - 制限設定により幅を持たせられるか。
 - できる限り、流入者に対して平等に許可証を発行したい。
@@ -200,7 +200,6 @@
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6InNjb3BlIiwiaXNzdWVVbml0Ijp7ImlkZW50aWZpZXIiOiJzY29wZToxNTExMDU5NTAwIiwidmFsaWRGcm9tIjoxNTExMDU5NTAwLCJ2YWxpZFRocm91Z2giOjE1MTEwNTk4MDAsIm51bWJlck9mUmVxdWVzdHMiOjF9LCJpYXQiOjE1MTEwNTk2MTAsImV4cCI6MTUxMTA1OTkxMCwiaXNzIjoiaHR0cHM6Ly93YWl0ZXIuZXhhbXBsZS5jb20ifQ.wE_osB77zotND2H56tUMyCFAaAS6SHlp4wCMyvRsVt4
 ```
 
-
 ## Usage
 
 ### Environment variables
@@ -212,10 +211,9 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6InNjb3BlIiwiaXNzdWVVbml0Ijp7Iml
  | `WAITER_RULES`           | true     |                 | 発行規則リスト       |
  | `WAITER_SECRET`          | true     |                 | 許可証暗号化の秘密鍵 |
 
-
 ## Code Samples
 
-コードサンプルは [example](https://github.com/motionpicture/waiter-domain/tree/master/example) にあります。
+コードサンプルは [example](https://github.com/waiter-jp/domain/tree/master/example) にあります。
 
 ## Jsdoc
 
