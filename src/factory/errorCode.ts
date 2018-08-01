@@ -1,8 +1,6 @@
 /**
  * エラーコード
- * @module errorCode
  */
-
 enum ErrorCode {
     AlreadyInUse = 'AlreadyInUse',
     Argument = 'Argument',
@@ -13,5 +11,4 @@ enum ErrorCode {
     ServiceUnavailable = 'ServiceUnavailable',
     RateLimitExceeded = 'RateLimitExceeded'
 }
-
 export default ErrorCode;

@@ -10,33 +10,26 @@ import ArgumentNullError from './error/argumentNull';
 
 /**
  * 許可証発行単位
- * @export
- * @interface
- * @memberof factory.passport
  */
 export interface IIssueUnit {
     /**
      * 許可証発行単位識別子
      * 発行単位内で整理番号付けを行う
      * スコープ+日時で一意になる想定
-     * @memberof IIssueUnit
      */
     identifier: string;
     /**
      * いつから有効な発行単位か
      * unix timestampe
-     * @memberof IIssueUnit
      */
     validFrom: number;
     /**
      * いつまで有効な発行単位か
      * unix timestampe
-     * @memberof IIssueUnit
      */
     validThrough: number;
     /**
      * 許可証発行リクエスト数
-     * @memberof IIssueUnit
      */
     numberOfRequests: number;
 }
@@ -45,37 +38,29 @@ export interface IIssueUnit {
  * 許可証インターフェース
  * どういうスコープに対する許可なのか、という情報を持つ。
  * 実際には許可証がjsonwebtokenに変換されて発行されるので、許可証の有効期間に関してはtokenが責任を持つことになる。
- * @export
- * @interface
- * @memberof factory.passport
  */
 export interface IPassport {
     /**
      * 許可証のスコープ
      * 発行依頼者が事前に設定する想定
-     * @memberof IPassport
      */
     scope: string;
     /**
      * 発行unixタイムスタンプ
-     * @memberof IPassport
      */
     iat: number;
     /**
      * 期限unixタイムスタンプ
-     * @memberof IPassport
      */
     exp: number;
     /**
      * 許可証発行者
-     * @memberof IPassport
      * @example https://waiter.example.com
      */
     iss: string;
     /**
      * 許可証発行単位名
      * 発行単位内で整理番号付けを行う
-     * @memberof IPassport
      */
     issueUnit: IIssueUnit;
 }

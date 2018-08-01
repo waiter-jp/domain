@@ -17,8 +17,6 @@ const debug = createDebug('waiter-domain:service:passport');
 
 /**
  * 許可証を発行する
- * @export
- * @function
  * @param scope 許可証スコープ
  */
 export function issue(
@@ -81,8 +79,6 @@ export function issue(
 
 /**
  * 現在の許可証発行単位を取得する
- * @export
- * @function
  * @param scope 許可証スコープ
  */
 export function currentIssueUnit(scope: string) {
@@ -97,11 +93,6 @@ export function currentIssueUnit(scope: string) {
 
 /**
  * 暗号化された許可証を検証する
- * @export
- * @function
- * @param {string} token
- * @param {string} secret
- * @returns {Promise<PassportFactory.IPassport>}
  */
 export async function verify(token: string, secret: string): Promise<PassportFactory.IPassport> {
     return new Promise<PassportFactory.IPassport>((resolve, reject) => {

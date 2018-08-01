@@ -8,8 +8,6 @@ const debug = createDebug('waiter-domain:repository:rule');
 /**
  * 許可証発行ルールローカルレポジトリー
  * 環境変数で許可証発行ルールを管理する場合のリポジトリークラス
- * @export
- * @class
  */
 export class InMemoryRepository {
     public readonly rulesFromJson: RuleFactory.IRule[];
@@ -37,7 +35,7 @@ export class InMemoryRepository {
 
     /**
      * スコープでルールを取得する
-     * @param {string} scope スコープ
+     * @param scope スコープ
      */
     public findbyScope(scope: string): RuleFactory.IRule {
         debug('finding a rule...', scope);

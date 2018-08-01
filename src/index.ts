@@ -30,14 +30,10 @@ export import redis = ioredis;
 export namespace repository {
     /**
      * 許可証発行単位レポジトリー
-     * @export
-     * @class
      */
     export class PassportIssueUnit extends PassportIssueUnitRepo { }
     /**
      * 発行ルールレポジトリー
-     * @export
-     * @class
      */
     export class Rule extends RuleRepo { }
 

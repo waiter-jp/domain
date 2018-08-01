@@ -3,18 +3,18 @@ import { WaiterError } from './waiter';
 
 /**
  * ArgumentNullError
- * @class ArgumentNullError
  * @extends {WaiterError}
  */
 export default class ArgumentNullError extends WaiterError {
     public readonly argumentName: string;
 
     constructor(argumentName: string, message?: string) {
+        let actualMessage = message;
         if (message === undefined || message.length === 0) {
-            message = `Missing argument: ${argumentName}`;
+            actualMessage = `Missing argument: ${argumentName}`;
         }
 
-        super(ErrorCode.Argument, message);
+        super(ErrorCode.Argument, actualMessage);
 
         this.argumentName = argumentName;
 

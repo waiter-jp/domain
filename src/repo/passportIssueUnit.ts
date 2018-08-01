@@ -9,8 +9,6 @@ const debug = createDebug('waiter-domain:repository:passportIssueUnit');
 
 /**
  * 許可証発行単位Redisレポジトリー
- * @export
- * @class
  */
 export class RedisRepository {
     public readonly redisClient: redis.Redis;
@@ -21,9 +19,8 @@ export class RedisRepository {
 
     /**
      * 発行単位属性を作成する
-     * @param {Date} issueDate 発行日時
-     * @param {RuleFactory.IRule} rule 発行ルール
-     * @returns {string}
+     * @param issueDate 発行日時
+     * @param rule 発行ルール
      */
     public static CREATE_ISSUE_UNIT_PARAMS(issueDate: Date, rule: RuleFactory.IRule) {
         const dateNow = moment(issueDate);
@@ -41,8 +38,8 @@ export class RedisRepository {
 
     /**
      * 許可証数をカウントアップする
-     * @param {Date} issueDate 発行日時
-     * @param {RuleFactory.IRule} rule 発行ルール
+     * @param issueDate 発行日時
+     * @param rule 発行ルール
      */
     public async incr(issueDate: Date, rule: RuleFactory.IRule): Promise<IIssueUnit> {
         const issueUnitParams = RedisRepository.CREATE_ISSUE_UNIT_PARAMS(issueDate, rule);
@@ -66,12 +63,12 @@ export class RedisRepository {
 
     /**
      * 現在の許可証発行単位を取得する
-     * @param {Date} issueDate 発行日時
-     * @param {RuleFactory.IRule} rule 発行ルール
+     * @param issueDate 発行日時
+     * @param rule 発行ルール
      */
     public async now(issueDate: Date, rule: RuleFactory.IRule): Promise<IIssueUnit> {
         const issueUnitParams = RedisRepository.CREATE_ISSUE_UNIT_PARAMS(issueDate, rule);
-        const result = await this.redisClient.get(issueUnitParams.identifier, debug);
+        const result = await this.redisClient.get(issueUnitParams.identifier);
         debug('result:', result);
 
         return ({

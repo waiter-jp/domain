@@ -9,35 +9,35 @@
     }
   ],
   "dependencies": {
-    "@types/ioredis": "0.0.26",
+    "@types/ioredis": "^3.2.13",
     "debug": "^3.1.0",
     "ioredis": "^3.2.2",
-    "jsonwebtoken": "^8.1.0",
-    "moment": "^2.19.3",
-    "validator": "^9.1.2"
+    "jsonwebtoken": "^8.3.0",
+    "moment": "^2.22.2",
+    "validator": "^10.4.0"
   },
-  "description": "Waiter domain library for Node.js",
+  "description": "Waiter Domain Library for Node.js",
   "devDependencies": {
     "@types/debug": "0.0.30",
-    "@types/jsonwebtoken": "^7.2.3",
-    "@types/mocha": "^2.2.44",
+    "@types/jsonwebtoken": "^7.2.8",
+    "@types/mocha": "^2.2.48",
     "@types/redis-mock": "^0.17.0",
     "@types/sinon": "^2.3.7",
     "@types/validator": "^6.3.0",
-    "coveralls": "^3.0.0",
+    "coveralls": "^3.0.2",
     "ink-docstrap": "^1.3.2",
-    "ioredis-mock": "^3.4.2",
+    "ioredis-mock": "^3.12.0",
     "jsdoc": "^3.5.5",
-    "mocha": "^4.0.1",
-    "nsp": "^2.8.1",
-    "nyc": "^11.4.0",
+    "mocha": "^5.2.0",
+    "nsp": "^3.2.1",
+    "nyc": "^12.0.2",
     "rimraf": "^2.6.2",
-    "sinon": "^4.1.2",
-    "snyk": "^1.52.1",
-    "ts-node": "^3.3.0",
-    "tslint": "^5.8.0",
-    "tslint-microsoft-contrib": "^5.0.1",
-    "typescript": "^2.6.2"
+    "sinon": "^4.5.0",
+    "snyk": "^1.89.1",
+    "ts-node": "^7.0.0",
+    "tslint": "^5.11.0",
+    "tslint-microsoft-contrib": "^5.1.0",
+    "typescript": "^3.0.1"
   },
   "engines": {
     "node": ">=6.9.1",
@@ -58,10 +58,10 @@
     "example": "./example",
     "test": "./test"
   },
-  "name": "@motionpicture/waiter-domain",
+  "name": "@waiter/domain",
   "repository": {
     "type": "git",
-    "url": "https://github.com/motionpicture/waiter-domain.git"
+    "url": "https://github.com/waiter-jp/domain.git"
   },
   "scripts": {
     "build": "tsc",
@@ -73,7 +73,7 @@
     "snyk": "snyk wizard",
     "test": "npm run check && npm run coverage",
     "tslint": "tslint --project tsconfig.json -c tslint.json --exclude \"**/*.spec.ts\" \"src/**/*.ts\"",
-    "preversion": "npm run clean && npm run build && npm test",
+    "preversion": "npm run clean && npm run build && npm test && npm run doc",
     "version": "git add -A",
     "postversion": "git push origin --tags",
     "prepublishOnly": "npm run clean && npm run build && npm test && npm run doc"

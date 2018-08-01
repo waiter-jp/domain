@@ -1,13 +1,11 @@
-<img src="https://motionpicture.jp/images/common/logo_01.svg" alt="motionpicture" title="motionpicture" align="right" height="56" width="98"/>
+# Waiter Domain Library for Node.js
 
-# WAITER ドメインパッケージ
-
-[![npm (scoped)](https://img.shields.io/npm/v/@motionpicture/waiter-domain.svg)](https://www.npmjs.com/package/@motionpicture/waiter-domain)
-[![CircleCI](https://circleci.com/gh/motionpicture/waiter-domain.svg?style=shield)](https://circleci.com/gh/motionpicture/waiter-domain)
-[![Coverage Status](https://coveralls.io/repos/github/motionpicture/waiter-domain/badge.svg)](https://coveralls.io/github/motionpicture/waiter-domain)
-[![Known Vulnerabilities](https://snyk.io/test/github/motionpicture/waiter-domain/badge.svg)](https://snyk.io/test/github/motionpicture/waiter-domain)
-[![Dependency Status](https://img.shields.io/david/motionpicture/waiter-domain.svg)](https://david-dm.org/motionpicture/waiter-domain)
-[![npm](https://img.shields.io/npm/dm/@motionpicture/waiter-domain.svg)](https://nodei.co/npm/@motionpicture/waiter-domain/)
+[![npm (scoped)](https://img.shields.io/npm/v/@waiter/domain.svg)](https://www.npmjs.com/package/@waiter/domain)
+[![CircleCI](https://circleci.com/gh/waiter-jp/domain.svg?style=svg)](https://circleci.com/gh/waiter-jp/domain)
+[![Coverage Status](https://coveralls.io/repos/github/waiter-jp/domain/badge.svg)](https://coveralls.io/github/waiter-jp/domain)
+[![Known Vulnerabilities](https://snyk.io/test/github/waiter-jp/domain/badge.svg)](https://snyk.io/test/github/waiter-jp/domain)
+[![Dependency Status](https://img.shields.io/david/waiter-jp/domain.svg)](https://david-dm.org/waiter-jp/domain)
+[![npm](https://img.shields.io/npm/dm/@waiter/domain.svg)](https://nodei.co/npm/@waiter/domain/)
 
 
 ## Table of contents
@@ -130,16 +128,16 @@
 
 - 許可証発行規則。事前にWAITERに環境変数として登録。
 
-field                                        | type                            | description
----------------------------------------------|---------------------------------|---------------------------------------
-name                                         | string                          | 規則名称
-description                                  | string                          | 規則説明
-scope                                        | string                          | スコープ
-aggregationUnitInSeconds                     | number                          | 許可証数集計単位(秒)
-threshold                                    | number                          | 単位時間当たりの許可証数閾値
-unavailableHoursSpecifications               | array                           | サービス休止時間帯設定リスト
-unavailableHoursSpecifications.startDate     | string                          | サービス休止開始日時
-unavailableHoursSpecifications.endDate       | string                          | サービス休止終了日時
+| field                                    | type   | description                  |
+| ---------------------------------------- | ------ | ---------------------------- |
+| name                                     | string | 規則名称                     |
+| description                              | string | 規則説明                     |
+| scope                                    | string | スコープ                     |
+| aggregationUnitInSeconds                 | number | 許可証数集計単位(秒)         |
+| threshold                                | number | 単位時間当たりの許可証数閾値 |
+| unavailableHoursSpecifications           | array  | サービス休止時間帯設定リスト |
+| unavailableHoursSpecifications.startDate | string | サービス休止開始日時         |
+| unavailableHoursSpecifications.endDate   | string | サービス休止終了日時         |
 
 ```json
 {
@@ -158,25 +156,25 @@ unavailableHoursSpecifications.endDate       | string                          |
 
 - スコープごとに発行単位が作成される。許可証の発行を依頼されると、単位ごとに発行数を集計しながら発行を試みる。  
 
-field                                   | type                            | description
-----------------------------------------|---------------------------------|---------------------------------------
-identifier                              | string                          | 許可証発行単位識別子
-validFrom                               | number                          | いつから有効な発行単位か
-validThrough                            | number                          | いつまで有効な発行単位か
-numberOfRequests                        | number                          | 許可証発行リクエスト数
+| field            | type   | description              |
+| ---------------- | ------ | ------------------------ |
+| identifier       | string | 許可証発行単位識別子     |
+| validFrom        | number | いつから有効な発行単位か |
+| validThrough     | number | いつまで有効な発行単位か |
+| numberOfRequests | number | 許可証発行リクエスト数   |
 
 **許可証**
 
 - 発行者が発行する許可証は鍵によって暗号化される。
 - 発行依頼者は鍵を事前に設定することで暗号化された許可証を検証し、許可するかどうかを判断する。
 
-field                                   | type                            | description
-----------------------------------------|---------------------------------|---------------------------------------
-iss                                     | string                          | 発行者
-iat                                     | number                          | 発行unixタイムスタンプ
-exp                                     | number                          | 期限unixタイムスタンプ
-scope                                   | string                          | スコープ
-issueUnit                               | IIssueUnit                      | 発行単許可証発行単位位名
+| field     | type       | description              |
+| --------- | ---------- | ------------------------ |
+| iss       | string     | 発行者                   |
+| iat       | number     | 発行unixタイムスタンプ   |
+| exp       | number     | 期限unixタイムスタンプ   |
+| scope     | string     | スコープ                 |
+| issueUnit | IIssueUnit | 発行単許可証発行単位位名 |
 
 ```json
 {
@@ -207,12 +205,12 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6InNjb3BlIiwiaXNzdWVVbml0Ijp7Iml
 
 ### Environment variables
 
- Name                                       | Required              | Value                | Purpose                           
---------------------------------------------|-----------------------|----------------------|-----------------------------------
- `DEBUG`                                    | false                 | waiter-domain:*      | Debug
- `WAITER_PASSPORT_ISSUER`                   | true                  |                      | 許可証発行者識別子
- `WAITER_RULES`                             | true                  |                      | 発行規則リスト
- `WAITER_SECRET`                            | true                  |                      | 許可証暗号化の秘密鍵
+ | Name                     | Required | Value           | Purpose              |
+ | ------------------------ | -------- | --------------- | -------------------- |
+ | `DEBUG`                  | false    | waiter-domain:* | Debug                |
+ | `WAITER_PASSPORT_ISSUER` | true     |                 | 許可証発行者識別子   |
+ | `WAITER_RULES`           | true     |                 | 発行規則リスト       |
+ | `WAITER_SECRET`          | true     |                 | 許可証暗号化の秘密鍵 |
 
 
 ## Code Samples

@@ -10,9 +10,6 @@ import * as errors from './errors';
 
 /**
  * サービス休止時間帯インターフェース
- * @export
- * @interface
- * @memberof factory.rule
  */
 export interface IUnavailableHoursSpecification {
     startDate: Date;
@@ -21,9 +18,6 @@ export interface IUnavailableHoursSpecification {
 
 /**
  * 許可証発行規則インターフェース
- * @export
- * @interface
- * @memberof factory.rule
  */
 export interface IRule {
     /**
