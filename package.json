@@ -10,7 +10,7 @@
   ],
   "dependencies": {
     "@types/ioredis": "^3.2.13",
-    "@waiter/factory": "^1.0.0-alpha.1",
+    "@waiter/factory": "^1.0.0",
     "debug": "^3.1.0",
     "ioredis": "^3.2.2",
     "jsonwebtoken": "^8.3.0",
@@ -34,7 +34,7 @@
     "nyc": "^12.0.2",
     "rimraf": "^2.6.2",
     "sinon": "^4.5.0",
-    "snyk": "^1.89.1",
+    "snyk": "^1.90.0",
     "ts-node": "^7.0.0",
     "tslint": "^5.11.0",
     "tslint-microsoft-contrib": "^5.1.0",
