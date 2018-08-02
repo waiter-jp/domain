@@ -10,8 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- [@waiter/factory](https://www.npmjs.com/package/@waiter/factory)をインストール。
-
 ### Deprecated
 
 ### Removed
@@ -19,6 +17,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v2.0.4 - 2018-08-02
+
+### Changed
+
+- [@waiter/factory](https://www.npmjs.com/package/@waiter/factory)をインストール。
 
 ## v2.0.3 - 2018-08-01
 
