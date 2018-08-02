@@ -1,19 +1,17 @@
 /**
  * 許可証サービス
- * @namespace service.passport
  */
-
+import * as factory from '@waiter/factory';
 import * as createDebug from 'debug';
 import * as jwt from 'jsonwebtoken';
 import * as moment from 'moment';
 import * as util from 'util';
+import * as validator from 'validator';
 
-import * as errors from '../factory/errors';
-import * as PassportFactory from '../factory/passport';
 import { RedisRepository as PassportIssueUnitRepo } from '../repo/passportIssueUnit';
 import { InMemoryRepository as RuleRepo } from '../repo/rule';
 
-const debug = createDebug('waiter-domain:service:passport');
+const debug = createDebug('waiter-domain:*');
 
 /**
  * 許可証を発行する
@@ -22,7 +20,7 @@ const debug = createDebug('waiter-domain:service:passport');
 export function issue(
     scope: string
 ) {
-    return async (ruleRepo: RuleRepo, passportIssueUnitRepo: PassportIssueUnitRepo): Promise<PassportFactory.IEncodedPassport> => {
+    return async (ruleRepo: RuleRepo, passportIssueUnitRepo: PassportIssueUnitRepo): Promise<factory.passport.IEncodedPassport> => {
         debug('rule exists?');
         const rule = ruleRepo.findbyScope(scope);
         const now = moment();
@@ -41,12 +39,12 @@ export function issue(
                     specification.startDate.toISOString(),
                     specification.endDate.toISOString()
                 );
-                throw new errors.ServiceUnavailable(message);
+                throw new factory.errors.ServiceUnavailable(message);
             }
         });
 
         if (passportIssueUnit.numberOfRequests > rule.threshold) {
-            throw new errors.RateLimitExceeded();
+            throw new factory.errors.RateLimitExceeded();
         }
 
         const payload = {
@@ -55,7 +53,7 @@ export function issue(
             iat: now.unix()
         };
 
-        return new Promise<PassportFactory.IEncodedPassport>((resolve, reject) => {
+        return new Promise<factory.passport.IEncodedPassport>((resolve, reject) => {
             // 許可証を暗号化する
             jwt.sign(
                 payload,
@@ -82,7 +80,7 @@ export function issue(
  * @param scope 許可証スコープ
  */
 export function currentIssueUnit(scope: string) {
-    return async (ruleRepo: RuleRepo, passportIssueUnitRepo: PassportIssueUnitRepo): Promise<PassportFactory.IIssueUnit> => {
+    return async (ruleRepo: RuleRepo, passportIssueUnitRepo: PassportIssueUnitRepo): Promise<factory.passport.IIssueUnit> => {
         debug('rule exists?');
         const rule = ruleRepo.findbyScope(scope);
         const issueDate = moment().toDate();
@@ -94,15 +92,53 @@ export function currentIssueUnit(scope: string) {
 /**
  * 暗号化された許可証を検証する
  */
-export async function verify(token: string, secret: string): Promise<PassportFactory.IPassport> {
-    return new Promise<PassportFactory.IPassport>((resolve, reject) => {
+export async function verify(token: string, secret: string): Promise<factory.passport.IPassport> {
+    return new Promise<factory.passport.IPassport>((resolve, reject) => {
         jwt.verify(token, secret, (err, decoded) => {
             if (err instanceof Error) {
                 reject(err);
             } else {
-                const passport = PassportFactory.create(<any>decoded);
+                const passport = create(<any>decoded);
                 resolve(passport);
             }
         });
     });
+}
+
+export function create(params: {
+    scope: string;
+    iat: number;
+    exp: number;
+    iss: string;
+    issueUnit: factory.passport.IIssueUnit;
+}): factory.passport.IPassport {
+    if (validator.isEmpty(params.scope)) {
+        throw new factory.errors.ArgumentNull('scope');
+    }
+    if (params.iat === undefined || !Number.isInteger(params.iat)) {
+        throw new factory.errors.Argument('iat', 'iat must be number.');
+    }
+    if (params.exp === undefined || !Number.isInteger(params.exp)) {
+        throw new factory.errors.Argument('exp', 'exp must be number.');
+    }
+    if (validator.isEmpty(params.iss)) {
+        throw new factory.errors.ArgumentNull('iss');
+    }
+    if (params.issueUnit == null || typeof params.issueUnit !== 'object') {
+        throw new factory.errors.Argument('issueUnit', 'issueUnit must be object.');
+    }
+    if (validator.isEmpty(params.issueUnit.identifier)) {
+        throw new factory.errors.ArgumentNull('issueUnit.identifier');
+    }
+    if (params.issueUnit.numberOfRequests === undefined || !Number.isInteger(params.issueUnit.numberOfRequests)) {
+        throw new factory.errors.Argument('issueUnit.numberOfRequests', 'issueUnit.numberOfRequests must be number.');
+    }
+
+    return {
+        scope: params.scope,
+        iat: params.iat,
+        exp: params.exp,
+        iss: params.iss,
+        issueUnit: params.issueUnit
+    };
 }

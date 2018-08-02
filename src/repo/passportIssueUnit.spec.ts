@@ -1,10 +1,7 @@
 // tslint:disable:no-implicit-dependencies
-
 /**
  * 許可証カウンターレポジトリーテスト
- * @ignore
  */
-
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 // tslint:disable-next-line:mocha-no-side-effect-code no-require-imports no-var-requires
@@ -15,7 +12,6 @@ import { RedisRepository as PassportIssueUnitRepo } from '../repo/passportIssueU
 
 let redisClient: any;
 let sandbox: sinon.SinonSandbox;
-
 before(() => {
     sandbox = sinon.sandbox.create();
 });
