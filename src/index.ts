@@ -1,8 +1,7 @@
 /**
- * waiter-domainモジュール
- * @module
+ * domain index
  */
-
+import * as factory from '@waiter/factory';
 import * as ioredis from 'ioredis';
 
 import * as PassportService from './service/passport';
@@ -10,10 +9,7 @@ import * as PassportService from './service/passport';
 import { RedisRepository as PassportIssueUnitRepo } from './repo/passportIssueUnit';
 import { InMemoryRepository as RuleRepo } from './repo/rule';
 
-import ErrorCode from './factory/errorCode';
-import * as ErrorFactory from './factory/errors';
-import * as PassportFactory from './factory/passport';
-import * as RuleFactory from './factory/rule';
+export import factory = factory;
 
 /**
  * Redis Cacheクライアント
@@ -26,7 +22,6 @@ import * as RuleFactory from './factory/rule';
  * });
  */
 export import redis = ioredis;
-
 export namespace repository {
     /**
      * 許可証発行単位レポジトリー
@@ -38,14 +33,6 @@ export namespace repository {
     export class Rule extends RuleRepo { }
 
 }
-
 export namespace service {
     export import passport = PassportService;
-}
-
-export namespace factory {
-    export import errorCode = ErrorCode;
-    export import errors = ErrorFactory;
-    export import passport = PassportFactory;
-    export import rule = RuleFactory;
 }

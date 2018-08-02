@@ -1,10 +1,8 @@
 // tslint:disable:no-implicit-dependencies
-
 /**
  * 許可証サービステスト
- * @ignore
  */
-
+import * as factory from '@waiter/factory';
 import * as assert from 'assert';
 import * as jwt from 'jsonwebtoken';
 import * as moment from 'moment';
@@ -13,13 +11,11 @@ import * as sinon from 'sinon';
 // tslint:disable-next-line:mocha-no-side-effect-code no-require-imports no-var-requires
 const redis = require('ioredis-mock');
 
-import * as errors from '../factory/errors';
 import { RedisRepository as PassportIssueUnitRepo } from '../repo/passportIssueUnit';
 import { InMemoryRepository as RuleRepo } from '../repo/rule';
 import * as passportService from '../service/passport';
 
 let sandbox: sinon.SinonSandbox;
-
 before(() => {
     sandbox = sinon.sandbox.create();
 });
@@ -44,7 +40,7 @@ describe('発行する', () => {
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
         const result = await passportService.issue(scope)(ruleRepo, passportCounterRepo).catch((err) => err);
-        assert(result instanceof errors.NotFound);
+        assert(result instanceof factory.errors.NotFound);
         sandbox.verify();
     });
 
@@ -71,7 +67,7 @@ describe('発行する', () => {
         sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
 
         const result = await passportService.issue(scope)(ruleRepo, passportCounterRepo).catch((err) => err);
-        assert(result instanceof errors.RateLimitExceeded);
+        assert(result instanceof factory.errors.RateLimitExceeded);
         sandbox.verify();
     });
 
@@ -93,7 +89,7 @@ describe('発行する', () => {
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
         const result = await passportService.issue(scope)(ruleRepo, passportCounterRepo).catch((err) => err);
-        assert(result instanceof errors.ServiceUnavailable);
+        assert(result instanceof factory.errors.ServiceUnavailable);
         sandbox.verify();
     });
 
@@ -283,7 +279,7 @@ describe('service.passport.currentIssueUnit()', () => {
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
         const result = await passportService.currentIssueUnit(scope)(ruleRepo, passportCounterRepo).catch((err) => err);
-        assert(result instanceof errors.NotFound);
+        assert(result instanceof factory.errors.NotFound);
         sandbox.verify();
     });
 
@@ -312,5 +308,128 @@ describe('service.passport.currentIssueUnit()', () => {
         const result = await passportService.currentIssueUnit(scope)(ruleRepo, passportCounterRepo);
         assert(Number.isInteger(result.numberOfRequests));
         sandbox.verify();
+    });
+});
+
+describe('service.passport.create()', () => {
+    let TEST_CREATE_PARAMS: any;
+    beforeEach(() => {
+        TEST_CREATE_PARAMS = {
+            scope: 'scope',
+            iat: 1511059610,
+            exp: 1511059910,
+            iss: 'issuer',
+            aud: 'audience',
+            issueUnit: {
+                identifier: 'scope:1508227500',
+                validFrom: 1508227500,
+                validThrough: 1508227800,
+                numberOfRequests: 2
+            }
+        };
+    });
+
+    it('作成できる', () => {
+        assert.doesNotThrow(() => {
+            passportService.create(TEST_CREATE_PARAMS);
+        });
+    });
+
+    it('発行日時が数字でなければArgumentError', () => {
+        assert.throws(
+            () => {
+                TEST_CREATE_PARAMS.iat = '1511059610';
+                passportService.create(TEST_CREATE_PARAMS);
+            },
+            (err: any) => {
+                assert(err instanceof factory.errors.Argument);
+
+                return true;
+            }
+        );
+    });
+
+    it('期限が数字でなければArgumentError', () => {
+        assert.throws(
+            () => {
+                TEST_CREATE_PARAMS.exp = '1511059610';
+                passportService.create(TEST_CREATE_PARAMS);
+            },
+            (err: any) => {
+                assert(err instanceof factory.errors.Argument);
+
+                return true;
+            }
+        );
+    });
+
+    it('スコープが空であればArgumentNullError', () => {
+        assert.throws(
+            () => {
+                const params = { ...TEST_CREATE_PARAMS, ...{ scope: '' } };
+                passportService.create(params);
+            },
+            (err: any) => {
+                assert(err instanceof factory.errors.ArgumentNull);
+
+                return true;
+            }
+        );
+    });
+
+    it('発行者が空であればArgumentNullError', () => {
+        assert.throws(
+            () => {
+                const params = { ...TEST_CREATE_PARAMS, ...{ iss: '' } };
+                passportService.create(params);
+            },
+            (err: any) => {
+                assert(err instanceof factory.errors.ArgumentNull);
+
+                return true;
+            }
+        );
+    });
+
+    it('発行単位がオブジェクトでなければArgumentError', () => {
+        assert.throws(
+            () => {
+                TEST_CREATE_PARAMS.issueUnit = null;
+                passportService.create(TEST_CREATE_PARAMS);
+            },
+            (err: any) => {
+                assert(err instanceof factory.errors.Argument);
+
+                return true;
+            }
+        );
+    });
+
+    it('識別子が空であればArgumentNullError', () => {
+        assert.throws(
+            () => {
+                TEST_CREATE_PARAMS.issueUnit.identifier = '';
+                passportService.create(TEST_CREATE_PARAMS);
+            },
+            (err: any) => {
+                assert(err instanceof factory.errors.ArgumentNull);
+
+                return true;
+            }
+        );
+    });
+
+    it('リクエスト数が数字でなければArgumentError', () => {
+        assert.throws(
+            () => {
+                TEST_CREATE_PARAMS.issueUnit.numberOfRequests = '1';
+                passportService.create(TEST_CREATE_PARAMS);
+            },
+            (err: any) => {
+                assert(err instanceof factory.errors.Argument);
+
+                return true;
+            }
+        );
     });
 });
