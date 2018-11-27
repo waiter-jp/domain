@@ -1,12 +1,13 @@
-import * as factory from '@waiter/factory';
 import * as createDebug from 'debug';
 import * as moment from 'moment';
 import * as validator from 'validator';
 
-const debug = createDebug('waiter-domain:*');
+import * as factory from '../factory';
+
+const debug = createDebug('waiter-domain:repository');
 
 /**
- * 許可証発行ルールローカルレポジトリー
+ * 許可証発行ルールローカルリポジトリ
  * 環境変数で許可証発行ルールを管理する場合のリポジトリークラス
  */
 export class InMemoryRepository {
@@ -25,7 +26,11 @@ export class InMemoryRepository {
             throw new Error(`Please set an environment variable \`WAITER_RULES\` correctly. ${error.message}`);
         }
     }
+
     public static CREATE_FROM_OBJECT(params: any): factory.rule.IRule {
+        if (typeof params.project !== 'object' || typeof params.project.id !== 'string' || validator.isEmpty(params.project.id)) {
+            throw new factory.errors.ArgumentNull('project');
+        }
         if (typeof params.name !== 'string' || validator.isEmpty(params.name)) {
             throw new factory.errors.ArgumentNull('name');
         }
@@ -60,6 +65,7 @@ export class InMemoryRepository {
         });
 
         return {
+            project: { id: params.project.id },
             name: params.name,
             description: params.description,
             scope: params.scope,
@@ -73,21 +79,36 @@ export class InMemoryRepository {
             })
         };
     }
+
     /**
-     * 全ルールを取得する
+     * 検索
      */
-    public findAll(): factory.rule.IRule[] {
-        return this.rulesFromJson;
+    public search(params: factory.rule.ISearchConditions): factory.rule.IRule[] {
+        let rules = this.rulesFromJson;
+
+        if (params.project !== undefined) {
+            if (Array.isArray(params.project.ids)) {
+                const projectIds = params.project.ids;
+                rules = rules.filter((rule) => projectIds.indexOf(rule.project.id) >= 0);
+            }
+        }
+
+        return rules;
     }
+
     /**
      * スコープでルールを取得する
-     * @param scope スコープ
      */
-    public findbyScope(scope: string): factory.rule.IRule {
-        debug('finding a rule...', scope);
-        const ruleFromJson = this.rulesFromJson.find((rule) => rule.scope === scope);
+    public findByScope(params: {
+        project: { id: string };
+        scope: string;
+    }): factory.rule.IRule {
+        debug('finding a rule...', params.scope);
+        const ruleFromJson = this.rulesFromJson.find(
+            (rule) => rule.project.id === params.project.id && rule.scope === params.scope
+        );
         if (ruleFromJson === undefined) {
-            throw new factory.errors.NotFound('rule');
+            throw new factory.errors.NotFound('Rule');
         }
         debug('rule found.', ruleFromJson);
 

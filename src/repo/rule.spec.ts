@@ -1,6 +1,6 @@
 // tslint:disable:no-implicit-dependencies
 /**
- * 発行規則レポジトリーテスト
+ * 発行規則リポジトリテスト
  */
 import * as factory from '@waiter/factory';
 import * as assert from 'assert';
@@ -57,9 +57,10 @@ describe('RuleRepo.constructor()', () => {
     });
 });
 
-describe('RuleRepo.findAll()', () => {
+describe('規則検索', () => {
     beforeEach(() => {
         process.env.WAITER_RULES = JSON.stringify([{
+            project: { id: 'projectId' },
             name: 'name',
             description: 'description',
             scope: 'scope',
@@ -71,6 +72,7 @@ describe('RuleRepo.findAll()', () => {
 
     afterEach(() => {
         process.env.WAITER_RULES = JSON.stringify([{
+            project: { id: 'projectId' },
             name: 'name',
             description: 'description',
             scope: 'scope',
@@ -84,7 +86,7 @@ describe('RuleRepo.findAll()', () => {
     it('環境変数の設定がされていれば、配列が返されるはず', async () => {
         // tslint:disable-next-line:no-unused-expression
         const ruleRepo = new RuleRepo();
-        const result = ruleRepo.findAll();
+        const result = ruleRepo.search({});
         assert(Array.isArray(result));
         sandbox.verify();
     });
@@ -93,6 +95,7 @@ describe('RuleRepo.CREATE_FROM_OBJECT()', () => {
     let TEST_CREATE_PARAMS: any;
     beforeEach(() => {
         TEST_CREATE_PARAMS = {
+            project: { id: 'projectId' },
             name: 'name',
             description: 'description',
             scope: 'scope',

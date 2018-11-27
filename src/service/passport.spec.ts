@@ -12,6 +12,7 @@ import * as sinon from 'sinon';
 const redis = require('ioredis-mock');
 
 import { RedisRepository as PassportIssueUnitRepo } from '../repo/passportIssueUnit';
+import { InMemoryRepository as ProjectRepo } from '../repo/project';
 import { InMemoryRepository as RuleRepo } from '../repo/rule';
 import * as passportService from '../service/passport';
 
@@ -22,6 +23,7 @@ before(() => {
 
 describe('発行する', () => {
     beforeEach(() => {
+        sandbox.restore();
         process.env.WAITER_SECRET = 'secret';
         process.env.WAITER_PASSPORT_ISSUER = 'https://example.com';
     });
@@ -29,17 +31,26 @@ describe('発行する', () => {
     afterEach(() => {
         process.env.WAITER_SECRET = 'secret';
         process.env.WAITER_PASSPORT_ISSUER = 'https://example.com';
-        sandbox.restore();
     });
 
     it('規則が存在しなければ、NotFoundエラーになるはず', async () => {
         process.env.WAITER_RULES = JSON.stringify([]);
         const scope = 'scope';
 
+        const projectRepo = new ProjectRepo();
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
-        const result = await passportService.issue(scope)(ruleRepo, passportCounterRepo).catch((err) => err);
+        sandbox.mock(projectRepo).expects('findById').once().returns({});
+
+        const result = await passportService.issue({
+            project: { id: 'projectId' },
+            scope: scope
+        })({
+            passportIssueUnit: passportCounterRepo,
+            project: projectRepo,
+            rule: ruleRepo
+        }).catch((err) => err);
         assert(result instanceof factory.errors.NotFound);
         sandbox.verify();
     });
@@ -47,6 +58,7 @@ describe('発行する', () => {
     it('許可証数上限に達すれば、RateLimitExceededエラーになるはず', async () => {
         const scope = 'scope';
         process.env.WAITER_RULES = JSON.stringify([{
+            project: { id: 'projectId' },
             name: 'name',
             description: 'description',
             scope: 'scope',
@@ -61,12 +73,21 @@ describe('発行する', () => {
             numberOfRequests: 1
         };
 
+        const projectRepo = new ProjectRepo();
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
+        sandbox.mock(projectRepo).expects('findById').once().returns({});
         sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
 
-        const result = await passportService.issue(scope)(ruleRepo, passportCounterRepo).catch((err) => err);
+        const result = await passportService.issue({
+            project: { id: 'projectId' },
+            scope: scope
+        })({
+            passportIssueUnit: passportCounterRepo,
+            project: projectRepo,
+            rule: ruleRepo
+        }).catch((err) => err);
         assert(result instanceof factory.errors.RateLimitExceeded);
         sandbox.verify();
     });
@@ -74,6 +95,7 @@ describe('発行する', () => {
     it('サービス休止時間帯であれば、許可証を発行できないはず', async () => {
         const scope = 'scope';
         process.env.WAITER_RULES = JSON.stringify([{
+            project: { id: 'projectId' },
             name: 'name',
             description: 'description',
             scope: 'scope',
@@ -85,10 +107,20 @@ describe('発行する', () => {
             }]
         }]);
 
+        const projectRepo = new ProjectRepo();
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
-        const result = await passportService.issue(scope)(ruleRepo, passportCounterRepo).catch((err) => err);
+        sandbox.mock(projectRepo).expects('findById').once().returns({});
+
+        const result = await passportService.issue({
+            project: { id: 'projectId' },
+            scope: scope
+        })({
+            passportIssueUnit: passportCounterRepo,
+            project: projectRepo,
+            rule: ruleRepo
+        }).catch((err) => err);
         assert(result instanceof factory.errors.ServiceUnavailable);
         sandbox.verify();
     });
@@ -96,6 +128,7 @@ describe('発行する', () => {
     it('RedisCacheが正常であれば、許可証を発行できるはず', async () => {
         const scope = 'scope';
         process.env.WAITER_RULES = JSON.stringify([{
+            project: { id: 'projectId' },
             name: 'name',
             description: 'description',
             scope: 'scope',
@@ -110,12 +143,21 @@ describe('発行する', () => {
             numberOfRequests: 1
         };
 
+        const projectRepo = new ProjectRepo();
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
+        sandbox.mock(projectRepo).expects('findById').once().returns({});
         sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
 
-        const result = await passportService.issue(scope)(ruleRepo, passportCounterRepo);
+        const result = await passportService.issue({
+            project: { id: 'projectId' },
+            scope: scope
+        })({
+            passportIssueUnit: passportCounterRepo,
+            project: projectRepo,
+            rule: ruleRepo
+        });
         assert.equal(typeof result, 'string');
         sandbox.verify();
     });
@@ -123,6 +165,7 @@ describe('発行する', () => {
     it('jwtモジュールで何かエラーが発生すれば、エラーになるはず', async () => {
         const scope = 'scope';
         process.env.WAITER_RULES = JSON.stringify([{
+            project: { id: 'projectId' },
             name: 'name',
             description: 'description',
             scope: 'scope',
@@ -138,147 +181,56 @@ describe('発行する', () => {
         };
         const signReult = new Error('signError');
 
+        const projectRepo = new ProjectRepo();
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
+        sandbox.mock(projectRepo).expects('findById').once().returns({});
         sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
         // tslint:disable-next-line:no-magic-numbers
         sandbox.mock(jwt).expects('sign').once().callsArgWith(3, signReult);
 
-        const result = await passportService.issue(scope)(ruleRepo, passportCounterRepo).catch((err) => err);
+        const result = await passportService.issue({
+            project: { id: 'projectId' },
+            scope: scope
+        })({
+            passportIssueUnit: passportCounterRepo,
+            project: projectRepo,
+            rule: ruleRepo
+        }).catch((err) => err);
         assert(result instanceof Error);
         sandbox.verify();
-    });
-});
-
-describe('許可証トークンを検証する', () => {
-    beforeEach(() => {
-        process.env.WAITER_SECRET = 'secret';
-    });
-
-    afterEach(() => {
-        process.env.WAITER_SECRET = 'secret';
-    });
-
-    it('jsonwebtokenが適切であれば、許可証オブジェクトを取得できるはず', async () => {
-        const secret = 'secret';
-        const token = '';
-        const verifyResult = {
-            scope: 'scope',
-            iat: 1511059610,
-            exp: 1511059910,
-            iss: 'issuer',
-            issueUnit: {
-                identifier: 'scope:1508227500',
-                validFrom: 1508227500,
-                validThrough: 1508227800,
-                numberOfRequests: 2
-            }
-        };
-
-        // tslint:disable-next-line:no-magic-numbers
-        sandbox.mock(jwt).expects('verify').once().callsArgWith(2, null, verifyResult);
-
-        const result = await passportService.verify(token, secret);
-        assert.deepEqual(result, verifyResult);
-        sandbox.verify();
-    });
-
-    it('秘密鍵が間違っていれば、JsonWebTokenErrorになるはず', async () => {
-        const secret = 'invalidsecret';
-        process.env.WAITER_RULES = JSON.stringify([{
-            name: 'name',
-            description: 'description',
-            scope: 'scope',
-            aggregationUnitInSeconds: 60,
-            threshold: 100,
-            unavailableHoursSpecifications: []
-        }]);
-        const scope = 'scope';
-        const incrResult = {
-            identifier: 'scope:1508227500',
-            validFrom: 1508227500,
-            validThrough: 1508227800,
-            numberOfRequests: 1
-        };
-
-        const ruleRepo = new RuleRepo();
-        const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
-
-        sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
-
-        // 許可証トークンを発行
-        const token = await passportService.issue(scope)(ruleRepo, passportCounterRepo);
-
-        const result = await passportService.verify(token, secret).catch((err) => err);
-        assert(result instanceof Error);
-        assert.equal(result.name, 'JsonWebTokenError');
-        sandbox.verify();
-    });
-
-    it('jsonwebtokenが期限切れであれば、TokenExpiredErrorになるはず', async () => {
-        const secret = 'secret';
-        process.env.WAITER_RULES = JSON.stringify([{
-            name: 'name',
-            description: 'description',
-            scope: 'scope',
-            aggregationUnitInSeconds: 1,
-            threshold: 100,
-            unavailableHoursSpecifications: []
-        }]);
-        const scope = 'scope';
-        const incrResult = {
-            identifier: 'scope:1508227500',
-            validFrom: 1508227500,
-            validThrough: 1508227800,
-            numberOfRequests: 1
-        };
-
-        const ruleRepo = new RuleRepo();
-        const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
-
-        sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
-
-        const token = await passportService.issue(scope)(ruleRepo, passportCounterRepo);
-
-        return new Promise((resolve, reject) => {
-            setTimeout(
-                async () => {
-                    try {
-                        const result = await passportService.verify(token, secret).catch((err) => err);
-                        assert(result instanceof Error);
-                        assert.equal(result.name, 'TokenExpiredError');
-                        sandbox.verify();
-                        resolve();
-                    } catch (error) {
-                        reject(error);
-                    }
-                },
-                // tslint:disable-next-line:no-magic-numbers
-                2000
-            );
-        });
     });
 });
 
 describe('service.passport.currentIssueUnit()', () => {
     beforeEach(() => {
+        sandbox.restore();
         process.env.WAITER_SECRET = 'secret';
     });
 
     afterEach(() => {
         process.env.WAITER_SECRET = 'secret';
-        sandbox.restore();
     });
 
     it('規則が存在しなければ、NotFoundエラーになるはず', async () => {
         process.env.WAITER_RULES = JSON.stringify([]);
         const scope = 'scope';
 
+        const projectRepo = new ProjectRepo();
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
-        const result = await passportService.currentIssueUnit(scope)(ruleRepo, passportCounterRepo).catch((err) => err);
+        sandbox.mock(projectRepo).expects('findById').once().returns({});
+
+        const result = await passportService.currentIssueUnit({
+            project: { id: 'projectId' },
+            scope: scope
+        })({
+            passportIssueUnit: passportCounterRepo,
+            project: projectRepo,
+            rule: ruleRepo
+        }).catch((err) => err);
         assert(result instanceof factory.errors.NotFound);
         sandbox.verify();
     });
@@ -286,6 +238,7 @@ describe('service.passport.currentIssueUnit()', () => {
     it('RedisCacheが正常であれば、許可証発行リクエスト数を取得できるはず', async () => {
         const scope = 'scope';
         process.env.WAITER_RULES = JSON.stringify([{
+            project: { id: 'projectId' },
             name: 'name',
             description: 'description',
             scope: 'scope',
@@ -300,12 +253,21 @@ describe('service.passport.currentIssueUnit()', () => {
             numberOfRequests: 2
         };
 
+        const projectRepo = new ProjectRepo();
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
+        sandbox.mock(projectRepo).expects('findById').once().returns({});
         sandbox.mock(passportCounterRepo).expects('now').once().resolves(incrResult);
 
-        const result = await passportService.currentIssueUnit(scope)(ruleRepo, passportCounterRepo);
+        const result = await passportService.currentIssueUnit({
+            project: { id: 'projectId' },
+            scope: scope
+        })({
+            passportIssueUnit: passportCounterRepo,
+            project: projectRepo,
+            rule: ruleRepo
+        });
         assert(Number.isInteger(result.numberOfRequests));
         sandbox.verify();
     });

@@ -1,32 +1,40 @@
 /**
  * 許可証サービス
  */
-import * as factory from '@waiter/factory';
 import * as createDebug from 'debug';
 import * as jwt from 'jsonwebtoken';
 import * as moment from 'moment';
 import * as util from 'util';
 import * as validator from 'validator';
 
+import * as factory from '../factory';
+
 import { RedisRepository as PassportIssueUnitRepo } from '../repo/passportIssueUnit';
+import { InMemoryRepository as ProjectRepo } from '../repo/project';
 import { InMemoryRepository as RuleRepo } from '../repo/rule';
 
-const debug = createDebug('waiter-domain:*');
+const debug = createDebug('waiter-domain:repository');
 
 /**
  * 許可証を発行する
- * @param scope 許可証スコープ
  */
-export function issue(
-    scope: string
-) {
-    return async (ruleRepo: RuleRepo, passportIssueUnitRepo: PassportIssueUnitRepo): Promise<factory.passport.IEncodedPassport> => {
-        debug('rule exists?');
-        const rule = ruleRepo.findbyScope(scope);
+export function issue(params: {
+    project: { id: string };
+    scope: string;
+}) {
+    return async (repos: {
+        passportIssueUnit: PassportIssueUnitRepo;
+        project: ProjectRepo;
+        rule: RuleRepo;
+    }): Promise<factory.passport.IEncodedPassport> => {
+        const project = repos.project.findById({ id: params.project.id });
+        const rule = repos.rule.findByScope(params);
         const now = moment();
         debug('now is', now.toDate(), now.unix());
 
-        const passportIssueUnit = await passportIssueUnitRepo.incr(now.toDate(), rule);
+        const passportIssueUnit = await repos.passportIssueUnit.incr({
+            issueDate: now.toDate(), project: project, rule: rule
+        });
         debug('incremented. passportIssueUnit:', passportIssueUnit);
 
         // サービス休止時間帯であれば、問答無用に発行できない
@@ -48,7 +56,8 @@ export function issue(
         }
 
         const payload = {
-            scope: scope,
+            aud: project.id,
+            scope: params.scope,
             issueUnit: passportIssueUnit,
             iat: now.unix()
         };
@@ -77,24 +86,35 @@ export function issue(
 
 /**
  * 現在の許可証発行単位を取得する
- * @param scope 許可証スコープ
  */
-export function currentIssueUnit(scope: string) {
-    return async (ruleRepo: RuleRepo, passportIssueUnitRepo: PassportIssueUnitRepo): Promise<factory.passport.IIssueUnit> => {
-        debug('rule exists?');
-        const rule = ruleRepo.findbyScope(scope);
+export function currentIssueUnit(params: {
+    project: { id: string };
+    scope: string;
+}) {
+    return async (repos: {
+        passportIssueUnit: PassportIssueUnitRepo;
+        project: ProjectRepo;
+        rule: RuleRepo;
+    }): Promise<factory.passport.IIssueUnit> => {
+        const project = repos.project.findById({ id: params.project.id });
+        const rule = repos.rule.findByScope(params);
         const issueDate = moment().toDate();
 
-        return passportIssueUnitRepo.now(issueDate, rule);
+        return repos.passportIssueUnit.now({
+            issueDate: issueDate, project: project, rule: rule
+        });
     };
 }
 
 /**
  * 暗号化された許可証を検証する
  */
-export async function verify(token: string, secret: string): Promise<factory.passport.IPassport> {
+export async function verify(params: {
+    token: string;
+    secret: string;
+}): Promise<factory.passport.IPassport> {
     return new Promise<factory.passport.IPassport>((resolve, reject) => {
-        jwt.verify(token, secret, (err, decoded) => {
+        jwt.verify(params.token, params.secret, (err, decoded) => {
             if (err instanceof Error) {
                 reject(err);
             } else {
@@ -105,13 +125,7 @@ export async function verify(token: string, secret: string): Promise<factory.pas
     });
 }
 
-export function create(params: {
-    scope: string;
-    iat: number;
-    exp: number;
-    iss: string;
-    issueUnit: factory.passport.IIssueUnit;
-}): factory.passport.IPassport {
+export function create(params: any): factory.passport.IPassport {
     if (validator.isEmpty(params.scope)) {
         throw new factory.errors.ArgumentNull('scope');
     }
@@ -135,6 +149,7 @@ export function create(params: {
     }
 
     return {
+        aud: params.aud,
         scope: params.scope,
         iat: params.iat,
         exp: params.exp,
