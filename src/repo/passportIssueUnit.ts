@@ -1,12 +1,13 @@
-import * as factory from '@waiter/factory';
 import * as createDebug from 'debug';
 import * as redis from 'ioredis';
 import * as moment from 'moment';
 
-const debug = createDebug('waiter-domain:*');
+import * as factory from '../factory';
+
+const debug = createDebug('waiter-domain:repository');
 
 /**
- * 許可証発行単位Redisレポジトリー
+ * 許可証発行単位Redisリポジトリ
  */
 export class RedisRepository {
     public readonly redisClient: redis.Redis;
@@ -17,18 +18,20 @@ export class RedisRepository {
 
     /**
      * 発行単位属性を作成する
-     * @param issueDate 発行日時
-     * @param rule 発行ルール
      */
-    public static CREATE_ISSUE_UNIT_PARAMS(issueDate: Date, rule: factory.rule.IRule) {
-        const dateNow = moment(issueDate);
+    public static CREATE_ISSUE_UNIT_PARAMS(params: {
+        issueDate: Date;
+        project: factory.project.IProject;
+        rule: factory.rule.IRule;
+    }) {
+        const dateNow = moment(params.issueDate);
         // tslint:disable-next-line:no-magic-numbers
-        const aggregationUnitInSeconds = parseInt(rule.aggregationUnitInSeconds.toString(), 10);
+        const aggregationUnitInSeconds = parseInt(params.rule.aggregationUnitInSeconds.toString(), 10);
         const validFrom = dateNow.unix() - dateNow.unix() % aggregationUnitInSeconds;
         const validThrough = validFrom + aggregationUnitInSeconds;
 
         return {
-            identifier: `${rule.scope}:${validFrom.toString()}`,
+            identifier: `${params.project.id}:${params.rule.scope}:${validFrom.toString()}`,
             validFrom: validFrom,
             validThrough: validThrough
         };
@@ -36,13 +39,15 @@ export class RedisRepository {
 
     /**
      * 許可証数をカウントアップする
-     * @param issueDate 発行日時
-     * @param rule 発行ルール
      */
-    public async incr(issueDate: Date, rule: factory.rule.IRule): Promise<factory.passport.IIssueUnit> {
-        const issueUnitParams = RedisRepository.CREATE_ISSUE_UNIT_PARAMS(issueDate, rule);
+    public async incr(params: {
+        issueDate: Date;
+        project: factory.project.IProject;
+        rule: factory.rule.IRule;
+    }): Promise<factory.passport.IIssueUnit> {
+        const issueUnitParams = RedisRepository.CREATE_ISSUE_UNIT_PARAMS(params);
         // tslint:disable-next-line:no-magic-numbers
-        const ttl = parseInt(rule.aggregationUnitInSeconds.toString(), 10);
+        const ttl = parseInt(params.rule.aggregationUnitInSeconds.toString(), 10);
 
         const results = await this.redisClient.multi()
             .incr(issueUnitParams.identifier, debug)
@@ -61,11 +66,13 @@ export class RedisRepository {
 
     /**
      * 現在の許可証発行単位を取得する
-     * @param issueDate 発行日時
-     * @param rule 発行ルール
      */
-    public async now(issueDate: Date, rule: factory.rule.IRule): Promise<factory.passport.IIssueUnit> {
-        const issueUnitParams = RedisRepository.CREATE_ISSUE_UNIT_PARAMS(issueDate, rule);
+    public async now(params: {
+        issueDate: Date;
+        project: factory.project.IProject;
+        rule: factory.rule.IRule;
+    }): Promise<factory.passport.IIssueUnit> {
+        const issueUnitParams = RedisRepository.CREATE_ISSUE_UNIT_PARAMS(params);
         const result = await this.redisClient.get(issueUnitParams.identifier);
         debug('result:', result);
 

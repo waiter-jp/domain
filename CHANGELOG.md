@@ -18,6 +18,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v3.0.0 - 2018-11-29
+
+### Added
+
+- 発行規則をプロジェクト単位で管理できるように対応
+- 発行規則にクライアント設定を追加
+
 ## v2.0.4 - 2018-08-02
 
 ### Changed
@@ -48,8 +55,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - 許可証インターフェースに発行日時と期限のプロパティを追加。
 
 ### Removed
-- MongoDBレポジトリーを削除。
-- SqlServerレポジトリーを削除。
+- MongoDBリポジトリを削除。
+- SqlServerリポジトリを削除。
 
 
 ## v1.0.1 - 2017-07-13

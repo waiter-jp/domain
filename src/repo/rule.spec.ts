@@ -1,10 +1,11 @@
 // tslint:disable:no-implicit-dependencies
 /**
- * 発行規則レポジトリーテスト
+ * 発行規則リポジトリテスト
  */
-import * as factory from '@waiter/factory';
 import * as assert from 'assert';
 import * as sinon from 'sinon';
+
+import * as factory from '../factory';
 import { InMemoryRepository as RuleRepo } from '../repo/rule';
 
 let sandbox: sinon.SinonSandbox;
@@ -57,20 +58,11 @@ describe('RuleRepo.constructor()', () => {
     });
 });
 
-describe('RuleRepo.findAll()', () => {
+describe('規則検索', () => {
     beforeEach(() => {
         process.env.WAITER_RULES = JSON.stringify([{
-            name: 'name',
-            description: 'description',
-            scope: 'scope',
-            aggregationUnitInSeconds: 60,
-            threshold: 100,
-            unavailableHoursSpecifications: []
-        }]);
-    });
-
-    afterEach(() => {
-        process.env.WAITER_RULES = JSON.stringify([{
+            project: { id: 'projectId' },
+            client: [{ id: 'clientId' }],
             name: 'name',
             description: 'description',
             scope: 'scope',
@@ -82,9 +74,14 @@ describe('RuleRepo.findAll()', () => {
     });
 
     it('環境変数の設定がされていれば、配列が返されるはず', async () => {
-        // tslint:disable-next-line:no-unused-expression
+        const searchCoditions = {
+            project: { ids: ['projectId'] },
+            client: { ids: ['clientId'] },
+            scopes: ['scope']
+        };
+
         const ruleRepo = new RuleRepo();
-        const result = ruleRepo.findAll();
+        const result = ruleRepo.search(searchCoditions);
         assert(Array.isArray(result));
         sandbox.verify();
     });
@@ -93,6 +90,7 @@ describe('RuleRepo.CREATE_FROM_OBJECT()', () => {
     let TEST_CREATE_PARAMS: any;
     beforeEach(() => {
         TEST_CREATE_PARAMS = {
+            project: { id: 'projectId' },
             name: 'name',
             description: 'description',
             scope: 'scope',
@@ -215,6 +213,34 @@ describe('RuleRepo.CREATE_FROM_OBJECT()', () => {
         assert.throws(
             () => {
                 TEST_CREATE_PARAMS.unavailableHoursSpecifications[0].endDate = 'xxx';
+                RuleRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
+            },
+            (err: any) => {
+                assert(err instanceof factory.errors.Argument);
+
+                return true;
+            }
+        );
+    });
+
+    it('プロジェクト属性が存在しなければArgumentError', () => {
+        assert.throws(
+            () => {
+                TEST_CREATE_PARAMS.project = undefined;
+                RuleRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
+            },
+            (err: any) => {
+                assert(err instanceof factory.errors.ArgumentNull);
+
+                return true;
+            }
+        );
+    });
+
+    it('クライアントが配列でなければArgumentError', () => {
+        assert.throws(
+            () => {
+                TEST_CREATE_PARAMS.client = {};
                 RuleRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
             },
             (err: any) => {

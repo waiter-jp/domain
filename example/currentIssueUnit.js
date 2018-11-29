@@ -1,8 +1,6 @@
 /**
  * 現在の許可証数取得サンプル
- * @ignore
  */
-
 const waiter = require('../');
 
 async function main() {
@@ -12,12 +10,20 @@ async function main() {
         password: process.env.TEST_REDIS_KEY
     });
 
+    const projectRepo = new waiter.repository.Project();
     const ruleRepo = new waiter.repository.Rule();
     const passportIssueUnitRepo = new waiter.repository.PassportIssueUnit(redisClient);
 
     const scope = 'scope';
 
-    const issueUnit = await waiter.service.passport.currentIssueUnit(scope)(ruleRepo, passportIssueUnitRepo);
+    const issueUnit = await waiter.service.passport.currentIssueUnit({
+        project: { id: 'cinerino' },
+        scope: scope
+    })({
+        passportIssueUnit: passportIssueUnitRepo,
+        project: projectRepo,
+        rule: ruleRepo
+    });
     console.log('current issueUnit is', issueUnit);
 
     redisClient.quit();
