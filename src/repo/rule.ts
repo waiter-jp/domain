@@ -1,10 +1,7 @@
-import * as createDebug from 'debug';
 import * as moment from 'moment';
 import * as validator from 'validator';
 
 import * as factory from '../factory';
-
-const debug = createDebug('waiter-domain:repository');
 
 /**
  * 許可証発行ルールローカルリポジトリ
@@ -31,6 +28,9 @@ export class InMemoryRepository {
         if (typeof params.project !== 'object' || typeof params.project.id !== 'string' || validator.isEmpty(params.project.id)) {
             throw new factory.errors.ArgumentNull('project');
         }
+        if (params.client !== undefined && !Array.isArray(params.client)) {
+            throw new factory.errors.Argument('client', 'client must be an array');
+        }
         if (typeof params.name !== 'string' || validator.isEmpty(params.name)) {
             throw new factory.errors.ArgumentNull('name');
         }
@@ -41,13 +41,13 @@ export class InMemoryRepository {
             throw new factory.errors.ArgumentNull('scope');
         }
         if (!Number.isInteger(params.aggregationUnitInSeconds)) {
-            throw new factory.errors.Argument('aggregationUnitInSeconds', 'aggregationUnitInSeconds must be number.');
+            throw new factory.errors.Argument('aggregationUnitInSeconds', 'aggregationUnitInSeconds must be number');
         }
         if (!Number.isInteger(params.threshold)) {
             throw new factory.errors.Argument('threshold', 'threshold must be number.');
         }
         if (!Array.isArray(params.unavailableHoursSpecifications)) {
-            throw new factory.errors.Argument('unavailableHoursSpecifications', 'unavailableHoursSpecifications must be an array.');
+            throw new factory.errors.Argument('unavailableHoursSpecifications', 'unavailableHoursSpecifications must be an array');
         }
         params.unavailableHoursSpecifications.forEach((unavailableHoursSpecification: any) => {
             if (!moment(unavailableHoursSpecification.startDate, 'YYYY-MM-DDTHH:mm:ssZ').isValid()) {
@@ -66,6 +66,7 @@ export class InMemoryRepository {
 
         return {
             project: { id: params.project.id },
+            client: params.client,
             name: params.name,
             description: params.description,
             scope: params.scope,
@@ -93,25 +94,25 @@ export class InMemoryRepository {
             }
         }
 
-        return rules;
-    }
+        if (params.client !== undefined) {
+            if (Array.isArray(params.client.ids)) {
+                const clientIds = params.client.ids;
+                rules = rules.filter((rule) => {
+                    if (rule.client === undefined) {
+                        return false;
+                    }
+                    const clientIds4rule = rule.client.map((r) => r.id);
 
-    /**
-     * スコープでルールを取得する
-     */
-    public findByScope(params: {
-        project: { id: string };
-        scope: string;
-    }): factory.rule.IRule {
-        debug('finding a rule...', params.scope);
-        const ruleFromJson = this.rulesFromJson.find(
-            (rule) => rule.project.id === params.project.id && rule.scope === params.scope
-        );
-        if (ruleFromJson === undefined) {
-            throw new factory.errors.NotFound('Rule');
+                    return clientIds.some((clientId) => clientIds4rule.indexOf(clientId) >= 0);
+                });
+            }
         }
-        debug('rule found.', ruleFromJson);
 
-        return ruleFromJson;
+        if (Array.isArray(params.scopes)) {
+            const scopes = params.scopes;
+            rules = rules.filter((rule) => scopes.indexOf(rule.scope) >= 0);
+        }
+
+        return rules;
     }
 }

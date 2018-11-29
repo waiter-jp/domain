@@ -10,7 +10,7 @@
   ],
   "dependencies": {
     "@types/ioredis": "^3.2.17",
-    "@waiter/factory": "^2.0.0-alpha.0",
+    "@waiter/factory": "^2.0.0-alpha.1",
     "debug": "^3.2.6",
     "ioredis": "^3.2.2",
     "jsonwebtoken": "^8.4.0",
@@ -70,7 +70,8 @@
     "clean": "rimraf ./lib \"npm-debug.log*\" ./doc ./coverage ./.nyc_output",
     "doc": "jsdoc -c jsdoc.json",
     "mocha": "mocha",
-    "coverage": "nyc mocha \"src/**/*.spec.ts\" | coveralls",
+    "nyc": "nyc mocha \"src/**/*.spec.ts\"",
+    "coverage": "npm run nyc && nyc report --reporter=text-lcov | coveralls",
     "snyk": "snyk wizard",
     "test": "npm run check && npm run coverage",
     "tslint": "tslint --project tsconfig.json -c tslint.json --exclude \"**/*.spec.ts\" \"src/**/*.ts\"",

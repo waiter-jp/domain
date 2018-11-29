@@ -28,7 +28,15 @@ export function issue(params: {
         rule: RuleRepo;
     }): Promise<factory.passport.IEncodedPassport> => {
         const project = repos.project.findById({ id: params.project.id });
-        const rule = repos.rule.findByScope(params);
+        const rules = repos.rule.search({
+            project: { ids: [project.id] },
+            scopes: [params.scope]
+        });
+        const rule = rules.shift();
+        if (rule === undefined) {
+            throw new factory.errors.NotFound('Rule');
+        }
+
         const now = moment();
         debug('now is', now.toDate(), now.unix());
 
@@ -56,9 +64,10 @@ export function issue(params: {
         }
 
         const payload = {
-            aud: project.id,
+            aud: (rule.client !== undefined) ? rule.client.map((r) => r.id) : undefined,
             scope: params.scope,
             issueUnit: passportIssueUnit,
+            project: project,
             iat: now.unix()
         };
 
@@ -97,7 +106,14 @@ export function currentIssueUnit(params: {
         rule: RuleRepo;
     }): Promise<factory.passport.IIssueUnit> => {
         const project = repos.project.findById({ id: params.project.id });
-        const rule = repos.rule.findByScope(params);
+        const rules = repos.rule.search({
+            project: { ids: [project.id] },
+            scopes: [params.scope]
+        });
+        const rule = rules.shift();
+        if (rule === undefined) {
+            throw new factory.errors.NotFound('Rule');
+        }
         const issueDate = moment().toDate();
 
         return repos.passportIssueUnit.now({
@@ -154,6 +170,7 @@ export function create(params: any): factory.passport.IPassport {
         iat: params.iat,
         exp: params.exp,
         iss: params.iss,
+        project: params.project,
         issueUnit: params.issueUnit
     };
 }

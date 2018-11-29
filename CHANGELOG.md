@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 - 発行規則をプロジェクト単位で管理できるように対応
+- 発行規則にクライアント設定を追加
 
 ### Changed
 
