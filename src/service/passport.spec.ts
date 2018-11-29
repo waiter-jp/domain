@@ -2,7 +2,6 @@
 /**
  * 許可証サービステスト
  */
-import * as factory from '@waiter/factory';
 import * as assert from 'assert';
 import * as jwt from 'jsonwebtoken';
 import * as moment from 'moment';
@@ -11,6 +10,7 @@ import * as sinon from 'sinon';
 // tslint:disable-next-line:mocha-no-side-effect-code no-require-imports no-var-requires
 const redis = require('ioredis-mock');
 
+import * as factory from '../factory';
 import { RedisRepository as PassportIssueUnitRepo } from '../repo/passportIssueUnit';
 import { InMemoryRepository as ProjectRepo } from '../repo/project';
 import { InMemoryRepository as RuleRepo } from '../repo/rule';
@@ -28,10 +28,10 @@ describe('発行する', () => {
         process.env.WAITER_PASSPORT_ISSUER = 'https://example.com';
     });
 
-    afterEach(() => {
-        process.env.WAITER_SECRET = 'secret';
-        process.env.WAITER_PASSPORT_ISSUER = 'https://example.com';
-    });
+    // afterEach(() => {
+    //     process.env.WAITER_SECRET = 'secret';
+    //     process.env.WAITER_PASSPORT_ISSUER = 'https://example.com';
+    // });
 
     it('規則が存在しなければ、NotFoundエラーになるはず', async () => {
         process.env.WAITER_RULES = JSON.stringify([]);
@@ -132,6 +132,7 @@ describe('発行する', () => {
         const project = { id: 'projectId' };
         process.env.WAITER_RULES = JSON.stringify([{
             project: { id: project.id },
+            client: [{ id: 'clientId' }],
             name: 'name',
             description: 'description',
             scope: scope,
@@ -207,15 +208,45 @@ describe('発行する', () => {
     });
 });
 
+describe('許可証トークンを検証する', () => {
+    beforeEach(() => {
+        process.env.WAITER_SECRET = 'secret';
+    });
+
+    it('jsonwebtokenが適切であれば、許可証オブジェクトを取得できるはず', async () => {
+        const secret = 'secret';
+        const token = 'token';
+        const verifyResult = {
+            scope: 'scope',
+            iat: 1511059610,
+            exp: 1511059910,
+            iss: 'issuer',
+            issueUnit: {
+                identifier: 'identifier',
+                validFrom: 1508227500,
+                validThrough: 1508227800,
+                numberOfRequests: 2
+            }
+        };
+
+        // tslint:disable-next-line:no-magic-numbers
+        sandbox.mock(jwt).expects('verify').once().callsArgWith(2, null, verifyResult);
+
+        const result = await passportService.verify({ token, secret });
+        assert(typeof result, 'object');
+        sandbox.verify();
+    });
+});
+
 describe('service.passport.currentIssueUnit()', () => {
     beforeEach(() => {
         sandbox.restore();
         process.env.WAITER_SECRET = 'secret';
     });
 
-    afterEach(() => {
-        process.env.WAITER_SECRET = 'secret';
-    });
+    // afterEach(() => {
+    //     process.env.WAITER_SECRET = 'secret';
+    // });
 
     it('規則が存在しなければ、NotFoundエラーになるはず', async () => {
         process.env.WAITER_RULES = JSON.stringify([]);

@@ -28,13 +28,6 @@ export class InMemoryRepository {
     }
 
     /**
-     * 全ルールを取得する
-     */
-    public findAll(): factory.project.IProject[] {
-        return this.projectsFromJson;
-    }
-
-    /**
      * IDで検索
      */
     public findById(params: { id: string }): factory.project.IProject {

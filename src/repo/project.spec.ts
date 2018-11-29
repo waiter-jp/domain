@@ -5,6 +5,7 @@
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 
+import * as factory from '../factory';
 import { InMemoryRepository as ProjectRepo } from '../repo/project';
 
 let sandbox: sinon.SinonSandbox;
@@ -14,10 +15,6 @@ before(() => {
 
 describe('ProjectRepo.constructor()', () => {
     beforeEach(() => {
-        process.env.WAITER_PROJECTS = JSON.stringify([{}]);
-    });
-
-    afterEach(() => {
         process.env.WAITER_PROJECTS = JSON.stringify([{}]);
         sandbox.restore();
     });
@@ -69,5 +66,36 @@ describe('ProjectRepo.CREATE_FROM_OBJECT()', () => {
         assert.doesNotThrow(() => {
             ProjectRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
         });
+    });
+});
+
+describe('IDでプロジェクト検索', () => {
+    beforeEach(() => {
+        sandbox.restore();
+        process.env.WAITER_PROJECTS = JSON.stringify([]);
+    });
+
+    it('プロジェクトが存在すればオブジェクトが返るはず', async () => {
+        const project = { id: 'projectId' };
+        process.env.WAITER_PROJECTS = JSON.stringify([project]);
+
+        const projectRepo = new ProjectRepo();
+        const result = projectRepo.findById({ id: project.id });
+        assert.deepEqual(result, project);
+        sandbox.verify();
+    });
+
+    it('プロジェクトが存在しなければNotFoundエラーとなるはず', () => {
+        const projectRepo = new ProjectRepo();
+        assert.throws(
+            () => {
+                projectRepo.findById({ id: 'invalidId' });
+            },
+            (err: any) => {
+                assert(err instanceof factory.errors.NotFound);
+
+                return true;
+            }
+        );
     });
 });

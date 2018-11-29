@@ -131,6 +131,8 @@ export async function verify(params: {
 }): Promise<factory.passport.IPassport> {
     return new Promise<factory.passport.IPassport>((resolve, reject) => {
         jwt.verify(params.token, params.secret, (err, decoded) => {
+            // tslint:disable-next-line:no-single-line-block-comment
+            /* istanbul ignore if */
             if (err instanceof Error) {
                 reject(err);
             } else {

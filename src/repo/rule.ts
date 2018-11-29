@@ -87,17 +87,27 @@ export class InMemoryRepository {
     public search(params: factory.rule.ISearchConditions): factory.rule.IRule[] {
         let rules = this.rulesFromJson;
 
+        // tslint:disable-next-line:no-single-line-block-comment
+        /* istanbul ignore else */
         if (params.project !== undefined) {
+            // tslint:disable-next-line:no-single-line-block-comment
+            /* istanbul ignore else */
             if (Array.isArray(params.project.ids)) {
                 const projectIds = params.project.ids;
                 rules = rules.filter((rule) => projectIds.indexOf(rule.project.id) >= 0);
             }
         }
 
+        // tslint:disable-next-line:no-single-line-block-comment
+        /* istanbul ignore else */
         if (params.client !== undefined) {
+            // tslint:disable-next-line:no-single-line-block-comment
+            /* istanbul ignore else */
             if (Array.isArray(params.client.ids)) {
                 const clientIds = params.client.ids;
                 rules = rules.filter((rule) => {
+                    // tslint:disable-next-line:no-single-line-block-comment
+                    /* istanbul ignore if */
                     if (rule.client === undefined) {
                         return false;
                     }
@@ -108,6 +118,8 @@ export class InMemoryRepository {
             }
         }
 
+        // tslint:disable-next-line:no-single-line-block-comment
+        /* istanbul ignore else */
         if (Array.isArray(params.scopes)) {
             const scopes = params.scopes;
             rules = rules.filter((rule) => scopes.indexOf(rule.scope) >= 0);

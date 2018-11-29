@@ -23,6 +23,7 @@ export import factory = factory;
  * });
  */
 export import redis = ioredis;
+
 export namespace repository {
     /**
      * 許可証発行単位リポジトリ
@@ -33,11 +34,12 @@ export namespace repository {
      */
     export class Project extends ProjectRepo { }
     /**
-     * 発行ルールリポジトリ
+     * 発行規則リポジトリ
      */
     export class Rule extends RuleRepo { }
 
 }
+
 export namespace service {
     export import passport = PassportService;
 }
