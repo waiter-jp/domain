@@ -1,6 +1,6 @@
 // tslint:disable:no-implicit-dependencies
 /**
- * 許可証カウンターレポジトリーテスト
+ * 許可証カウンターリポジトリテスト
  */
 import * as assert from 'assert';
 import * as sinon from 'sinon';
@@ -42,7 +42,11 @@ describe('PassportIssueUnitRepo.incr()', () => {
         sandbox.mock(redisClient).expects('multi').once().returns(multi);
         sandbox.mock(multi).expects('exec').once().resolves(execResult);
 
-        const result = await passportCounterRepo.incr(issueDate, rule);
+        const result = await passportCounterRepo.incr({
+            issueDate: issueDate,
+            project: <any>{},
+            rule: <any>rule
+        });
         assert.equal(typeof result, 'object');
         sandbox.verify();
     });
@@ -64,7 +68,11 @@ describe('PassportIssueUnitRepo.incr()', () => {
         sandbox.mock(redisClient).expects('multi').once().returns(multi);
         sandbox.mock(multi).expects('exec').once().rejects(execResult);
 
-        const result = await passportCounterRepo.incr(issueDate, rule).catch((err) => err);
+        const result = await passportCounterRepo.incr({
+            issueDate: issueDate,
+            project: <any>{},
+            rule: <any>rule
+        }).catch((err) => err);
         assert.deepEqual(result.message, execResult.message);
         sandbox.verify();
     });
@@ -94,7 +102,11 @@ describe('PassportCounterRepo.now()', () => {
         const passportCounterRepo = new PassportIssueUnitRepo(redisClient);
         sandbox.mock(redisClient).expects('get').once().resolves(execResult);
 
-        const result = await passportCounterRepo.now(issueDate, rule);
+        const result = await passportCounterRepo.now({
+            issueDate: issueDate,
+            project: <any>{},
+            rule: <any>rule
+        });
         assert.equal(typeof result, 'object');
         assert.equal(result.numberOfRequests, execResult);
         sandbox.verify();
@@ -115,7 +127,11 @@ describe('PassportCounterRepo.now()', () => {
         const passportCounterRepo = new PassportIssueUnitRepo(redisClient);
         sandbox.mock(redisClient).expects('get').once().resolves(execResult);
 
-        const result = await passportCounterRepo.now(issueDate, rule);
+        const result = await passportCounterRepo.now({
+            issueDate: issueDate,
+            project: <any>{},
+            rule: <any>rule
+        });
         assert.equal(typeof result, 'object');
         assert.equal(result.numberOfRequests, 0);
         sandbox.verify();

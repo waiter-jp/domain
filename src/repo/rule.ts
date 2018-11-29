@@ -1,12 +1,10 @@
-import * as factory from '@waiter/factory';
-import * as createDebug from 'debug';
 import * as moment from 'moment';
 import * as validator from 'validator';
 
-const debug = createDebug('waiter-domain:*');
+import * as factory from '../factory';
 
 /**
- * 許可証発行ルールローカルレポジトリー
+ * 許可証発行ルールローカルリポジトリ
  * 環境変数で許可証発行ルールを管理する場合のリポジトリークラス
  */
 export class InMemoryRepository {
@@ -25,7 +23,14 @@ export class InMemoryRepository {
             throw new Error(`Please set an environment variable \`WAITER_RULES\` correctly. ${error.message}`);
         }
     }
+
     public static CREATE_FROM_OBJECT(params: any): factory.rule.IRule {
+        if (typeof params.project !== 'object' || typeof params.project.id !== 'string' || validator.isEmpty(params.project.id)) {
+            throw new factory.errors.ArgumentNull('project');
+        }
+        if (params.client !== undefined && !Array.isArray(params.client)) {
+            throw new factory.errors.Argument('client', 'client must be an array');
+        }
         if (typeof params.name !== 'string' || validator.isEmpty(params.name)) {
             throw new factory.errors.ArgumentNull('name');
         }
@@ -36,13 +41,13 @@ export class InMemoryRepository {
             throw new factory.errors.ArgumentNull('scope');
         }
         if (!Number.isInteger(params.aggregationUnitInSeconds)) {
-            throw new factory.errors.Argument('aggregationUnitInSeconds', 'aggregationUnitInSeconds must be number.');
+            throw new factory.errors.Argument('aggregationUnitInSeconds', 'aggregationUnitInSeconds must be number');
         }
         if (!Number.isInteger(params.threshold)) {
             throw new factory.errors.Argument('threshold', 'threshold must be number.');
         }
         if (!Array.isArray(params.unavailableHoursSpecifications)) {
-            throw new factory.errors.Argument('unavailableHoursSpecifications', 'unavailableHoursSpecifications must be an array.');
+            throw new factory.errors.Argument('unavailableHoursSpecifications', 'unavailableHoursSpecifications must be an array');
         }
         params.unavailableHoursSpecifications.forEach((unavailableHoursSpecification: any) => {
             if (!moment(unavailableHoursSpecification.startDate, 'YYYY-MM-DDTHH:mm:ssZ').isValid()) {
@@ -60,6 +65,8 @@ export class InMemoryRepository {
         });
 
         return {
+            project: { id: params.project.id },
+            client: params.client,
             name: params.name,
             description: params.description,
             scope: params.scope,
@@ -73,24 +80,51 @@ export class InMemoryRepository {
             })
         };
     }
-    /**
-     * 全ルールを取得する
-     */
-    public findAll(): factory.rule.IRule[] {
-        return this.rulesFromJson;
-    }
-    /**
-     * スコープでルールを取得する
-     * @param scope スコープ
-     */
-    public findbyScope(scope: string): factory.rule.IRule {
-        debug('finding a rule...', scope);
-        const ruleFromJson = this.rulesFromJson.find((rule) => rule.scope === scope);
-        if (ruleFromJson === undefined) {
-            throw new factory.errors.NotFound('rule');
-        }
-        debug('rule found.', ruleFromJson);
 
-        return ruleFromJson;
+    /**
+     * 検索
+     */
+    public search(params: factory.rule.ISearchConditions): factory.rule.IRule[] {
+        let rules = this.rulesFromJson;
+
+        // tslint:disable-next-line:no-single-line-block-comment
+        /* istanbul ignore else */
+        if (params.project !== undefined) {
+            // tslint:disable-next-line:no-single-line-block-comment
+            /* istanbul ignore else */
+            if (Array.isArray(params.project.ids)) {
+                const projectIds = params.project.ids;
+                rules = rules.filter((rule) => projectIds.indexOf(rule.project.id) >= 0);
+            }
+        }
+
+        // tslint:disable-next-line:no-single-line-block-comment
+        /* istanbul ignore else */
+        if (params.client !== undefined) {
+            // tslint:disable-next-line:no-single-line-block-comment
+            /* istanbul ignore else */
+            if (Array.isArray(params.client.ids)) {
+                const clientIds = params.client.ids;
+                rules = rules.filter((rule) => {
+                    // tslint:disable-next-line:no-single-line-block-comment
+                    /* istanbul ignore if */
+                    if (rule.client === undefined) {
+                        return false;
+                    }
+                    const clientIds4rule = rule.client.map((r) => r.id);
+
+                    return clientIds.some((clientId) => clientIds4rule.indexOf(clientId) >= 0);
+                });
+            }
+        }
+
+        // tslint:disable-next-line:no-single-line-block-comment
+        /* istanbul ignore else */
+        if (Array.isArray(params.scopes)) {
+            const scopes = params.scopes;
+            rules = rules.filter((rule) => scopes.indexOf(rule.scope) >= 0);
+        }
+
+        return rules;
     }
 }
