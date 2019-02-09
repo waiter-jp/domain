@@ -8,12 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 
-- プロジェクトと規則のMongoDBリポジトリを追加
-- キャッシュサービスを追加
-
 ### Changed
-
-- update packages
 
 ### Deprecated
 
@@ -22,6 +17,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v4.0.0 - 2019-02-09
+
+### Added
+
+- プロジェクトと規則のMongoDBリポジトリを追加
+- キャッシュサービスを追加
+
+### Changed
+
+- update packages
 
 ## v3.0.0 - 2018-11-29
 
