@@ -1,0 +1,270 @@
+[
+    {
+        "project": {
+            "id": "cinerino"
+        },
+        "name": "mcdonalds",
+        "description": "mcdonalds",
+        "scope": "mcdonalds",
+        "aggregationUnitInSeconds": 20,
+        "threshold": 5,
+        "unavailableHoursSpecifications": [
+            {
+                "startDate": "2017-11-10T09:00:00Z",
+                "endDate": "2017-11-10T09:30:00Z"
+            }
+        ]
+    },
+    {
+        "project": {
+            "id": "cinerino"
+        },
+        "name": "kfc",
+        "description": "kfc",
+        "scope": "kfc",
+        "aggregationUnitInSeconds": 10,
+        "threshold": 6,
+        "unavailableHoursSpecifications": []
+    },
+    {
+        "project": {
+            "id": "cinerino"
+        },
+        "name": "wendys",
+        "description": "wendys",
+        "scope": "wendys",
+        "aggregationUnitInSeconds": 30,
+        "threshold": 20,
+        "unavailableHoursSpecifications": []
+    },
+    {
+        "project": {
+            "id": "cinerino"
+        },
+        "name": "PlaceOrder as CineMotion Akasaka",
+        "description": "CinerinoPlaceOrderTransactionAtCineMotion",
+        "scope": "Transaction:PlaceOrder:59d20831e53ebc2b4e774466",
+        "aggregationUnitInSeconds": 60,
+        "threshold": 60,
+        "unavailableHoursSpecifications": []
+    },
+    {
+        "project": {
+            "id": "cinerino"
+        },
+        "name": "PlaceOrder as CinemaSunshine Heiwajima",
+        "description": "CinerinoPlaceOrderTransactionAtCinemaSunshineHeiwajima",
+        "scope": "Transaction:PlaceOrder:5c1c874e9c0e3c346b7c5154",
+        "aggregationUnitInSeconds": 60,
+        "threshold": 60,
+        "unavailableHoursSpecifications": []
+    },
+    {
+        "project": {
+            "id": "toei-development"
+        },
+        "name": "PlaceOrder at Shibuya TOEI",
+        "description": "PlaceOrder at Shibuya TOEI",
+        "scope": "Transaction:PlaceOrder:5b9373bdc39335ff3c7847b2",
+        "aggregationUnitInSeconds": 60,
+        "threshold": 60,
+        "unavailableHoursSpecifications": []
+    },
+    {
+        "project": {
+            "id": "toei-development"
+        },
+        "client": [
+            {
+                "id": "5860lg7ki6tsu8ob7lhmdgqgnu"
+            }
+        ],
+        "name": "PlaceOrder at Shibuya TOEI POS",
+        "description": "PlaceOrder at Shibuya TOEI POS",
+        "scope": "Transaction:PlaceOrder:5b9373bdc39335ff3c7847b2:POS",
+        "aggregationUnitInSeconds": 60,
+        "threshold": 60,
+        "unavailableHoursSpecifications": []
+    },
+    {
+        "project": {
+            "id": "sskts-development"
+        },
+        "aggregationUnitInSeconds": 60,
+        "description": "Place order transaction at Ikebukuro.",
+        "name": "PlaceOrderAtIkebukuro",
+        "scope": "placeOrderTransaction.MovieTheater-101",
+        "threshold": 180,
+        "unavailableHoursSpecifications": []
+    },
+    {
+        "project": {
+            "id": "sskts-development"
+        },
+        "aggregationUnitInSeconds": 60,
+        "description": "Place order transaction at Kitajima.",
+        "name": "PlaceOrderAtKitajima",
+        "scope": "placeOrderTransaction.MovieTheater-112",
+        "threshold": 60,
+        "unavailableHoursSpecifications": []
+    },
+    {
+        "project": {
+            "id": "sskts-development"
+        },
+        "aggregationUnitInSeconds": 60,
+        "description": "Place order transaction at Aira.",
+        "name": "PlaceOrderAtAira",
+        "scope": "placeOrderTransaction.MovieTheater-118",
+        "threshold": 300,
+        "unavailableHoursSpecifications": []
+    },
+    {
+        "project": {
+            "id": "sskts-development"
+        },
+        "aggregationUnitInSeconds": 60,
+        "description": "Place order transaction at Yukarigaoka.",
+        "name": "PlaceOrderAtYukarigaoka",
+        "scope": "placeOrderTransaction.MovieTheater-119",
+        "threshold": 60,
+        "unavailableHoursSpecifications": []
+    },
+    {
+        "project": {
+            "id": "sskts-development"
+        },
+        "aggregationUnitInSeconds": 60,
+        "description": "Place order transaction at Koriyama.",
+        "name": "PlaceOrderAtKoriyama",
+        "scope": "placeOrderTransaction.MovieTheater-116",
+        "threshold": 60,
+        "unavailableHoursSpecifications": []
+    },
+    {
+        "project": {
+            "id": "sskts-development"
+        },
+        "aggregationUnitInSeconds": 60,
+        "description": "Place order transaction at Shimonoseki.",
+        "name": "PlaceOrderAtShimonoseki",
+        "scope": "placeOrderTransaction.MovieTheater-117",
+        "threshold": 60,
+        "unavailableHoursSpecifications": []
+    },
+    {
+        "project": {
+            "id": "sskts-development"
+        },
+        "aggregationUnitInSeconds": 60,
+        "description": "Place order transaction at Kahoku.",
+        "name": "PlaceOrderAtKahoku",
+        "scope": "placeOrderTransaction.MovieTheater-114",
+        "threshold": 60,
+        "unavailableHoursSpecifications": []
+    },
+    {
+        "project": {
+            "id": "sskts-development"
+        },
+        "aggregationUnitInSeconds": 60,
+        "description": "Place order transaction at Heiwajima.",
+        "name": "PlaceOrderAtHeiwajima",
+        "scope": "placeOrderTransaction.MovieTheater-102",
+        "threshold": 60,
+        "unavailableHoursSpecifications": []
+    },
+    {
+        "project": {
+            "id": "sskts-development"
+        },
+        "aggregationUnitInSeconds": 60,
+        "description": "Place order transaction at Numazu.",
+        "name": "PlaceOrderAtNumazu",
+        "scope": "placeOrderTransaction.MovieTheater-106",
+        "threshold": 60,
+        "unavailableHoursSpecifications": []
+    },
+    {
+        "project": {
+            "id": "sskts-development"
+        },
+        "aggregationUnitInSeconds": 60,
+        "description": "Place order transaction at Kinuyama.",
+        "name": "PlaceOrderAtKinuyama",
+        "scope": "placeOrderTransaction.MovieTheater-108",
+        "threshold": 60,
+        "unavailableHoursSpecifications": []
+    },
+    {
+        "project": {
+            "id": "sskts-development"
+        },
+        "aggregationUnitInSeconds": 60,
+        "description": "Place order transaction at Okaido.",
+        "name": "PlaceOrderAtOkaido",
+        "scope": "placeOrderTransaction.MovieTheater-107",
+        "threshold": 60,
+        "unavailableHoursSpecifications": []
+    },
+    {
+        "project": {
+            "id": "sskts-development"
+        },
+        "aggregationUnitInSeconds": 60,
+        "description": "Place order transaction at Ozu.",
+        "name": "PlaceOrderAtOzu",
+        "scope": "placeOrderTransaction.MovieTheater-110",
+        "threshold": 60,
+        "unavailableHoursSpecifications": []
+    },
+    {
+        "project": {
+            "id": "sskts-development"
+        },
+        "aggregationUnitInSeconds": 60,
+        "description": "Place order transaction at Shigenobu.",
+        "name": "PlaceOrderAtShigenobu",
+        "scope": "placeOrderTransaction.MovieTheater-109",
+        "threshold": 60,
+        "unavailableHoursSpecifications": []
+    },
+    {
+        "project": {
+            "id": "sskts-development"
+        },
+        "aggregationUnitInSeconds": 60,
+        "description": "Place order transaction at Tsuchiura.",
+        "name": "PlaceOrderAtTsuchiura",
+        "scope": "placeOrderTransaction.MovieTheater-113",
+        "threshold": 60,
+        "unavailableHoursSpecifications": []
+    },
+    {
+        "project": {
+            "id": "sskts-development"
+        },
+        "aggregationUnitInSeconds": 60,
+        "description": "Place order transaction at Masaki.",
+        "name": "PlaceOrderAtMasaki",
+        "scope": "placeOrderTransaction.MovieTheater-115",
+        "threshold": 60,
+        "unavailableHoursSpecifications": []
+    },
+    {
+        "project": {
+            "id": "ttts-development"
+        },
+        "aggregationUnitInSeconds": 60,
+        "description": "placeOrderTransactionWithTokyoTower",
+        "name": "placeOrderTransactionWithTokyoTower",
+        "scope": "placeOrderTransaction.TokyoTower",
+        "threshold": 5,
+        "unavailableHoursSpecifications": [
+            {
+                "startDate": "2018-01-19T07:55:00Z",
+                "endDate": "2018-01-19T08:00:00Z"
+            }
+        ]
+    }
+]
