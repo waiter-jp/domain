@@ -9,13 +9,13 @@
     }
   ],
   "dependencies": {
-    "@types/ioredis": "^3.2.17",
+    "@types/ioredis": "^3.2.19",
     "@waiter/factory": "^2.0.0",
     "debug": "^3.2.6",
     "ioredis": "^3.2.2",
     "jsonwebtoken": "^8.4.0",
-    "moment": "^2.22.2",
-    "validator": "^10.9.0"
+    "moment": "^2.24.0",
+    "validator": "^10.11.0"
   },
   "description": "Waiter Domain Library for Node.js",
   "devDependencies": {
@@ -30,15 +30,13 @@
     "ioredis-mock": "^3.14.3",
     "jsdoc": "^3.5.5",
     "mocha": "^5.2.0",
-    "nsp": "^3.2.1",
     "nyc": "^12.0.2",
-    "rimraf": "^2.6.2",
+    "rimraf": "^2.6.3",
     "sinon": "^4.5.0",
-    "snyk": "^1.111.1",
     "ts-node": "^7.0.1",
-    "tslint": "^5.11.0",
+    "tslint": "^5.12.1",
     "tslint-microsoft-contrib": "^5.2.1",
-    "typescript": "^3.1.6"
+    "typescript": "^3.3.3"
   },
   "engines": {
     "node": ">=6.9.1",
@@ -66,7 +64,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "check": "npm run tslint & nsp check",
+    "check": "npm run tslint",
     "clean": "rimraf ./lib \"npm-debug.log*\" ./doc ./coverage ./.nyc_output",
     "doc": "jsdoc -c jsdoc.json",
     "mocha": "mocha",
