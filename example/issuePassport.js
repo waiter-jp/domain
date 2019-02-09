@@ -10,8 +10,8 @@ async function main() {
         password: process.env.TEST_REDIS_KEY
     });
 
-    const projectRepo = new waiter.repository.Project();
-    const ruleRepo = new waiter.repository.Rule();
+    const projectRepo = new waiter.repository.ProjectInMemory();
+    const ruleRepo = new waiter.repository.RuleInMemory();
     const passportIssueUnitRepo = new waiter.repository.PassportIssueUnit(redisClient);
 
     const scope = 'scope';

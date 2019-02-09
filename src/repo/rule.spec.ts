@@ -3,17 +3,20 @@
  * 発行規則リポジトリテスト
  */
 import * as assert from 'assert';
+import * as mongoose from 'mongoose';
 import * as sinon from 'sinon';
+// tslint:disable-next-line:no-require-imports no-var-requires
+require('sinon-mongoose');
 
 import * as factory from '../factory';
-import { InMemoryRepository as RuleRepo } from '../repo/rule';
+import { InMemoryRepository as RuleInMemoryRepo, MongoRepository as RuleRepo } from '../repo/rule';
 
 let sandbox: sinon.SinonSandbox;
 before(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.createSandbox();
 });
 
-describe('RuleRepo.constructor()', () => {
+describe('RuleInMemoryRepo.constructor()', () => {
     beforeEach(() => {
         process.env.WAITER_RULES = JSON.stringify([{}]);
     });
@@ -29,7 +32,7 @@ describe('RuleRepo.constructor()', () => {
         assert.throws(
             () => {
                 // tslint:disable-next-line:no-unused-expression
-                new RuleRepo();
+                new RuleInMemoryRepo();
             },
             (err: any) => {
                 assert(err instanceof Error);
@@ -46,7 +49,7 @@ describe('RuleRepo.constructor()', () => {
         assert.throws(
             () => {
                 // tslint:disable-next-line:no-unused-expression
-                new RuleRepo();
+                new RuleInMemoryRepo();
             },
             (err: any) => {
                 assert(err instanceof Error);
@@ -80,13 +83,13 @@ describe('規則検索', () => {
             scopes: ['scope']
         };
 
-        const ruleRepo = new RuleRepo();
+        const ruleRepo = new RuleInMemoryRepo();
         const result = ruleRepo.search(searchCoditions);
         assert(Array.isArray(result));
         sandbox.verify();
     });
 });
-describe('RuleRepo.CREATE_FROM_OBJECT()', () => {
+describe('RuleInMemoryRepo.CREATE_FROM_OBJECT()', () => {
     let TEST_CREATE_PARAMS: any;
     beforeEach(() => {
         TEST_CREATE_PARAMS = {
@@ -107,7 +110,7 @@ describe('RuleRepo.CREATE_FROM_OBJECT()', () => {
 
     it('作成できる', () => {
         assert.doesNotThrow(() => {
-            RuleRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
+            RuleInMemoryRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
         });
     });
 
@@ -115,7 +118,7 @@ describe('RuleRepo.CREATE_FROM_OBJECT()', () => {
         assert.throws(
             () => {
                 TEST_CREATE_PARAMS.name = undefined;
-                RuleRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
+                RuleInMemoryRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
             },
             (err: any) => {
                 assert(err instanceof factory.errors.ArgumentNull);
@@ -129,7 +132,7 @@ describe('RuleRepo.CREATE_FROM_OBJECT()', () => {
         assert.throws(
             () => {
                 TEST_CREATE_PARAMS.description = undefined;
-                RuleRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
+                RuleInMemoryRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
             },
             (err: any) => {
                 assert(err instanceof factory.errors.ArgumentNull);
@@ -143,7 +146,7 @@ describe('RuleRepo.CREATE_FROM_OBJECT()', () => {
         assert.throws(
             () => {
                 TEST_CREATE_PARAMS.scope = undefined;
-                RuleRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
+                RuleInMemoryRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
             },
             (err: any) => {
                 assert(err instanceof factory.errors.ArgumentNull);
@@ -157,7 +160,7 @@ describe('RuleRepo.CREATE_FROM_OBJECT()', () => {
         assert.throws(
             () => {
                 TEST_CREATE_PARAMS.aggregationUnitInSeconds = <any>'1';
-                RuleRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
+                RuleInMemoryRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
             },
             (err: any) => {
                 assert(err instanceof factory.errors.Argument);
@@ -171,7 +174,7 @@ describe('RuleRepo.CREATE_FROM_OBJECT()', () => {
         assert.throws(
             () => {
                 TEST_CREATE_PARAMS.threshold = <any>'1';
-                RuleRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
+                RuleInMemoryRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
             },
             (err: any) => {
                 assert(err instanceof factory.errors.Argument);
@@ -185,7 +188,7 @@ describe('RuleRepo.CREATE_FROM_OBJECT()', () => {
         assert.throws(
             () => {
                 TEST_CREATE_PARAMS.unavailableHoursSpecifications = {};
-                RuleRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
+                RuleInMemoryRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
             },
             (err: any) => {
                 assert(err instanceof factory.errors.Argument);
@@ -199,7 +202,7 @@ describe('RuleRepo.CREATE_FROM_OBJECT()', () => {
         assert.throws(
             () => {
                 TEST_CREATE_PARAMS.unavailableHoursSpecifications[0].startDate = 'xxx';
-                RuleRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
+                RuleInMemoryRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
             },
             (err: any) => {
                 assert(err instanceof factory.errors.Argument);
@@ -213,7 +216,7 @@ describe('RuleRepo.CREATE_FROM_OBJECT()', () => {
         assert.throws(
             () => {
                 TEST_CREATE_PARAMS.unavailableHoursSpecifications[0].endDate = 'xxx';
-                RuleRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
+                RuleInMemoryRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
             },
             (err: any) => {
                 assert(err instanceof factory.errors.Argument);
@@ -227,7 +230,7 @@ describe('RuleRepo.CREATE_FROM_OBJECT()', () => {
         assert.throws(
             () => {
                 TEST_CREATE_PARAMS.project = undefined;
-                RuleRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
+                RuleInMemoryRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
             },
             (err: any) => {
                 assert(err instanceof factory.errors.ArgumentNull);
@@ -241,7 +244,7 @@ describe('RuleRepo.CREATE_FROM_OBJECT()', () => {
         assert.throws(
             () => {
                 TEST_CREATE_PARAMS.client = {};
-                RuleRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
+                RuleInMemoryRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
             },
             (err: any) => {
                 assert(err instanceof factory.errors.Argument);
@@ -249,5 +252,31 @@ describe('RuleRepo.CREATE_FROM_OBJECT()', () => {
                 return true;
             }
         );
+    });
+});
+
+describe('MongoDBで規則検索', () => {
+    beforeEach(() => {
+        sandbox.restore();
+    });
+
+    it('MongoDBが正常であれば配列が返るはず', async () => {
+        const rules = [{}];
+
+        const ruleRepo = new RuleRepo(mongoose.connection);
+
+        sandbox.mock(ruleRepo.ruleModel)
+            .expects('find')
+            .once()
+            .chain('exec')
+            .resolves(rules.map((a) => new ruleRepo.ruleModel(a)));
+
+        const result = await ruleRepo.search({
+            limit: 1,
+            page: 1,
+            sort: {}
+        });
+        assert(Array.isArray(result));
+        sandbox.verify();
     });
 });

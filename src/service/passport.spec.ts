@@ -18,7 +18,7 @@ import * as passportService from '../service/passport';
 
 let sandbox: sinon.SinonSandbox;
 before(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.createSandbox();
 });
 
 describe('発行する', () => {
@@ -28,13 +28,14 @@ describe('発行する', () => {
         process.env.WAITER_PASSPORT_ISSUER = 'https://example.com';
     });
 
-    // afterEach(() => {
-    //     process.env.WAITER_SECRET = 'secret';
-    //     process.env.WAITER_PASSPORT_ISSUER = 'https://example.com';
-    // });
+    afterEach(() => {
+        delete process.env.WAITER_RULES;
+        delete process.env.WAITER_PROJECTS;
+    });
 
     it('規則が存在しなければ、NotFoundエラーになるはず', async () => {
         process.env.WAITER_RULES = JSON.stringify([]);
+        process.env.WAITER_PROJECTS = JSON.stringify([]);
         const scope = 'scope';
 
         const projectRepo = new ProjectRepo();
@@ -67,6 +68,7 @@ describe('発行する', () => {
             threshold: 0,
             unavailableHoursSpecifications: []
         }]);
+        process.env.WAITER_PROJECTS = JSON.stringify([]);
         const incrResult = {
             identifier: 'scope:1508227500',
             validFrom: 1508227500,
@@ -108,6 +110,7 @@ describe('発行する', () => {
                 endDate: moment().add(1, 'hour').toISOString()
             }]
         }]);
+        process.env.WAITER_PROJECTS = JSON.stringify([]);
 
         const projectRepo = new ProjectRepo();
         const ruleRepo = new RuleRepo();
@@ -140,6 +143,7 @@ describe('発行する', () => {
             threshold: 100,
             unavailableHoursSpecifications: []
         }]);
+        process.env.WAITER_PROJECTS = JSON.stringify([]);
         const incrResult = {
             identifier: 'scope:1508227500',
             validFrom: 1508227500,
@@ -178,6 +182,7 @@ describe('発行する', () => {
             threshold: 100,
             unavailableHoursSpecifications: []
         }]);
+        process.env.WAITER_PROJECTS = JSON.stringify([]);
         const incrResult = {
             identifier: 'scope:1508227500',
             validFrom: 1508227500,
@@ -244,12 +249,14 @@ describe('service.passport.currentIssueUnit()', () => {
         process.env.WAITER_SECRET = 'secret';
     });
 
-    // afterEach(() => {
-    //     process.env.WAITER_SECRET = 'secret';
-    // });
+    afterEach(() => {
+        delete process.env.WAITER_RULES;
+        delete process.env.WAITER_PROJECTS;
+    });
 
     it('規則が存在しなければ、NotFoundエラーになるはず', async () => {
         process.env.WAITER_RULES = JSON.stringify([]);
+        process.env.WAITER_PROJECTS = JSON.stringify([]);
         const scope = 'scope';
 
         const projectRepo = new ProjectRepo();
@@ -282,6 +289,7 @@ describe('service.passport.currentIssueUnit()', () => {
             threshold: 100,
             unavailableHoursSpecifications: []
         }]);
+        process.env.WAITER_PROJECTS = JSON.stringify([]);
         const incrResult = {
             identifier: 'scope:1508227500',
             validFrom: 1508227500,

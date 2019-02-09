@@ -128,16 +128,16 @@
 
 - 許可証発行規則。事前にWAITERに環境変数として登録。
 
-| field                                    | type   | description    |
-|------------------------------------------|--------|----------------|
-| name                                     | string | 規則名称           |
-| description                              | string | 規則説明           |
-| scope                                    | string | スコープ           |
-| aggregationUnitInSeconds                 | number | 許可証数集計単位(秒)    |
+| field                                    | type   | description                  |
+| ---------------------------------------- | ------ | ---------------------------- |
+| name                                     | string | 規則名称                     |
+| description                              | string | 規則説明                     |
+| scope                                    | string | スコープ                     |
+| aggregationUnitInSeconds                 | number | 許可証数集計単位(秒)         |
 | threshold                                | number | 単位時間当たりの許可証数閾値 |
 | unavailableHoursSpecifications           | array  | サービス休止時間帯設定リスト |
-| unavailableHoursSpecifications.startDate | string | サービス休止開始日時     |
-| unavailableHoursSpecifications.endDate   | string | サービス休止終了日時     |
+| unavailableHoursSpecifications.startDate | string | サービス休止開始日時         |
+| unavailableHoursSpecifications.endDate   | string | サービス休止終了日時         |
 
 ```json
 {
@@ -156,25 +156,25 @@
 
 - スコープごとに発行単位が作成される。許可証の発行を依頼されると、単位ごとに発行数を集計しながら発行を試みる。  
 
-| field            | type   | description  |
-|------------------|--------|--------------|
-| identifier       | string | 許可証発行単位識別子   |
+| field            | type   | description              |
+| ---------------- | ------ | ------------------------ |
+| identifier       | string | 許可証発行単位識別子     |
 | validFrom        | number | いつから有効な発行単位か |
 | validThrough     | number | いつまで有効な発行単位か |
-| numberOfRequests | number | 許可証発行リクエスト数  |
+| numberOfRequests | number | 許可証発行リクエスト数   |
 
 **許可証**
 
 - 発行者が発行する許可証は鍵によって暗号化される。
 - 発行依頼者は鍵を事前に設定することで暗号化された許可証を検証し、許可するかどうかを判断する。
 
-| field     | type       | description   |
-|-----------|------------|---------------|
-| iss       | string     | 発行者           |
-| iat       | number     | 発行unixタイムスタンプ |
-| exp       | number     | 期限unixタイムスタンプ |
-| scope     | string     | スコープ          |
-| issueUnit | IIssueUnit | 発行単許可証発行単位位名  |
+| field     | type       | description              |
+| --------- | ---------- | ------------------------ |
+| iss       | string     | 発行者                   |
+| iat       | number     | 発行unixタイムスタンプ   |
+| exp       | number     | 期限unixタイムスタンプ   |
+| scope     | string     | スコープ                 |
+| issueUnit | IIssueUnit | 発行単許可証発行単位位名 |
 
 ```json
 {
@@ -208,16 +208,11 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6InNjb3BlIiwiaXNzdWVVbml0Ijp7Iml
  | ------------------------ | -------- | --------------- | -------------------- |
  | `DEBUG`                  | false    | waiter-domain:* | Debug                |
  | `WAITER_PASSPORT_ISSUER` | true     |                 | 許可証発行者識別子   |
- | `WAITER_RULES`           | true     |                 | 発行規則リスト       |
  | `WAITER_SECRET`          | true     |                 | 許可証暗号化の秘密鍵 |
 
 ## Code Samples
 
 コードサンプルは [example](https://github.com/waiter-jp/domain/tree/master/example) にあります。
-
-## Jsdoc
-
-`npm run doc`でjsdocを作成できます。./docに出力されます。
 
 ## License
 

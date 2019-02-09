@@ -1,3 +1,7 @@
+import { Connection, Model } from 'mongoose';
+
+import { modelName } from './mongoose/model/project';
+
 import * as factory from '../factory';
 
 /**
@@ -37,5 +41,48 @@ export class InMemoryRepository {
         }
 
         return project;
+    }
+}
+
+/**
+ * MongoDBリポジトリ
+ */
+export class MongoRepository {
+    public readonly projectModel: typeof Model;
+
+    constructor(connection: Connection) {
+        this.projectModel = connection.model(modelName);
+    }
+
+    public async search(params: any): Promise<any[]> {
+        const conditions = [
+            { _id: { $exists: true } }
+        ];
+
+        const query = this.projectModel.find(
+            { $and: conditions },
+            {
+                __v: 0,
+                createdAt: 0,
+                updatedAt: 0
+            }
+        );
+
+        // tslint:disable-next-line:no-single-line-block-comment
+        /* istanbul ignore else */
+        if (params.limit !== undefined && params.page !== undefined) {
+            query.limit(params.limit)
+                .skip(params.limit * (params.page - 1));
+        }
+
+        // tslint:disable-next-line:no-single-line-block-comment
+        /* istanbul ignore else */
+        if (params.sort !== undefined) {
+            query.sort(params.sort);
+        }
+
+        return query.setOptions({ maxTimeMS: 10000 })
+            .exec()
+            .then((docs) => docs.map((doc) => doc.toObject()));
     }
 }
