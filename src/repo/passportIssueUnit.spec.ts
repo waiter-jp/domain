@@ -13,7 +13,7 @@ import { RedisRepository as PassportIssueUnitRepo } from '../repo/passportIssueU
 let redisClient: any;
 let sandbox: sinon.SinonSandbox;
 before(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.createSandbox();
 });
 
 describe('PassportIssueUnitRepo.incr()', () => {

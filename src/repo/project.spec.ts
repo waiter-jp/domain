@@ -3,17 +3,20 @@
  * プロジェクトリポジトリテスト
  */
 import * as assert from 'assert';
+import * as mongoose from 'mongoose';
 import * as sinon from 'sinon';
+// tslint:disable-next-line:no-require-imports no-var-requires
+require('sinon-mongoose');
 
 import * as factory from '../factory';
-import { InMemoryRepository as ProjectRepo } from '../repo/project';
+import { InMemoryRepository as ProjectInMemoryRepo, MongoRepository as ProjectRepo } from '../repo/project';
 
 let sandbox: sinon.SinonSandbox;
 before(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.createSandbox();
 });
 
-describe('ProjectRepo.constructor()', () => {
+describe('ProjectInMemoryRepo.constructor()', () => {
     beforeEach(() => {
         process.env.WAITER_PROJECTS = JSON.stringify([{}]);
         sandbox.restore();
@@ -25,7 +28,7 @@ describe('ProjectRepo.constructor()', () => {
         assert.throws(
             () => {
                 // tslint:disable-next-line:no-unused-expression
-                new ProjectRepo();
+                new ProjectInMemoryRepo();
             },
             (err: any) => {
                 assert(err instanceof Error);
@@ -42,7 +45,7 @@ describe('ProjectRepo.constructor()', () => {
         assert.throws(
             () => {
                 // tslint:disable-next-line:no-unused-expression
-                new ProjectRepo();
+                new ProjectInMemoryRepo();
             },
             (err: any) => {
                 assert(err instanceof Error);
@@ -54,7 +57,7 @@ describe('ProjectRepo.constructor()', () => {
     });
 });
 
-describe('ProjectRepo.CREATE_FROM_OBJECT()', () => {
+describe('ProjectInMemoryRepo.CREATE_FROM_OBJECT()', () => {
     let TEST_CREATE_PARAMS: any;
     beforeEach(() => {
         TEST_CREATE_PARAMS = {
@@ -64,7 +67,7 @@ describe('ProjectRepo.CREATE_FROM_OBJECT()', () => {
 
     it('作成できる', () => {
         assert.doesNotThrow(() => {
-            ProjectRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
+            ProjectInMemoryRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
         });
     });
 });
@@ -79,14 +82,14 @@ describe('IDでプロジェクト検索', () => {
         const project = { id: 'projectId' };
         process.env.WAITER_PROJECTS = JSON.stringify([project]);
 
-        const projectRepo = new ProjectRepo();
+        const projectRepo = new ProjectInMemoryRepo();
         const result = projectRepo.findById({ id: project.id });
         assert.deepEqual(result, project);
         sandbox.verify();
     });
 
     it('プロジェクトが存在しなければNotFoundエラーとなるはず', () => {
-        const projectRepo = new ProjectRepo();
+        const projectRepo = new ProjectInMemoryRepo();
         assert.throws(
             () => {
                 projectRepo.findById({ id: 'invalidId' });
@@ -97,5 +100,31 @@ describe('IDでプロジェクト検索', () => {
                 return true;
             }
         );
+    });
+});
+
+describe('MongoDBでプロジェクト検索', () => {
+    beforeEach(() => {
+        sandbox.restore();
+    });
+
+    it('MongoDBが正常であれば配列が返るはず', async () => {
+        const projects = [{ id: 'projectId' }];
+
+        const projectRepo = new ProjectRepo(mongoose.connection);
+
+        sandbox.mock(projectRepo.projectModel)
+            .expects('find')
+            .once()
+            .chain('exec')
+            .resolves(projects.map((a) => new projectRepo.projectModel(a)));
+
+        const result = await projectRepo.search({
+            limit: 1,
+            page: 1,
+            sort: {}
+        });
+        assert(Array.isArray(result));
+        sandbox.verify();
     });
 });

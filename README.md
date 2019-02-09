@@ -208,7 +208,6 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6InNjb3BlIiwiaXNzdWVVbml0Ijp7Iml
  | ------------------------ | -------- | --------------- | -------------------- |
  | `DEBUG`                  | false    | waiter-domain:* | Debug                |
  | `WAITER_PASSPORT_ISSUER` | true     |                 | 許可証発行者識別子   |
- | `WAITER_RULES`           | true     |                 | 発行規則リスト       |
  | `WAITER_SECRET`          | true     |                 | 許可証暗号化の秘密鍵 |
 
 ## Code Samples

@@ -135,8 +135,6 @@ export class InMemoryRepository {
 /**
  * MongoDBリポジトリ
  */
-// tslint:disable-next-line:no-single-line-block-comment
-/* istanbul ignore next */
 export class MongoRepository {
     public readonly ruleModel: typeof Model;
 
@@ -148,6 +146,7 @@ export class MongoRepository {
         const conditions = [
             { _id: { $exists: true } }
         ];
+
         const query = this.ruleModel.find(
             { $and: conditions },
             {
@@ -156,12 +155,14 @@ export class MongoRepository {
                 updatedAt: 0
             }
         );
+
         // tslint:disable-next-line:no-single-line-block-comment
         /* istanbul ignore else */
         if (params.limit !== undefined && params.page !== undefined) {
             query.limit(params.limit)
                 .skip(params.limit * (params.page - 1));
         }
+
         // tslint:disable-next-line:no-single-line-block-comment
         /* istanbul ignore else */
         if (params.sort !== undefined) {

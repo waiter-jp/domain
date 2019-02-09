@@ -7,15 +7,12 @@ import { MongoRepository as RuleRepo } from '../repo/rule';
 /**
  * インメモリデータストアを初期化する
  */
-export /* istanbul ignore next */ function initializeInMemoryDataStore() {
+export function initializeInMemoryDataStore() {
     return async (repos: {
         project: ProjectRepo;
         rule: RuleRepo;
     }) => {
-        const projects = await repos.project.search({});
-        const rules = await repos.rule.search({});
-
-        process.env.WAITER_PROJECTS = JSON.stringify(projects);
-        process.env.WAITER_RULES = JSON.stringify(rules);
+        process.env.WAITER_PROJECTS = JSON.stringify(await repos.project.search({}));
+        process.env.WAITER_RULES = JSON.stringify(await repos.rule.search({}));
     };
 }
