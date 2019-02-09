@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 
+- プロジェクトと規則のMongoDBリポジトリを追加
+- キャッシュサービスを追加
+
 ### Changed
 
 - update packages

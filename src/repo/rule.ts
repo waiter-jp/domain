@@ -1,5 +1,8 @@
 import * as moment from 'moment';
+import { Connection, Model } from 'mongoose';
 import * as validator from 'validator';
+
+import { modelName } from './mongoose/model/rule';
 
 import * as factory from '../factory';
 
@@ -126,5 +129,47 @@ export class InMemoryRepository {
         }
 
         return rules;
+    }
+}
+
+/**
+ * MongoDBリポジトリ
+ */
+// tslint:disable-next-line:no-single-line-block-comment
+/* istanbul ignore next */
+export class MongoRepository {
+    public readonly ruleModel: typeof Model;
+
+    constructor(connection: Connection) {
+        this.ruleModel = connection.model(modelName);
+    }
+
+    public async search(params: any): Promise<any[]> {
+        const conditions = [
+            { _id: { $exists: true } }
+        ];
+        const query = this.ruleModel.find(
+            { $and: conditions },
+            {
+                __v: 0,
+                createdAt: 0,
+                updatedAt: 0
+            }
+        );
+        // tslint:disable-next-line:no-single-line-block-comment
+        /* istanbul ignore else */
+        if (params.limit !== undefined && params.page !== undefined) {
+            query.limit(params.limit)
+                .skip(params.limit * (params.page - 1));
+        }
+        // tslint:disable-next-line:no-single-line-block-comment
+        /* istanbul ignore else */
+        if (params.sort !== undefined) {
+            query.sort(params.sort);
+        }
+
+        return query.setOptions({ maxTimeMS: 10000 })
+            .exec()
+            .then((docs) => docs.map((doc) => doc.toObject()));
     }
 }
