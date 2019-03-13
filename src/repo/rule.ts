@@ -27,6 +27,7 @@ export class InMemoryRepository {
         }
     }
 
+    // tslint:disable-next-line:cyclomatic-complexity
     public static CREATE_FROM_OBJECT(params: any): factory.rule.IRule {
         if (typeof params.project !== 'object' || typeof params.project.id !== 'string' || validator.isEmpty(params.project.id)) {
             throw new factory.errors.ArgumentNull('project');
@@ -49,23 +50,54 @@ export class InMemoryRepository {
         if (!Number.isInteger(params.threshold)) {
             throw new factory.errors.Argument('threshold', 'threshold must be number.');
         }
-        if (!Array.isArray(params.unavailableHoursSpecifications)) {
+
+        // 利用不可期間リストは、配列or未指定
+        if (!Array.isArray(params.availableHoursSpecifications) && params.availableHoursSpecifications !== undefined) {
+            throw new factory.errors.Argument('availableHoursSpecifications', 'availableHoursSpecifications must be an array');
+        }
+
+        // 利用不可期間リストは、配列or未指定
+        if (!Array.isArray(params.unavailableHoursSpecifications) && params.unavailableHoursSpecifications !== undefined) {
             throw new factory.errors.Argument('unavailableHoursSpecifications', 'unavailableHoursSpecifications must be an array');
         }
-        params.unavailableHoursSpecifications.forEach((unavailableHoursSpecification: any) => {
-            if (!moment(unavailableHoursSpecification.startDate, 'YYYY-MM-DDTHH:mm:ssZ').isValid()) {
-                throw new factory.errors.Argument(
-                    'unavailableHoursSpecification.startDate',
-                    'unavailableHoursSpecification.startDate must be Date.'
-                );
-            }
-            if (!moment(unavailableHoursSpecification.endDate, 'YYYY-MM-DDTHH:mm:ssZ').isValid()) {
-                throw new factory.errors.Argument(
-                    'unavailableHoursSpecification.endDate',
-                    'unavailableHoursSpecification.endDate must be Date.'
-                );
-            }
-        });
+
+        // tslint:disable-next-line:no-single-line-block-comment
+        /* istanbul ignore else */
+        if (Array.isArray(params.availableHoursSpecifications)) {
+            params.availableHoursSpecifications.forEach((spec: any) => {
+                if (!moment(spec.startDate, 'YYYY-MM-DDTHH:mm:ssZ').isValid()) {
+                    throw new factory.errors.Argument(
+                        'availableHoursSpecification.startDate',
+                        'availableHoursSpecification.startDate must be Date.'
+                    );
+                }
+                if (!moment(spec.endDate, 'YYYY-MM-DDTHH:mm:ssZ').isValid()) {
+                    throw new factory.errors.Argument(
+                        'availableHoursSpecification.endDate',
+                        'availableHoursSpecification.endDate must be Date.'
+                    );
+                }
+            });
+        }
+
+        // tslint:disable-next-line:no-single-line-block-comment
+        /* istanbul ignore else */
+        if (Array.isArray(params.unavailableHoursSpecifications)) {
+            params.unavailableHoursSpecifications.forEach((spec: any) => {
+                if (!moment(spec.startDate, 'YYYY-MM-DDTHH:mm:ssZ').isValid()) {
+                    throw new factory.errors.Argument(
+                        'unavailableHoursSpecification.startDate',
+                        'unavailableHoursSpecification.startDate must be Date.'
+                    );
+                }
+                if (!moment(spec.endDate, 'YYYY-MM-DDTHH:mm:ssZ').isValid()) {
+                    throw new factory.errors.Argument(
+                        'unavailableHoursSpecification.endDate',
+                        'unavailableHoursSpecification.endDate must be Date.'
+                    );
+                }
+            });
+        }
 
         return {
             project: { id: params.project.id },
@@ -75,12 +107,22 @@ export class InMemoryRepository {
             scope: params.scope,
             aggregationUnitInSeconds: params.aggregationUnitInSeconds,
             threshold: params.threshold,
-            unavailableHoursSpecifications: params.unavailableHoursSpecifications.map((unavailableHoursSpecification: any) => {
-                return {
-                    startDate: moment(unavailableHoursSpecification.startDate, 'YYYY-MM-DDTHH:mm:ssZ').toDate(),
-                    endDate: moment(unavailableHoursSpecification.endDate, 'YYYY-MM-DDTHH:mm:ssZ').toDate()
-                };
-            })
+            availableHoursSpecifications: (Array.isArray(params.availableHoursSpecifications))
+                ? params.availableHoursSpecifications.map((spec: any) => {
+                    return {
+                        startDate: moment(spec.startDate, 'YYYY-MM-DDTHH:mm:ssZ').toDate(),
+                        endDate: moment(spec.endDate, 'YYYY-MM-DDTHH:mm:ssZ').toDate()
+                    };
+                })
+                : /* istanbul ignore next */ undefined,
+            unavailableHoursSpecifications: Array.isArray(params.unavailableHoursSpecifications)
+                ? params.unavailableHoursSpecifications.map((spec: any) => {
+                    return {
+                        startDate: moment(spec.startDate, 'YYYY-MM-DDTHH:mm:ssZ').toDate(),
+                        endDate: moment(spec.endDate, 'YYYY-MM-DDTHH:mm:ssZ').toDate()
+                    };
+                })
+                : /* istanbul ignore next */ undefined
         };
     }
 

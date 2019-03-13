@@ -10,7 +10,7 @@
   ],
   "dependencies": {
     "@types/ioredis": "^3.2.19",
-    "@waiter/factory": "^2.0.0",
+    "@waiter/factory": "^2.1.0-alpha.0",
     "debug": "^3.2.6",
     "ioredis": "^3.2.2",
     "jsonwebtoken": "^8.4.0",
