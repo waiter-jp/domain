@@ -86,5 +86,5 @@
     "postversion": "git push origin --tags",
     "prepublishOnly": "npm test && npm run doc"
   },
-  "version": "4.0.0"
+  "version": "4.1.0-alpha.0"
 }
