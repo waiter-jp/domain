@@ -47,6 +47,7 @@ export function issue(params: {
 
         // サービス利用可能期間指定があれば、どれかひとつの期間に適合すればok
         if (Array.isArray(rule.availableHoursSpecifications)) {
+            // 空配列であればunavailableとなります
             const unavailable = rule.availableHoursSpecifications.every((spec) => {
                 return now < spec.startDate || now > spec.endDate;
             });
