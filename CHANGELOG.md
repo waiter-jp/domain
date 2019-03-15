@@ -8,8 +8,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 
-- 許可証発行規則にて利用可能期間をポジティブリストとして指定することができるように機能追加
-
 ### Changed
 
 ### Deprecated
@@ -19,6 +17,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v4.1.0 - 2019-03-15
+
+### Added
+
+- 許可証発行規則にて利用可能期間をポジティブリストとして指定することができるように機能追加
 
 ## v4.0.0 - 2019-02-09
 
