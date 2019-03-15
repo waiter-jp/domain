@@ -71,6 +71,7 @@ describe('規則検索', () => {
             scope: 'scope',
             aggregationUnitInSeconds: 60,
             threshold: 100,
+            availableHoursSpecifications: [],
             unavailableHoursSpecifications: []
         }]);
         sandbox.restore();
@@ -99,6 +100,12 @@ describe('RuleInMemoryRepo.CREATE_FROM_OBJECT()', () => {
             scope: 'scope',
             aggregationUnitInSeconds: 60,
             threshold: 100,
+            availableHoursSpecifications: [
+                {
+                    startDate: '2017-11-10T09:00:00Z',
+                    endDate: '2017-11-10T09:30:00Z'
+                }
+            ],
             unavailableHoursSpecifications: [
                 {
                     startDate: '2017-11-10T09:00:00Z',
@@ -174,6 +181,48 @@ describe('RuleInMemoryRepo.CREATE_FROM_OBJECT()', () => {
         assert.throws(
             () => {
                 TEST_CREATE_PARAMS.threshold = <any>'1';
+                RuleInMemoryRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
+            },
+            (err: any) => {
+                assert(err instanceof factory.errors.Argument);
+
+                return true;
+            }
+        );
+    });
+
+    it('availableHoursSpecificationsが配列でなければArgumentError', () => {
+        assert.throws(
+            () => {
+                TEST_CREATE_PARAMS.availableHoursSpecifications = {};
+                RuleInMemoryRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
+            },
+            (err: any) => {
+                assert(err instanceof factory.errors.Argument);
+
+                return true;
+            }
+        );
+    });
+
+    it('サービス利用可能期間の開始日時が不適切であればArgumentError', () => {
+        assert.throws(
+            () => {
+                TEST_CREATE_PARAMS.availableHoursSpecifications[0].startDate = 'xxx';
+                RuleInMemoryRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
+            },
+            (err: any) => {
+                assert(err instanceof factory.errors.Argument);
+
+                return true;
+            }
+        );
+    });
+
+    it('サービス利用可能期間の終了日時が不適切であればArgumentError', () => {
+        assert.throws(
+            () => {
+                TEST_CREATE_PARAMS.availableHoursSpecifications[0].endDate = 'xxx';
                 RuleInMemoryRepo.CREATE_FROM_OBJECT(TEST_CREATE_PARAMS);
             },
             (err: any) => {

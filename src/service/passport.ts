@@ -27,6 +27,9 @@ export function issue(params: {
         project: ProjectRepo;
         rule: RuleRepo;
     }): Promise<factory.passport.IEncodedPassport> => {
+        const now = new Date();
+        debug('now is', now);
+
         const project = repos.project.findById({ id: params.project.id });
         const rules = repos.rule.search({
             project: { ids: [project.id] },
@@ -37,27 +40,43 @@ export function issue(params: {
             throw new factory.errors.NotFound('Rule');
         }
 
-        const now = moment();
-        debug('now is', now.toDate(), now.unix());
-
         const passportIssueUnit = await repos.passportIssueUnit.incr({
-            issueDate: now.toDate(), project: project, rule: rule
+            issueDate: now, project: project, rule: rule
         });
         debug('incremented. passportIssueUnit:', passportIssueUnit);
 
-        // サービス休止時間帯であれば、問答無用に発行できない
-        rule.unavailableHoursSpecifications.forEach((specification) => {
+        // サービス利用可能期間指定があれば、どれかひとつの期間に適合すればok
+        if (Array.isArray(rule.availableHoursSpecifications)) {
+            // 空配列であればunavailableとなります
+            const unavailable = rule.availableHoursSpecifications.every((spec) => {
+                return now < spec.startDate || now > spec.endDate;
+            });
+
             // tslint:disable-next-line:no-single-line-block-comment
             /* istanbul ignore else */
-            if (now.toDate() >= specification.startDate && now.toDate() <= specification.endDate) {
-                const message = util.format(
-                    'Specified scope unavailable from %s to %s.',
-                    specification.startDate.toISOString(),
-                    specification.endDate.toISOString()
-                );
-                throw new factory.errors.ServiceUnavailable(message);
+            if (unavailable) {
+                throw new factory.errors.ServiceUnavailable('Not within the available period');
             }
-        });
+        }
+
+        // サービス利用不可期間であれば、どれかひとつの不可期間にあてはまれば不許可
+        // tslint:disable-next-line:no-single-line-block-comment
+        /* istanbul ignore else */
+        if (Array.isArray(rule.unavailableHoursSpecifications)) {
+            rule.unavailableHoursSpecifications.forEach((spec) => {
+                // tslint:disable-next-line:no-single-line-block-comment
+                /* istanbul ignore else */
+                if (now >= spec.startDate && now <= spec.endDate) {
+                    const message = util.format(
+                        'Specified scope unavailable from %s to %s',
+                        spec.startDate.toISOString(),
+                        spec.endDate.toISOString()
+                    );
+
+                    throw new factory.errors.ServiceUnavailable(message);
+                }
+            });
+        }
 
         if (passportIssueUnit.numberOfRequests > rule.threshold) {
             throw new factory.errors.RateLimitExceeded();
@@ -68,7 +87,7 @@ export function issue(params: {
             scope: params.scope,
             issueUnit: passportIssueUnit,
             project: project,
-            iat: now.unix()
+            iat: moment(now).unix()
         };
 
         return new Promise<factory.passport.IEncodedPassport>((resolve, reject) => {

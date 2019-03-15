@@ -95,6 +95,49 @@ describe('発行する', () => {
         sandbox.verify();
     });
 
+    it('サービス利用可能期間外であれば、許可証を発行できないはず', async () => {
+        const scope = 'scope';
+        const project = { id: 'projectId' };
+        process.env.WAITER_RULES = JSON.stringify([{
+            project: { id: project.id },
+            name: 'name',
+            description: 'description',
+            scope: scope,
+            aggregationUnitInSeconds: 60,
+            threshold: 100,
+            availableHoursSpecifications: [
+                {
+                    startDate: moment().add(1, 'hours').toISOString(),
+                    // tslint:disable-next-line:no-magic-numbers
+                    endDate: moment().add(2, 'hours').toISOString()
+                },
+                {
+                    // tslint:disable-next-line:no-magic-numbers
+                    startDate: moment().add(-2, 'hours').toISOString(),
+                    endDate: moment().add(-1, 'hours').toISOString()
+                }
+            ]
+        }]);
+        process.env.WAITER_PROJECTS = JSON.stringify([]);
+
+        const projectRepo = new ProjectRepo();
+        const ruleRepo = new RuleRepo();
+        const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
+
+        sandbox.mock(projectRepo).expects('findById').once().returns(project);
+
+        const result = await passportService.issue({
+            project: { id: project.id },
+            scope: scope
+        })({
+            passportIssueUnit: passportCounterRepo,
+            project: projectRepo,
+            rule: ruleRepo
+        }).catch((err) => err);
+        assert(result instanceof factory.errors.ServiceUnavailable);
+        sandbox.verify();
+    });
+
     it('サービス休止時間帯であれば、許可証を発行できないはず', async () => {
         const scope = 'scope';
         const project = { id: 'projectId' };
