@@ -21,6 +21,7 @@ const debug = createDebug('waiter-domain:repository');
 export function issue(params: {
     project: { id: string };
     scope: string;
+    expiresIn?: number;
 }) {
     return async (repos: {
         passportIssueUnit: PassportIssueUnitRepo;
@@ -91,14 +92,16 @@ export function issue(params: {
         };
 
         return new Promise<factory.passport.IEncodedPassport>((resolve, reject) => {
+            const expiresIn = Number(rule.aggregationUnitInSeconds.toString())
+                + ((params.expiresIn !== undefined) /* istanbul ignore next */ ? Number(params.expiresIn) : 0);
+
             // 許可証を暗号化する
             jwt.sign(
                 payload,
                 <string>process.env.WAITER_SECRET,
                 {
                     issuer: <string>process.env.WAITER_PASSPORT_ISSUER,
-                    // tslint:disable-next-line:no-magic-numbers
-                    expiresIn: parseInt(rule.aggregationUnitInSeconds.toString(), 10)
+                    expiresIn: expiresIn
                 },
                 (err, encoded) => {
                     if (err instanceof Error) {

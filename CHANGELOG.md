@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Security
 
+## v4.2.0 - 2019-07-18
+
+### Added
+
+- JsonWebToken自体の期限調整機能を追加
+
 ## v4.1.0 - 2019-03-15
 
 ### Added
