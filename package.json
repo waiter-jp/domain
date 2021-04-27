@@ -15,7 +15,7 @@
     "ioredis": "^3.2.2",
     "jsonwebtoken": "^8.4.0",
     "moment": "^2.24.0",
-    "validator": "^10.11.0"
+    "validator": "^13.6.0"
   },
   "description": "Waiter Domain Library for Node.js",
   "devDependencies": {
