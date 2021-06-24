@@ -31,9 +31,9 @@ export function issue(params: {
         const now = new Date();
         debug('now is', now);
 
-        const project = repos.project.findById({ id: params.project.id });
+        // const project = repos.project.findById({ id: params.project.id });
         const rules = repos.rule.search({
-            project: { ids: [project.id] },
+            project: { ids: [params.project.id] },
             scopes: [params.scope]
         });
         const rule = rules.shift();
@@ -42,7 +42,7 @@ export function issue(params: {
         }
 
         const passportIssueUnit = await repos.passportIssueUnit.incr({
-            issueDate: now, project: project, rule: rule
+            issueDate: now, project: params.project, rule: rule
         });
         debug('incremented. passportIssueUnit:', passportIssueUnit);
 
@@ -87,7 +87,7 @@ export function issue(params: {
             aud: (rule.client !== undefined) ? rule.client.map((r) => r.id) : undefined,
             scope: params.scope,
             issueUnit: passportIssueUnit,
-            project: project,
+            project: params.project,
             iat: moment(now).unix()
         };
 
@@ -127,9 +127,9 @@ export function currentIssueUnit(params: {
         project: ProjectRepo;
         rule: RuleRepo;
     }): Promise<factory.passport.IIssueUnit> => {
-        const project = repos.project.findById({ id: params.project.id });
+        // const project = repos.project.findById({ id: params.project.id });
         const rules = repos.rule.search({
-            project: { ids: [project.id] },
+            project: { ids: [params.project.id] },
             scopes: [params.scope]
         });
         const rule = rules.shift();
@@ -139,7 +139,7 @@ export function currentIssueUnit(params: {
         const issueDate = moment().toDate();
 
         return repos.passportIssueUnit.now({
-            issueDate: issueDate, project: project, rule: rule
+            issueDate: issueDate, project: params.project, rule: rule
         });
     };
 }

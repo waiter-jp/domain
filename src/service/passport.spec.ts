@@ -42,7 +42,7 @@ describe('発行する', () => {
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
-        sandbox.mock(projectRepo).expects('findById').once().returns({});
+        // sandbox.mock(projectRepo).expects('findById').once().returns({});
 
         const result = await passportService.issue({
             project: { id: 'projectId' },
@@ -80,7 +80,7 @@ describe('発行する', () => {
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
-        sandbox.mock(projectRepo).expects('findById').once().returns(project);
+        // sandbox.mock(projectRepo).expects('findById').once().returns(project);
         sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
 
         const result = await passportService.issue({
@@ -124,7 +124,7 @@ describe('発行する', () => {
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
-        sandbox.mock(projectRepo).expects('findById').once().returns(project);
+        // sandbox.mock(projectRepo).expects('findById').once().returns(project);
 
         const result = await passportService.issue({
             project: { id: project.id },
@@ -159,7 +159,7 @@ describe('発行する', () => {
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
-        sandbox.mock(projectRepo).expects('findById').once().returns(project);
+        // sandbox.mock(projectRepo).expects('findById').once().returns(project);
 
         const result = await passportService.issue({
             project: { id: project.id },
@@ -198,7 +198,7 @@ describe('発行する', () => {
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
-        sandbox.mock(projectRepo).expects('findById').once().returns(project);
+        // sandbox.mock(projectRepo).expects('findById').once().returns(project);
         sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
 
         const result = await passportService.issue({
@@ -238,7 +238,7 @@ describe('発行する', () => {
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
-        sandbox.mock(projectRepo).expects('findById').once().returns(project);
+        // sandbox.mock(projectRepo).expects('findById').once().returns(project);
         sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
         // tslint:disable-next-line:no-magic-numbers
         sandbox.mock(jwt).expects('sign').once().callsArgWith(3, signReult);
@@ -306,7 +306,7 @@ describe('service.passport.currentIssueUnit()', () => {
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
-        sandbox.mock(projectRepo).expects('findById').once().returns({});
+        // sandbox.mock(projectRepo).expects('findById').once().returns({});
 
         const result = await passportService.currentIssueUnit({
             project: { id: 'projectId' },
@@ -344,7 +344,7 @@ describe('service.passport.currentIssueUnit()', () => {
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
-        sandbox.mock(projectRepo).expects('findById').once().returns(project);
+        // sandbox.mock(projectRepo).expects('findById').once().returns(project);
         sandbox.mock(passportCounterRepo).expects('now').once().resolves(incrResult);
 
         const result = await passportService.currentIssueUnit({
