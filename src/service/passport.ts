@@ -10,7 +10,6 @@ import * as validator from 'validator';
 import * as factory from '../factory';
 
 import { RedisRepository as PassportIssueUnitRepo } from '../repo/passportIssueUnit';
-import { InMemoryRepository as ProjectRepo } from '../repo/project';
 import { InMemoryRepository as RuleRepo } from '../repo/rule';
 
 const debug = createDebug('waiter-domain:repository');
@@ -25,7 +24,6 @@ export function issue(params: {
 }) {
     return async (repos: {
         passportIssueUnit: PassportIssueUnitRepo;
-        project: ProjectRepo;
         rule: RuleRepo;
     }): Promise<factory.passport.IEncodedPassport> => {
         const now = new Date();
@@ -124,7 +122,6 @@ export function currentIssueUnit(params: {
 }) {
     return async (repos: {
         passportIssueUnit: PassportIssueUnitRepo;
-        project: ProjectRepo;
         rule: RuleRepo;
     }): Promise<factory.passport.IIssueUnit> => {
         // const project = repos.project.findById({ id: params.project.id });

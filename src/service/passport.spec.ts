@@ -12,7 +12,6 @@ const redis = require('ioredis-mock');
 
 import * as factory from '../factory';
 import { RedisRepository as PassportIssueUnitRepo } from '../repo/passportIssueUnit';
-import { InMemoryRepository as ProjectRepo } from '../repo/project';
 import { InMemoryRepository as RuleRepo } from '../repo/rule';
 import * as passportService from '../service/passport';
 
@@ -30,15 +29,14 @@ describe('発行する', () => {
 
     afterEach(() => {
         delete process.env.WAITER_RULES;
-        delete process.env.WAITER_PROJECTS;
+        // delete process.env.WAITER_PROJECTS;
     });
 
     it('規則が存在しなければ、NotFoundエラーになるはず', async () => {
         process.env.WAITER_RULES = JSON.stringify([]);
-        process.env.WAITER_PROJECTS = JSON.stringify([]);
+        // process.env.WAITER_PROJECTS = JSON.stringify([]);
         const scope = 'scope';
 
-        const projectRepo = new ProjectRepo();
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
@@ -49,7 +47,6 @@ describe('発行する', () => {
             scope: scope
         })({
             passportIssueUnit: passportCounterRepo,
-            project: projectRepo,
             rule: ruleRepo
         }).catch((err) => err);
         assert(result instanceof factory.errors.NotFound);
@@ -68,7 +65,7 @@ describe('発行する', () => {
             threshold: 0,
             unavailableHoursSpecifications: []
         }]);
-        process.env.WAITER_PROJECTS = JSON.stringify([]);
+        // process.env.WAITER_PROJECTS = JSON.stringify([]);
         const incrResult = {
             identifier: 'scope:1508227500',
             validFrom: 1508227500,
@@ -76,7 +73,6 @@ describe('発行する', () => {
             numberOfRequests: 1
         };
 
-        const projectRepo = new ProjectRepo();
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
@@ -88,7 +84,6 @@ describe('発行する', () => {
             scope: scope
         })({
             passportIssueUnit: passportCounterRepo,
-            project: projectRepo,
             rule: ruleRepo
         }).catch((err) => err);
         assert(result instanceof factory.errors.RateLimitExceeded);
@@ -118,9 +113,8 @@ describe('発行する', () => {
                 }
             ]
         }]);
-        process.env.WAITER_PROJECTS = JSON.stringify([]);
+        // process.env.WAITER_PROJECTS = JSON.stringify([]);
 
-        const projectRepo = new ProjectRepo();
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
@@ -131,7 +125,6 @@ describe('発行する', () => {
             scope: scope
         })({
             passportIssueUnit: passportCounterRepo,
-            project: projectRepo,
             rule: ruleRepo
         }).catch((err) => err);
         assert(result instanceof factory.errors.ServiceUnavailable);
@@ -153,9 +146,8 @@ describe('発行する', () => {
                 endDate: moment().add(1, 'hour').toISOString()
             }]
         }]);
-        process.env.WAITER_PROJECTS = JSON.stringify([]);
+        // process.env.WAITER_PROJECTS = JSON.stringify([]);
 
-        const projectRepo = new ProjectRepo();
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
@@ -166,7 +158,6 @@ describe('発行する', () => {
             scope: scope
         })({
             passportIssueUnit: passportCounterRepo,
-            project: projectRepo,
             rule: ruleRepo
         }).catch((err) => err);
         assert(result instanceof factory.errors.ServiceUnavailable);
@@ -186,7 +177,7 @@ describe('発行する', () => {
             threshold: 100,
             unavailableHoursSpecifications: []
         }]);
-        process.env.WAITER_PROJECTS = JSON.stringify([]);
+        // process.env.WAITER_PROJECTS = JSON.stringify([]);
         const incrResult = {
             identifier: 'scope:1508227500',
             validFrom: 1508227500,
@@ -194,7 +185,6 @@ describe('発行する', () => {
             numberOfRequests: 1
         };
 
-        const projectRepo = new ProjectRepo();
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
@@ -206,7 +196,6 @@ describe('発行する', () => {
             scope: scope
         })({
             passportIssueUnit: passportCounterRepo,
-            project: projectRepo,
             rule: ruleRepo
         });
         assert.equal(typeof result, 'string');
@@ -225,7 +214,7 @@ describe('発行する', () => {
             threshold: 100,
             unavailableHoursSpecifications: []
         }]);
-        process.env.WAITER_PROJECTS = JSON.stringify([]);
+        // process.env.WAITER_PROJECTS = JSON.stringify([]);
         const incrResult = {
             identifier: 'scope:1508227500',
             validFrom: 1508227500,
@@ -234,7 +223,6 @@ describe('発行する', () => {
         };
         const signReult = new Error('signError');
 
-        const projectRepo = new ProjectRepo();
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
@@ -248,7 +236,6 @@ describe('発行する', () => {
             scope: scope
         })({
             passportIssueUnit: passportCounterRepo,
-            project: projectRepo,
             rule: ruleRepo
         }).catch((err) => err);
         assert(result instanceof Error);
@@ -294,15 +281,14 @@ describe('service.passport.currentIssueUnit()', () => {
 
     afterEach(() => {
         delete process.env.WAITER_RULES;
-        delete process.env.WAITER_PROJECTS;
+        // delete process.env.WAITER_PROJECTS;
     });
 
     it('規則が存在しなければ、NotFoundエラーになるはず', async () => {
         process.env.WAITER_RULES = JSON.stringify([]);
-        process.env.WAITER_PROJECTS = JSON.stringify([]);
+        // process.env.WAITER_PROJECTS = JSON.stringify([]);
         const scope = 'scope';
 
-        const projectRepo = new ProjectRepo();
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
@@ -313,7 +299,6 @@ describe('service.passport.currentIssueUnit()', () => {
             scope: scope
         })({
             passportIssueUnit: passportCounterRepo,
-            project: projectRepo,
             rule: ruleRepo
         }).catch((err) => err);
         assert(result instanceof factory.errors.NotFound);
@@ -332,7 +317,7 @@ describe('service.passport.currentIssueUnit()', () => {
             threshold: 100,
             unavailableHoursSpecifications: []
         }]);
-        process.env.WAITER_PROJECTS = JSON.stringify([]);
+        // process.env.WAITER_PROJECTS = JSON.stringify([]);
         const incrResult = {
             identifier: 'scope:1508227500',
             validFrom: 1508227500,
@@ -340,7 +325,6 @@ describe('service.passport.currentIssueUnit()', () => {
             numberOfRequests: 2
         };
 
-        const projectRepo = new ProjectRepo();
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
@@ -352,7 +336,6 @@ describe('service.passport.currentIssueUnit()', () => {
             scope: scope
         })({
             passportIssueUnit: passportCounterRepo,
-            project: projectRepo,
             rule: ruleRepo
         });
         assert(Number.isInteger(result.numberOfRequests));
