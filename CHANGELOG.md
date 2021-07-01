@@ -10,10 +10,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
-- プロジェクトリポジトリ参照を廃止
-- update packages
-- validatorモジュールへの依存を排除
-
 ### Deprecated
 
 ### Removed
@@ -21,6 +17,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 ### Security
+
+## v5.0.0 - 2021-07-01
+
+### Changed
+
+- プロジェクトリポジトリ参照を廃止
+- update packages
+- validatorモジュールへの依存を排除
 
 ## v4.2.0 - 2019-07-18
 
