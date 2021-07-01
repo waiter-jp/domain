@@ -30,7 +30,10 @@ describe('インメモリデータストアを初期化する', () => {
     it('リポジトリが正常であれは成功するはず', async () => {
         const ruleRepo = new RuleRepo(mongoose.connection);
 
-        sandbox.mock(ruleRepo).expects('search').once().resolves([{}]);
+        sandbox.mock(ruleRepo)
+            .expects('search')
+            .once()
+            .resolves([{}]);
 
         await CacheService.initializeInMemoryDataStore()({
             rule: ruleRepo

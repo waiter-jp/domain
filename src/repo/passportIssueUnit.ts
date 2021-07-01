@@ -7,7 +7,7 @@ import * as factory from '../factory';
 const debug = createDebug('waiter-domain:repository');
 
 /**
- * 許可証発行単位Redisリポジトリ
+ * 許可証発行単位リポジトリ
  */
 export class RedisRepository {
     public readonly redisClient: redis.Redis;

@@ -48,7 +48,8 @@ describe('発行する', () => {
         })({
             passportIssueUnit: passportCounterRepo,
             rule: ruleRepo
-        }).catch((err) => err);
+        })
+            .catch((err) => err);
         assert(result instanceof factory.errors.NotFound);
         sandbox.verify();
     });
@@ -77,7 +78,10 @@ describe('発行する', () => {
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
         // sandbox.mock(projectRepo).expects('findById').once().returns(project);
-        sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
+        sandbox.mock(passportCounterRepo)
+            .expects('incr')
+            .once()
+            .resolves(incrResult);
 
         const result = await passportService.issue({
             project: { id: project.id },
@@ -85,7 +89,8 @@ describe('発行する', () => {
         })({
             passportIssueUnit: passportCounterRepo,
             rule: ruleRepo
-        }).catch((err) => err);
+        })
+            .catch((err) => err);
         assert(result instanceof factory.errors.RateLimitExceeded);
         sandbox.verify();
     });
@@ -102,14 +107,22 @@ describe('発行する', () => {
             threshold: 100,
             availableHoursSpecifications: [
                 {
-                    startDate: moment().add(1, 'hours').toISOString(),
-                    // tslint:disable-next-line:no-magic-numbers
-                    endDate: moment().add(2, 'hours').toISOString()
+                    startDate: moment()
+                        .add(1, 'hours')
+                        .toISOString(),
+                    endDate: moment()
+                        // tslint:disable-next-line:no-magic-numbers
+                        .add(2, 'hours')
+                        .toISOString()
                 },
                 {
-                    // tslint:disable-next-line:no-magic-numbers
-                    startDate: moment().add(-2, 'hours').toISOString(),
-                    endDate: moment().add(-1, 'hours').toISOString()
+                    startDate: moment()
+                        // tslint:disable-next-line:no-magic-numbers
+                        .add(-2, 'hours')
+                        .toISOString(),
+                    endDate: moment()
+                        .add(-1, 'hours')
+                        .toISOString()
                 }
             ]
         }]);
@@ -126,7 +139,8 @@ describe('発行する', () => {
         })({
             passportIssueUnit: passportCounterRepo,
             rule: ruleRepo
-        }).catch((err) => err);
+        })
+            .catch((err) => err);
         assert(result instanceof factory.errors.ServiceUnavailable);
         sandbox.verify();
     });
@@ -142,8 +156,12 @@ describe('発行する', () => {
             aggregationUnitInSeconds: 60,
             threshold: 100,
             unavailableHoursSpecifications: [{
-                startDate: moment().add(-1, 'hour').toISOString(),
-                endDate: moment().add(1, 'hour').toISOString()
+                startDate: moment()
+                    .add(-1, 'hour')
+                    .toISOString(),
+                endDate: moment()
+                    .add(1, 'hour')
+                    .toISOString()
             }]
         }]);
         // process.env.WAITER_PROJECTS = JSON.stringify([]);
@@ -159,7 +177,8 @@ describe('発行する', () => {
         })({
             passportIssueUnit: passportCounterRepo,
             rule: ruleRepo
-        }).catch((err) => err);
+        })
+            .catch((err) => err);
         assert(result instanceof factory.errors.ServiceUnavailable);
         sandbox.verify();
     });
@@ -189,7 +208,10 @@ describe('発行する', () => {
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
         // sandbox.mock(projectRepo).expects('findById').once().returns(project);
-        sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
+        sandbox.mock(passportCounterRepo)
+            .expects('incr')
+            .once()
+            .resolves(incrResult);
 
         const result = await passportService.issue({
             project: { id: project.id },
@@ -227,9 +249,15 @@ describe('発行する', () => {
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
         // sandbox.mock(projectRepo).expects('findById').once().returns(project);
-        sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
-        // tslint:disable-next-line:no-magic-numbers
-        sandbox.mock(jwt).expects('sign').once().callsArgWith(3, signReult);
+        sandbox.mock(passportCounterRepo)
+            .expects('incr')
+            .once()
+            .resolves(incrResult);
+        sandbox.mock(jwt)
+            .expects('sign')
+            .once()
+            // tslint:disable-next-line:no-magic-numbers
+            .callsArgWith(3, signReult);
 
         const result = await passportService.issue({
             project: { id: project.id },
@@ -237,7 +265,8 @@ describe('発行する', () => {
         })({
             passportIssueUnit: passportCounterRepo,
             rule: ruleRepo
-        }).catch((err) => err);
+        })
+            .catch((err) => err);
         assert(result instanceof Error);
         sandbox.verify();
     });
@@ -264,8 +293,11 @@ describe('許可証トークンを検証する', () => {
             }
         };
 
-        // tslint:disable-next-line:no-magic-numbers
-        sandbox.mock(jwt).expects('verify').once().callsArgWith(2, null, verifyResult);
+        sandbox.mock(jwt)
+            .expects('verify')
+            .once()
+            // tslint:disable-next-line:no-magic-numbers no-null-keyword
+            .callsArgWith(2, null, verifyResult);
 
         const result = await passportService.verify({ token, secret });
         assert(typeof result, 'object');
@@ -300,7 +332,8 @@ describe('service.passport.currentIssueUnit()', () => {
         })({
             passportIssueUnit: passportCounterRepo,
             rule: ruleRepo
-        }).catch((err) => err);
+        })
+            .catch((err) => err);
         assert(result instanceof factory.errors.NotFound);
         sandbox.verify();
     });
@@ -329,7 +362,10 @@ describe('service.passport.currentIssueUnit()', () => {
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
         // sandbox.mock(projectRepo).expects('findById').once().returns(project);
-        sandbox.mock(passportCounterRepo).expects('now').once().resolves(incrResult);
+        sandbox.mock(passportCounterRepo)
+            .expects('now')
+            .once()
+            .resolves(incrResult);
 
         const result = await passportService.currentIssueUnit({
             project: { id: project.id },
@@ -426,7 +462,7 @@ describe('service.passport.create()', () => {
     it('発行単位がオブジェクトでなければArgumentError', () => {
         assert.throws(
             () => {
-                TEST_CREATE_PARAMS.issueUnit = null;
+                TEST_CREATE_PARAMS.issueUnit = undefined;
                 passportService.create(TEST_CREATE_PARAMS);
             },
             (err: any) => {
@@ -437,14 +473,14 @@ describe('service.passport.create()', () => {
         );
     });
 
-    it('識別子が空であればArgumentNullError', () => {
+    it('識別子が空であればArgumentError', () => {
         assert.throws(
             () => {
                 TEST_CREATE_PARAMS.issueUnit.identifier = '';
                 passportService.create(TEST_CREATE_PARAMS);
             },
             (err: any) => {
-                assert(err instanceof factory.errors.ArgumentNull);
+                assert(err instanceof factory.errors.Argument);
 
                 return true;
             }
