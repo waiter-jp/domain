@@ -36,11 +36,18 @@ describe('PassportIssueUnitRepo.incr()', () => {
             unavailableHoursSpecifications: []
         };
         const multi = redisClient.multi();
+        // tslint:disable-next-line:no-null-keyword
         const execResult = [[null, 1], [null, 1]];
 
         const passportCounterRepo = new PassportIssueUnitRepo(redisClient);
-        sandbox.mock(redisClient).expects('multi').once().returns(multi);
-        sandbox.mock(multi).expects('exec').once().resolves(execResult);
+        sandbox.mock(redisClient)
+            .expects('multi')
+            .once()
+            .returns(multi);
+        sandbox.mock(multi)
+            .expects('exec')
+            .once()
+            .resolves(execResult);
 
         const result = await passportCounterRepo.incr({
             issueDate: issueDate,
@@ -65,14 +72,21 @@ describe('PassportIssueUnitRepo.incr()', () => {
         const execResult = new Error('execError');
 
         const passportCounterRepo = new PassportIssueUnitRepo(redisClient);
-        sandbox.mock(redisClient).expects('multi').once().returns(multi);
-        sandbox.mock(multi).expects('exec').once().rejects(execResult);
+        sandbox.mock(redisClient)
+            .expects('multi')
+            .once()
+            .returns(multi);
+        sandbox.mock(multi)
+            .expects('exec')
+            .once()
+            .rejects(execResult);
 
         const result = await passportCounterRepo.incr({
             issueDate: issueDate,
             project: <any>{},
             rule: <any>rule
-        }).catch((err) => err);
+        })
+            .catch((err) => err);
         assert.deepEqual(result.message, execResult.message);
         sandbox.verify();
     });
@@ -100,7 +114,10 @@ describe('PassportCounterRepo.now()', () => {
         const execResult = 1;
 
         const passportCounterRepo = new PassportIssueUnitRepo(redisClient);
-        sandbox.mock(redisClient).expects('get').once().resolves(execResult);
+        sandbox.mock(redisClient)
+            .expects('get')
+            .once()
+            .resolves(execResult);
 
         const result = await passportCounterRepo.now({
             issueDate: issueDate,
@@ -122,10 +139,14 @@ describe('PassportCounterRepo.now()', () => {
             threshold: 100,
             unavailableHoursSpecifications: []
         };
+        // tslint:disable-next-line:no-null-keyword
         const execResult = null;
 
         const passportCounterRepo = new PassportIssueUnitRepo(redisClient);
-        sandbox.mock(redisClient).expects('get').once().resolves(execResult);
+        sandbox.mock(redisClient)
+            .expects('get')
+            .once()
+            .resolves(execResult);
 
         const result = await passportCounterRepo.now({
             issueDate: issueDate,

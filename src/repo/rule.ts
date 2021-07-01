@@ -1,6 +1,5 @@
 import * as moment from 'moment';
 import { Connection, Model } from 'mongoose';
-import * as validator from 'validator';
 
 import { modelName } from './mongoose/model/rule';
 
@@ -27,27 +26,27 @@ export class InMemoryRepository {
         }
     }
 
-    // tslint:disable-next-line:cyclomatic-complexity
+    // tslint:disable-next-line:cyclomatic-complexity max-func-body-length
     public static CREATE_FROM_OBJECT(params: any): factory.rule.IRule {
-        if (typeof params.project !== 'object' || typeof params.project.id !== 'string' || validator.isEmpty(params.project.id)) {
-            throw new factory.errors.ArgumentNull('project');
+        if (typeof params.project?.id !== 'string' || params.project.id.length === 0) {
+            throw new factory.errors.ArgumentNull('project.id');
         }
         if (params.client !== undefined && !Array.isArray(params.client)) {
             throw new factory.errors.Argument('client', 'client must be an array');
         }
-        if (typeof params.name !== 'string' || validator.isEmpty(params.name)) {
+        if (typeof params.name !== 'string' || params.name.length === 0) {
             throw new factory.errors.ArgumentNull('name');
         }
-        if (typeof params.description !== 'string' || validator.isEmpty(params.description)) {
+        if (typeof params.description !== 'string' || params.description.length === 0) {
             throw new factory.errors.ArgumentNull('description');
         }
-        if (typeof params.scope !== 'string' || validator.isEmpty(params.scope)) {
+        if (typeof params.scope !== 'string' || params.scope.length === 0) {
             throw new factory.errors.ArgumentNull('scope');
         }
-        if (!Number.isInteger(params.aggregationUnitInSeconds)) {
+        if (typeof params.aggregationUnitInSeconds !== 'number') {
             throw new factory.errors.Argument('aggregationUnitInSeconds', 'aggregationUnitInSeconds must be number');
         }
-        if (!Number.isInteger(params.threshold)) {
+        if (typeof params.threshold !== 'number') {
             throw new factory.errors.Argument('threshold', 'threshold must be number.');
         }
 
@@ -65,13 +64,15 @@ export class InMemoryRepository {
         /* istanbul ignore else */
         if (Array.isArray(params.availableHoursSpecifications)) {
             params.availableHoursSpecifications.forEach((spec: any) => {
-                if (!moment(spec.startDate, 'YYYY-MM-DDTHH:mm:ssZ').isValid()) {
+                if (!moment(spec.startDate, 'YYYY-MM-DDTHH:mm:ssZ')
+                    .isValid()) {
                     throw new factory.errors.Argument(
                         'availableHoursSpecification.startDate',
                         'availableHoursSpecification.startDate must be Date.'
                     );
                 }
-                if (!moment(spec.endDate, 'YYYY-MM-DDTHH:mm:ssZ').isValid()) {
+                if (!moment(spec.endDate, 'YYYY-MM-DDTHH:mm:ssZ')
+                    .isValid()) {
                     throw new factory.errors.Argument(
                         'availableHoursSpecification.endDate',
                         'availableHoursSpecification.endDate must be Date.'
@@ -84,13 +85,15 @@ export class InMemoryRepository {
         /* istanbul ignore else */
         if (Array.isArray(params.unavailableHoursSpecifications)) {
             params.unavailableHoursSpecifications.forEach((spec: any) => {
-                if (!moment(spec.startDate, 'YYYY-MM-DDTHH:mm:ssZ').isValid()) {
+                if (!moment(spec.startDate, 'YYYY-MM-DDTHH:mm:ssZ')
+                    .isValid()) {
                     throw new factory.errors.Argument(
                         'unavailableHoursSpecification.startDate',
                         'unavailableHoursSpecification.startDate must be Date.'
                     );
                 }
-                if (!moment(spec.endDate, 'YYYY-MM-DDTHH:mm:ssZ').isValid()) {
+                if (!moment(spec.endDate, 'YYYY-MM-DDTHH:mm:ssZ')
+                    .isValid()) {
                     throw new factory.errors.Argument(
                         'unavailableHoursSpecification.endDate',
                         'unavailableHoursSpecification.endDate must be Date.'
@@ -110,16 +113,20 @@ export class InMemoryRepository {
             availableHoursSpecifications: (Array.isArray(params.availableHoursSpecifications))
                 ? params.availableHoursSpecifications.map((spec: any) => {
                     return {
-                        startDate: moment(spec.startDate, 'YYYY-MM-DDTHH:mm:ssZ').toDate(),
-                        endDate: moment(spec.endDate, 'YYYY-MM-DDTHH:mm:ssZ').toDate()
+                        startDate: moment(spec.startDate, 'YYYY-MM-DDTHH:mm:ssZ')
+                            .toDate(),
+                        endDate: moment(spec.endDate, 'YYYY-MM-DDTHH:mm:ssZ')
+                            .toDate()
                     };
                 })
                 : /* istanbul ignore next */ undefined,
             unavailableHoursSpecifications: Array.isArray(params.unavailableHoursSpecifications)
                 ? params.unavailableHoursSpecifications.map((spec: any) => {
                     return {
-                        startDate: moment(spec.startDate, 'YYYY-MM-DDTHH:mm:ssZ').toDate(),
-                        endDate: moment(spec.endDate, 'YYYY-MM-DDTHH:mm:ssZ').toDate()
+                        startDate: moment(spec.startDate, 'YYYY-MM-DDTHH:mm:ssZ')
+                            .toDate(),
+                        endDate: moment(spec.endDate, 'YYYY-MM-DDTHH:mm:ssZ')
+                            .toDate()
                     };
                 })
                 : /* istanbul ignore next */ undefined

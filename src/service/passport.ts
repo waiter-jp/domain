@@ -5,12 +5,10 @@ import * as createDebug from 'debug';
 import * as jwt from 'jsonwebtoken';
 import * as moment from 'moment';
 import * as util from 'util';
-import * as validator from 'validator';
 
 import * as factory from '../factory';
 
 import { RedisRepository as PassportIssueUnitRepo } from '../repo/passportIssueUnit';
-import { InMemoryRepository as ProjectRepo } from '../repo/project';
 import { InMemoryRepository as RuleRepo } from '../repo/rule';
 
 const debug = createDebug('waiter-domain:repository');
@@ -25,15 +23,14 @@ export function issue(params: {
 }) {
     return async (repos: {
         passportIssueUnit: PassportIssueUnitRepo;
-        project: ProjectRepo;
         rule: RuleRepo;
     }): Promise<factory.passport.IEncodedPassport> => {
         const now = new Date();
         debug('now is', now);
 
-        const project = repos.project.findById({ id: params.project.id });
+        // const project = repos.project.findById({ id: params.project.id });
         const rules = repos.rule.search({
-            project: { ids: [project.id] },
+            project: { ids: [params.project.id] },
             scopes: [params.scope]
         });
         const rule = rules.shift();
@@ -42,7 +39,7 @@ export function issue(params: {
         }
 
         const passportIssueUnit = await repos.passportIssueUnit.incr({
-            issueDate: now, project: project, rule: rule
+            issueDate: now, project: params.project, rule: rule
         });
         debug('incremented. passportIssueUnit:', passportIssueUnit);
 
@@ -87,8 +84,9 @@ export function issue(params: {
             aud: (rule.client !== undefined) ? rule.client.map((r) => r.id) : undefined,
             scope: params.scope,
             issueUnit: passportIssueUnit,
-            project: project,
-            iat: moment(now).unix()
+            project: params.project,
+            iat: moment(now)
+                .unix()
         };
 
         return new Promise<factory.passport.IEncodedPassport>((resolve, reject) => {
@@ -124,22 +122,22 @@ export function currentIssueUnit(params: {
 }) {
     return async (repos: {
         passportIssueUnit: PassportIssueUnitRepo;
-        project: ProjectRepo;
         rule: RuleRepo;
     }): Promise<factory.passport.IIssueUnit> => {
-        const project = repos.project.findById({ id: params.project.id });
+        // const project = repos.project.findById({ id: params.project.id });
         const rules = repos.rule.search({
-            project: { ids: [project.id] },
+            project: { ids: [params.project.id] },
             scopes: [params.scope]
         });
         const rule = rules.shift();
         if (rule === undefined) {
             throw new factory.errors.NotFound('Rule');
         }
-        const issueDate = moment().toDate();
+        const issueDate = moment()
+            .toDate();
 
         return repos.passportIssueUnit.now({
-            issueDate: issueDate, project: project, rule: rule
+            issueDate: issueDate, project: params.project, rule: rule
         });
     };
 }
@@ -166,26 +164,23 @@ export async function verify(params: {
 }
 
 export function create(params: any): factory.passport.IPassport {
-    if (validator.isEmpty(params.scope)) {
+    if (typeof params.scope !== 'string' || params.scope.length === 0) {
         throw new factory.errors.ArgumentNull('scope');
     }
-    if (params.iat === undefined || !Number.isInteger(params.iat)) {
-        throw new factory.errors.Argument('iat', 'iat must be number.');
+    if (typeof params.iat !== 'number') {
+        throw new factory.errors.Argument('iat', 'iat must be number');
     }
-    if (params.exp === undefined || !Number.isInteger(params.exp)) {
-        throw new factory.errors.Argument('exp', 'exp must be number.');
+    if (typeof params.exp !== 'number') {
+        throw new factory.errors.Argument('exp', 'exp must be number');
     }
-    if (validator.isEmpty(params.iss)) {
+    if (typeof params.iss !== 'string' || params.iss.length === 0) {
         throw new factory.errors.ArgumentNull('iss');
     }
-    if (params.issueUnit == null || typeof params.issueUnit !== 'object') {
-        throw new factory.errors.Argument('issueUnit', 'issueUnit must be object.');
+    if (typeof params.issueUnit?.identifier !== 'string' || params.issueUnit.identifier.length === 0) {
+        throw new factory.errors.Argument('issueUnit.identifier', 'issueUnit.identifier must be string');
     }
-    if (validator.isEmpty(params.issueUnit.identifier)) {
-        throw new factory.errors.ArgumentNull('issueUnit.identifier');
-    }
-    if (params.issueUnit.numberOfRequests === undefined || !Number.isInteger(params.issueUnit.numberOfRequests)) {
-        throw new factory.errors.Argument('issueUnit.numberOfRequests', 'issueUnit.numberOfRequests must be number.');
+    if (typeof params.issueUnit.numberOfRequests !== 'number') {
+        throw new factory.errors.Argument('issueUnit.numberOfRequests', 'issueUnit.numberOfRequests must be number');
     }
 
     return {

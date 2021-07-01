@@ -7,7 +7,7 @@ import * as factory from '../factory';
 const debug = createDebug('waiter-domain:repository');
 
 /**
- * 許可証発行単位Redisリポジトリ
+ * 許可証発行単位リポジトリ
  */
 export class RedisRepository {
     public readonly redisClient: redis.Redis;
@@ -21,7 +21,7 @@ export class RedisRepository {
      */
     public static CREATE_ISSUE_UNIT_PARAMS(params: {
         issueDate: Date;
-        project: factory.project.IProject;
+        project: { id: string };
         rule: factory.rule.IRule;
     }) {
         const dateNow = moment(params.issueDate);
@@ -42,7 +42,7 @@ export class RedisRepository {
      */
     public async incr(params: {
         issueDate: Date;
-        project: factory.project.IProject;
+        project: { id: string };
         rule: factory.rule.IRule;
     }): Promise<factory.passport.IIssueUnit> {
         const issueUnitParams = RedisRepository.CREATE_ISSUE_UNIT_PARAMS(params);
@@ -69,7 +69,7 @@ export class RedisRepository {
      */
     public async now(params: {
         issueDate: Date;
-        project: factory.project.IProject;
+        project: { id: string };
         rule: factory.rule.IRule;
     }): Promise<factory.passport.IIssueUnit> {
         const issueUnitParams = RedisRepository.CREATE_ISSUE_UNIT_PARAMS(params);

@@ -12,7 +12,6 @@ const redis = require('ioredis-mock');
 
 import * as factory from '../factory';
 import { RedisRepository as PassportIssueUnitRepo } from '../repo/passportIssueUnit';
-import { InMemoryRepository as ProjectRepo } from '../repo/project';
 import { InMemoryRepository as RuleRepo } from '../repo/rule';
 import * as passportService from '../service/passport';
 
@@ -30,28 +29,27 @@ describe('発行する', () => {
 
     afterEach(() => {
         delete process.env.WAITER_RULES;
-        delete process.env.WAITER_PROJECTS;
+        // delete process.env.WAITER_PROJECTS;
     });
 
     it('規則が存在しなければ、NotFoundエラーになるはず', async () => {
         process.env.WAITER_RULES = JSON.stringify([]);
-        process.env.WAITER_PROJECTS = JSON.stringify([]);
+        // process.env.WAITER_PROJECTS = JSON.stringify([]);
         const scope = 'scope';
 
-        const projectRepo = new ProjectRepo();
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
-        sandbox.mock(projectRepo).expects('findById').once().returns({});
+        // sandbox.mock(projectRepo).expects('findById').once().returns({});
 
         const result = await passportService.issue({
             project: { id: 'projectId' },
             scope: scope
         })({
             passportIssueUnit: passportCounterRepo,
-            project: projectRepo,
             rule: ruleRepo
-        }).catch((err) => err);
+        })
+            .catch((err) => err);
         assert(result instanceof factory.errors.NotFound);
         sandbox.verify();
     });
@@ -68,7 +66,7 @@ describe('発行する', () => {
             threshold: 0,
             unavailableHoursSpecifications: []
         }]);
-        process.env.WAITER_PROJECTS = JSON.stringify([]);
+        // process.env.WAITER_PROJECTS = JSON.stringify([]);
         const incrResult = {
             identifier: 'scope:1508227500',
             validFrom: 1508227500,
@@ -76,21 +74,23 @@ describe('発行する', () => {
             numberOfRequests: 1
         };
 
-        const projectRepo = new ProjectRepo();
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
-        sandbox.mock(projectRepo).expects('findById').once().returns(project);
-        sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
+        // sandbox.mock(projectRepo).expects('findById').once().returns(project);
+        sandbox.mock(passportCounterRepo)
+            .expects('incr')
+            .once()
+            .resolves(incrResult);
 
         const result = await passportService.issue({
             project: { id: project.id },
             scope: scope
         })({
             passportIssueUnit: passportCounterRepo,
-            project: projectRepo,
             rule: ruleRepo
-        }).catch((err) => err);
+        })
+            .catch((err) => err);
         assert(result instanceof factory.errors.RateLimitExceeded);
         sandbox.verify();
     });
@@ -107,33 +107,40 @@ describe('発行する', () => {
             threshold: 100,
             availableHoursSpecifications: [
                 {
-                    startDate: moment().add(1, 'hours').toISOString(),
-                    // tslint:disable-next-line:no-magic-numbers
-                    endDate: moment().add(2, 'hours').toISOString()
+                    startDate: moment()
+                        .add(1, 'hours')
+                        .toISOString(),
+                    endDate: moment()
+                        // tslint:disable-next-line:no-magic-numbers
+                        .add(2, 'hours')
+                        .toISOString()
                 },
                 {
-                    // tslint:disable-next-line:no-magic-numbers
-                    startDate: moment().add(-2, 'hours').toISOString(),
-                    endDate: moment().add(-1, 'hours').toISOString()
+                    startDate: moment()
+                        // tslint:disable-next-line:no-magic-numbers
+                        .add(-2, 'hours')
+                        .toISOString(),
+                    endDate: moment()
+                        .add(-1, 'hours')
+                        .toISOString()
                 }
             ]
         }]);
-        process.env.WAITER_PROJECTS = JSON.stringify([]);
+        // process.env.WAITER_PROJECTS = JSON.stringify([]);
 
-        const projectRepo = new ProjectRepo();
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
-        sandbox.mock(projectRepo).expects('findById').once().returns(project);
+        // sandbox.mock(projectRepo).expects('findById').once().returns(project);
 
         const result = await passportService.issue({
             project: { id: project.id },
             scope: scope
         })({
             passportIssueUnit: passportCounterRepo,
-            project: projectRepo,
             rule: ruleRepo
-        }).catch((err) => err);
+        })
+            .catch((err) => err);
         assert(result instanceof factory.errors.ServiceUnavailable);
         sandbox.verify();
     });
@@ -149,26 +156,29 @@ describe('発行する', () => {
             aggregationUnitInSeconds: 60,
             threshold: 100,
             unavailableHoursSpecifications: [{
-                startDate: moment().add(-1, 'hour').toISOString(),
-                endDate: moment().add(1, 'hour').toISOString()
+                startDate: moment()
+                    .add(-1, 'hour')
+                    .toISOString(),
+                endDate: moment()
+                    .add(1, 'hour')
+                    .toISOString()
             }]
         }]);
-        process.env.WAITER_PROJECTS = JSON.stringify([]);
+        // process.env.WAITER_PROJECTS = JSON.stringify([]);
 
-        const projectRepo = new ProjectRepo();
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
-        sandbox.mock(projectRepo).expects('findById').once().returns(project);
+        // sandbox.mock(projectRepo).expects('findById').once().returns(project);
 
         const result = await passportService.issue({
             project: { id: project.id },
             scope: scope
         })({
             passportIssueUnit: passportCounterRepo,
-            project: projectRepo,
             rule: ruleRepo
-        }).catch((err) => err);
+        })
+            .catch((err) => err);
         assert(result instanceof factory.errors.ServiceUnavailable);
         sandbox.verify();
     });
@@ -186,7 +196,7 @@ describe('発行する', () => {
             threshold: 100,
             unavailableHoursSpecifications: []
         }]);
-        process.env.WAITER_PROJECTS = JSON.stringify([]);
+        // process.env.WAITER_PROJECTS = JSON.stringify([]);
         const incrResult = {
             identifier: 'scope:1508227500',
             validFrom: 1508227500,
@@ -194,19 +204,20 @@ describe('発行する', () => {
             numberOfRequests: 1
         };
 
-        const projectRepo = new ProjectRepo();
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
-        sandbox.mock(projectRepo).expects('findById').once().returns(project);
-        sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
+        // sandbox.mock(projectRepo).expects('findById').once().returns(project);
+        sandbox.mock(passportCounterRepo)
+            .expects('incr')
+            .once()
+            .resolves(incrResult);
 
         const result = await passportService.issue({
             project: { id: project.id },
             scope: scope
         })({
             passportIssueUnit: passportCounterRepo,
-            project: projectRepo,
             rule: ruleRepo
         });
         assert.equal(typeof result, 'string');
@@ -225,7 +236,7 @@ describe('発行する', () => {
             threshold: 100,
             unavailableHoursSpecifications: []
         }]);
-        process.env.WAITER_PROJECTS = JSON.stringify([]);
+        // process.env.WAITER_PROJECTS = JSON.stringify([]);
         const incrResult = {
             identifier: 'scope:1508227500',
             validFrom: 1508227500,
@@ -234,23 +245,28 @@ describe('発行する', () => {
         };
         const signReult = new Error('signError');
 
-        const projectRepo = new ProjectRepo();
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
-        sandbox.mock(projectRepo).expects('findById').once().returns(project);
-        sandbox.mock(passportCounterRepo).expects('incr').once().resolves(incrResult);
-        // tslint:disable-next-line:no-magic-numbers
-        sandbox.mock(jwt).expects('sign').once().callsArgWith(3, signReult);
+        // sandbox.mock(projectRepo).expects('findById').once().returns(project);
+        sandbox.mock(passportCounterRepo)
+            .expects('incr')
+            .once()
+            .resolves(incrResult);
+        sandbox.mock(jwt)
+            .expects('sign')
+            .once()
+            // tslint:disable-next-line:no-magic-numbers
+            .callsArgWith(3, signReult);
 
         const result = await passportService.issue({
             project: { id: project.id },
             scope: scope
         })({
             passportIssueUnit: passportCounterRepo,
-            project: projectRepo,
             rule: ruleRepo
-        }).catch((err) => err);
+        })
+            .catch((err) => err);
         assert(result instanceof Error);
         sandbox.verify();
     });
@@ -277,8 +293,11 @@ describe('許可証トークンを検証する', () => {
             }
         };
 
-        // tslint:disable-next-line:no-magic-numbers
-        sandbox.mock(jwt).expects('verify').once().callsArgWith(2, null, verifyResult);
+        sandbox.mock(jwt)
+            .expects('verify')
+            .once()
+            // tslint:disable-next-line:no-magic-numbers no-null-keyword
+            .callsArgWith(2, null, verifyResult);
 
         const result = await passportService.verify({ token, secret });
         assert(typeof result, 'object');
@@ -294,28 +313,27 @@ describe('service.passport.currentIssueUnit()', () => {
 
     afterEach(() => {
         delete process.env.WAITER_RULES;
-        delete process.env.WAITER_PROJECTS;
+        // delete process.env.WAITER_PROJECTS;
     });
 
     it('規則が存在しなければ、NotFoundエラーになるはず', async () => {
         process.env.WAITER_RULES = JSON.stringify([]);
-        process.env.WAITER_PROJECTS = JSON.stringify([]);
+        // process.env.WAITER_PROJECTS = JSON.stringify([]);
         const scope = 'scope';
 
-        const projectRepo = new ProjectRepo();
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
-        sandbox.mock(projectRepo).expects('findById').once().returns({});
+        // sandbox.mock(projectRepo).expects('findById').once().returns({});
 
         const result = await passportService.currentIssueUnit({
             project: { id: 'projectId' },
             scope: scope
         })({
             passportIssueUnit: passportCounterRepo,
-            project: projectRepo,
             rule: ruleRepo
-        }).catch((err) => err);
+        })
+            .catch((err) => err);
         assert(result instanceof factory.errors.NotFound);
         sandbox.verify();
     });
@@ -332,7 +350,7 @@ describe('service.passport.currentIssueUnit()', () => {
             threshold: 100,
             unavailableHoursSpecifications: []
         }]);
-        process.env.WAITER_PROJECTS = JSON.stringify([]);
+        // process.env.WAITER_PROJECTS = JSON.stringify([]);
         const incrResult = {
             identifier: 'scope:1508227500',
             validFrom: 1508227500,
@@ -340,19 +358,20 @@ describe('service.passport.currentIssueUnit()', () => {
             numberOfRequests: 2
         };
 
-        const projectRepo = new ProjectRepo();
         const ruleRepo = new RuleRepo();
         const passportCounterRepo = new PassportIssueUnitRepo(new redis({}));
 
-        sandbox.mock(projectRepo).expects('findById').once().returns(project);
-        sandbox.mock(passportCounterRepo).expects('now').once().resolves(incrResult);
+        // sandbox.mock(projectRepo).expects('findById').once().returns(project);
+        sandbox.mock(passportCounterRepo)
+            .expects('now')
+            .once()
+            .resolves(incrResult);
 
         const result = await passportService.currentIssueUnit({
             project: { id: project.id },
             scope: scope
         })({
             passportIssueUnit: passportCounterRepo,
-            project: projectRepo,
             rule: ruleRepo
         });
         assert(Number.isInteger(result.numberOfRequests));
@@ -443,7 +462,7 @@ describe('service.passport.create()', () => {
     it('発行単位がオブジェクトでなければArgumentError', () => {
         assert.throws(
             () => {
-                TEST_CREATE_PARAMS.issueUnit = null;
+                TEST_CREATE_PARAMS.issueUnit = undefined;
                 passportService.create(TEST_CREATE_PARAMS);
             },
             (err: any) => {
@@ -454,14 +473,14 @@ describe('service.passport.create()', () => {
         );
     });
 
-    it('識別子が空であればArgumentNullError', () => {
+    it('識別子が空であればArgumentError', () => {
         assert.throws(
             () => {
                 TEST_CREATE_PARAMS.issueUnit.identifier = '';
                 passportService.create(TEST_CREATE_PARAMS);
             },
             (err: any) => {
-                assert(err instanceof factory.errors.ArgumentNull);
+                assert(err instanceof factory.errors.Argument);
 
                 return true;
             }
